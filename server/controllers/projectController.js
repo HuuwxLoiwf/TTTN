@@ -73,11 +73,12 @@ export const createProject = async (req, res) => {
     });
 
     if (team_members?.length > 0) {
-      const memberData = team_members.map((email) => ({ email }));
       const users = await prisma.user.findMany({ where: { email: { in: team_members } } });
-      for (const u of users) {
-        await prisma.projectMember.create({
-          data: { userId: u.id, projectId: project.id },
+      const extraMembers = users.filter((u) => u.id !== userId);
+      if (extraMembers.length > 0) {
+        await prisma.projectMember.createMany({
+          data: extraMembers.map((u) => ({ userId: u.id, projectId: project.id })),
+          skipDuplicates: true,
         });
       }
     }
@@ -140,6 +141,11 @@ export const addProjectMember = async (req, res) => {
     const { email } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(404).json({ error: "User not found" });
+
+    const existing = await prisma.projectMember.findUnique({
+      where: { userId_projectId: { userId: user.id, projectId: id } },
+    });
+    if (existing) return res.status(400).json({ error: "Người dùng đã là thành viên dự án" });
 
     const member = await prisma.projectMember.create({
       data: { userId: user.id, projectId: id },

@@ -78,7 +78,10 @@ export const createWorkspace = async (req, res) => {
         description: description || '',
         ownerId: userId,
         members: {
-          create: { userId, role: "ADMIN" },
+          createMany: {
+            data: [{ userId, role: "ADMIN" }],
+            skipDuplicates: true,
+          },
         },
       },
       include: {
