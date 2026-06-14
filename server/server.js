@@ -29,8 +29,11 @@ if (!process.env.VERCEL) {
 }
 
 app.use(express.json());
-app.use(cors());
-app.use(clerkMiddleware());
+app.use(cors({ origin: '*', credentials: true }));
+app.use(clerkMiddleware({
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY,
+}));
 
 // Static file serving only works locally (Vercel has no persistent filesystem)
 if (!process.env.VERCEL) {
@@ -38,6 +41,17 @@ if (!process.env.VERCEL) {
 }
 
 app.get('/', (req, res) => res.send('Server is live'));
+
+// Debug route — kiểm tra env vars có được load không
+app.get('/api/debug', (req, res) => {
+    res.json({
+        hasSecretKey: !!process.env.CLERK_SECRET_KEY,
+        hasPublishableKey: !!process.env.CLERK_PUBLISHABLE_KEY,
+        hasDatabase: !!process.env.DATABASE_URL,
+        userId: req.auth?.userId || null,
+        env: process.env.NODE_ENV,
+    });
+});
 
 app.use('/api/inngest', serve({ client: inngest, functions }));
 app.use('/api/users', userRoutes);
