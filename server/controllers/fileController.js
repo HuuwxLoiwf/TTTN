@@ -5,7 +5,10 @@ import { fileURLToPath } from 'url';
 import prisma from '../configs/prisma.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadsDir = path.join(__dirname, '..', 'uploads');
+// Vercel's /var/task is read-only; use /tmp on serverless, local uploads/ otherwise
+const uploadsDir = process.env.VERCEL
+    ? '/tmp/uploads'
+    : path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
 const storage = multer.diskStorage({

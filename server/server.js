@@ -23,16 +23,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const httpServer = http.createServer(app);
 
-initSocket(httpServer);
+// Socket.io requires persistent connections — not supported on Vercel serverless
+if (!process.env.VERCEL) {
+    initSocket(httpServer);
+}
 
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
 
-// Serve uploaded files as static assets
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static file serving only works locally (Vercel has no persistent filesystem)
+if (!process.env.VERCEL) {
+    app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+}
 
-app.get('/', (req, res) => res.send('Server is live '));
+app.get('/', (req, res) => res.send('Server is live'));
 
 app.use('/api/inngest', serve({ client: inngest, functions }));
 app.use('/api/users', userRoutes);
@@ -46,4 +51,9 @@ app.use('/api/files', fileRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-httpServer.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+// On Vercel, the platform handles listening — do not call listen()
+if (!process.env.VERCEL) {
+    httpServer.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+}
+
+export default app;
