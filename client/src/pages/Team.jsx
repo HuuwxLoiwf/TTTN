@@ -28,13 +28,13 @@ const Team = () => {
             {/* Header */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">Team</h1>
+                    <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">Nhóm</h1>
                     <p className="text-gray-500 dark:text-zinc-400 text-sm">
-                        Manage team members and their contributions
+                        Quản lý thành viên nhóm và đóng góp của họ
                     </p>
                 </div>
                 <button onClick={() => setIsDialogOpen(true)} className="flex items-center px-5 py-2 rounded text-sm bg-gradient-to-br from-blue-500 to-blue-600 hover:opacity-90 text-white transition" >
-                    <UserPlus className="w-4 h-4 mr-2" /> Invite Member
+                    <UserPlus className="w-4 h-4 mr-2" /> Mời thành viên
                 </button>
                 <InviteMemberDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
             </div>
@@ -45,7 +45,7 @@ const Team = () => {
                 <div className="max-sm:w-full dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-gray-300 dark:border-zinc-800 rounded-lg p-6">
                     <div className="flex items-center justify-between gap-8 md:gap-22">
                         <div>
-                            <p className="text-sm text-gray-500 dark:text-zinc-400">Total Members</p>
+                            <p className="text-sm text-gray-500 dark:text-zinc-400">Tổng thành viên</p>
                             <p className="text-xl font-bold text-gray-900 dark:text-white">{users.length}</p>
                         </div>
                         <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-500/10">
@@ -58,7 +58,7 @@ const Team = () => {
                 <div className="max-sm:w-full dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-gray-300 dark:border-zinc-800 rounded-lg p-6">
                     <div className="flex items-center justify-between gap-8 md:gap-22">
                         <div>
-                            <p className="text-sm text-gray-500 dark:text-zinc-400">Active Projects</p>
+                            <p className="text-sm text-gray-500 dark:text-zinc-400">Dự án đang hoạt động</p>
                             <p className="text-xl font-bold text-gray-900 dark:text-white">
                                 {projects.filter((p) => p.status !== "CANCELLED" && p.status !== "COMPLETED").length}
                             </p>
@@ -73,7 +73,7 @@ const Team = () => {
                 <div className="max-sm:w-full dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-gray-300 dark:border-zinc-800 rounded-lg p-6">
                     <div className="flex items-center justify-between gap-8 md:gap-22">
                         <div>
-                            <p className="text-sm text-gray-500 dark:text-zinc-400">Total Tasks</p>
+                            <p className="text-sm text-gray-500 dark:text-zinc-400">Tổng công việc</p>
                             <p className="text-xl font-bold text-gray-900 dark:text-white">{tasks.length}</p>
                         </div>
                         <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-500/10">
@@ -86,7 +86,7 @@ const Team = () => {
             {/* Search */}
             <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-zinc-400 size-3" />
-                <input placeholder="Search team members..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-8 w-full text-sm rounded-md border border-gray-300 dark:border-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-400 py-2 focus:outline-none focus:border-blue-500" />
+                <input placeholder="Tìm kiếm thành viên..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-8 w-full text-sm rounded-md border border-gray-300 dark:border-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-400 py-2 focus:outline-none focus:border-blue-500" />
             </div>
 
             {/* Team Members */}
@@ -98,13 +98,13 @@ const Team = () => {
                         </div>
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                             {users.length === 0
-                                ? "No team members yet"
-                                : "No members match your search"}
+                                ? "Chưa có thành viên nào"
+                                : "Không tìm thấy thành viên"}
                         </h3>
                         <p className="text-gray-500 dark:text-zinc-400 mb-6">
                             {users.length === 0
-                                ? "Invite team members to start collaborating"
-                                : "Try adjusting your search term"}
+                                ? "Mời thành viên để bắt đầu cộng tác"
+                                : "Hãy thử thay đổi từ khóa tìm kiếm"}
                         </p>
                     </div>
                 ) : (
@@ -115,13 +115,13 @@ const Team = () => {
                                 <thead className="bg-gray-50 dark:bg-zinc-900/50">
                                     <tr>
                                         <th className="px-6 py-2.5 text-left font-medium text-sm">
-                                            Name
+                                            Tên
                                         </th>
                                         <th className="px-6 py-2.5 text-left font-medium text-sm">
                                             Email
                                         </th>
                                         <th className="px-6 py-2.5 text-left font-medium text-sm">
-                                            Role
+                                            Vai trò
                                         </th>
                                     </tr>
                                 </thead>

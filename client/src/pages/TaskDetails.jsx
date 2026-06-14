@@ -3,8 +3,9 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { CalendarIcon, MessageCircle, PenIcon } from "lucide-react";
-import { assets } from "../assets/assets";
+import { apiFetch } from "../lib/api";
 
 const TaskDetails = () => {
 
@@ -12,7 +13,9 @@ const TaskDetails = () => {
     const projectId = searchParams.get("projectId");
     const taskId = searchParams.get("taskId");
 
-    const user = { id : 'user_1'}
+    const { user } = useUser();
+    const { getToken } = useAuth();
+
     const [task, setTask] = useState(null);
     const [project, setProject] = useState(null);
     const [comments, setComments] = useState([]);
@@ -22,14 +25,21 @@ const TaskDetails = () => {
     const { currentWorkspace } = useSelector((state) => state.workspace);
 
     const fetchComments = async () => {
-
+        if (!taskId) return;
+        try {
+            const token = await getToken();
+            const data = await apiFetch(token, `/comments/task/${taskId}`);
+            setComments(data);
+        } catch (e) {
+            console.error("Không thể tải bình luận:", e);
+        }
     };
 
     const fetchTaskDetails = async () => {
         setLoading(true);
         if (!projectId || !taskId) return;
 
-        const proj = currentWorkspace.projects.find((p) => p.id === projectId);
+        const proj = currentWorkspace?.projects.find((p) => p.id === projectId);
         if (!proj) return;
 
         const tsk = proj.tasks.find((t) => t.id === taskId);
@@ -42,39 +52,35 @@ const TaskDetails = () => {
 
     const handleAddComment = async () => {
         if (!newComment.trim()) return;
-
+        const loadingToast = toast.loading("Đang thêm bình luận...");
         try {
-
-            toast.loading("Adding comment...");
-
-            //  Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-
-            const dummyComment = { id: Date.now(), user: { id: 1, name: "User", image: assets.profile_img_a }, content: newComment, createdAt: new Date() };
-            
-            setComments((prev) => [...prev, dummyComment]);
+            const token = await getToken();
+            const comment = await apiFetch(token, `/comments/task/${taskId}`, {
+                method: 'POST',
+                body: { content: newComment },
+            });
+            setComments((prev) => [...prev, comment]);
             setNewComment("");
-            toast.dismissAll();
-            toast.success("Comment added.");
+            toast.dismiss(loadingToast);
+            toast.success("Đã thêm bình luận.");
         } catch (error) {
-            toast.dismissAll();
-            toast.error(error?.response?.data?.message || error.message);
-            console.error(error);
+            toast.dismiss(loadingToast);
+            toast.error(error.message);
         }
     };
 
-    useEffect(() => { fetchTaskDetails(); }, [taskId]);
+    useEffect(() => { fetchTaskDetails(); }, [taskId, currentWorkspace]);
 
     useEffect(() => {
         if (taskId && task) {
             fetchComments();
-            const interval = setInterval(() => { fetchComments(); }, 10000);
+            const interval = setInterval(() => { fetchComments(); }, 15000);
             return () => clearInterval(interval);
         }
     }, [taskId, task]);
 
-    if (loading) return <div className="text-gray-500 dark:text-zinc-400 px-4 py-6">Loading task details...</div>;
-    if (!task) return <div className="text-red-500 px-4 py-6">Task not found.</div>;
+    if (loading) return <div className="text-gray-500 dark:text-zinc-400 px-4 py-6">Đang tải chi tiết công việc...</div>;
+    if (!task) return <div className="text-red-500 px-4 py-6">Không tìm thấy công việc.</div>;
 
     return (
         <div className="flex flex-col-reverse lg:flex-row gap-6 sm:p-4 text-gray-900 dark:text-zinc-100 max-w-6xl mx-auto">
@@ -82,17 +88,19 @@ const TaskDetails = () => {
             <div className="w-full lg:w-2/3">
                 <div className="p-5 rounded-md  border border-gray-300 dark:border-zinc-800  flex flex-col lg:h-[80vh]">
                     <h2 className="text-base font-semibold flex items-center gap-2 mb-4 text-gray-900 dark:text-white">
-                        <MessageCircle className="size-5" /> Task Discussion ({comments.length})
+                        <MessageCircle className="size-5" /> Thảo luận công việc ({comments.length})
                     </h2>
 
                     <div className="flex-1 md:overflow-y-scroll no-scrollbar">
                         {comments.length > 0 ? (
                             <div className="flex flex-col gap-4 mb-6 mr-2">
                                 {comments.map((comment) => (
-                                    <div key={comment.id} className={`sm:max-w-4/5 dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-900 border border-gray-300 dark:border-zinc-700 p-3 rounded-md ${comment.user.id === user?.id ? "ml-auto" : "mr-auto"}`} >
+                                    <div key={comment.id} className={`sm:max-w-4/5 dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-900 border border-gray-300 dark:border-zinc-700 p-3 rounded-md ${comment.user?.id === user?.id ? "ml-auto" : "mr-auto"}`} >
                                         <div className="flex items-center gap-2 mb-1 text-sm text-gray-500 dark:text-zinc-400">
-                                            <img src={comment.user.image} alt="avatar" className="size-5 rounded-full" />
-                                            <span className="font-medium text-gray-900 dark:text-white">{comment.user.name}</span>
+                                            {comment.user?.image_url && (
+                                                <img src={comment.user.image_url} alt="avatar" className="size-5 rounded-full" />
+                                            )}
+                                            <span className="font-medium text-gray-900 dark:text-white">{comment.user?.name || comment.user?.email || "Người dùng"}</span>
                                             <span className="text-xs text-gray-400 dark:text-zinc-600">
                                                 • {format(new Date(comment.createdAt), "dd MMM yyyy, HH:mm")}
                                             </span>
@@ -102,7 +110,7 @@ const TaskDetails = () => {
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-gray-600 dark:text-zinc-500 mb-4 text-sm">No comments yet. Be the first!</p>
+                            <p className="text-gray-600 dark:text-zinc-500 mb-4 text-sm">Chưa có bình luận nào. Hãy là người đầu tiên!</p>
                         )}
                     </div>
 
@@ -111,12 +119,12 @@ const TaskDetails = () => {
                         <textarea
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Write a comment..."
+                            placeholder="Viết bình luận..."
                             className="w-full dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-md p-2 text-sm text-gray-900 dark:text-zinc-200 resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
                             rows={3}
                         />
                         <button onClick={handleAddComment} className="bg-gradient-to-l from-blue-500 to-blue-600 transition-colors text-white text-sm px-5 py-2 rounded " >
-                            Post
+                            Đăng
                         </button>
                     </div>
                 </div>
@@ -149,12 +157,14 @@ const TaskDetails = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-zinc-300">
                         <div className="flex items-center gap-2">
-                            <img src={task.assignee?.image} className="size-5 rounded-full" alt="avatar" />
-                            {task.assignee?.name || "Unassigned"}
+                            {task.assignee?.image_url && (
+                                <img src={task.assignee.image_url} className="size-5 rounded-full" alt="avatar" />
+                            )}
+                            {task.assignee?.name || task.assignee?.email || "Chưa giao"}
                         </div>
                         <div className="flex items-center gap-2">
                             <CalendarIcon className="size-4 text-gray-500 dark:text-zinc-500" />
-                            Due : {format(new Date(task.due_date), "dd MMM yyyy")}
+                            Hạn chót: {task.due_date ? format(new Date(task.due_date), "dd MMM yyyy") : "—"}
                         </div>
                     </div>
                 </div>
@@ -162,13 +172,15 @@ const TaskDetails = () => {
                 {/* Project Info */}
                 {project && (
                     <div className="p-4 rounded-md bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 border border-gray-300 dark:border-zinc-800 ">
-                        <p className="text-xl font-medium mb-4">Project Details</p>
+                        <p className="text-xl font-medium mb-4">Thông tin dự án</p>
                         <h2 className="text-gray-900 dark:text-zinc-100 flex items-center gap-2"> <PenIcon className="size-4" /> {project.name}</h2>
-                        <p className="text-xs mt-3">Project Start Date: {format(new Date(project.start_date), "dd MMM yyyy")}</p>
+                        {project.start_date && (
+                            <p className="text-xs mt-3">Ngày bắt đầu: {format(new Date(project.start_date), "dd MMM yyyy")}</p>
+                        )}
                         <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-zinc-400 mt-3">
-                            <span>Status: {project.status}</span>
-                            <span>Priority: {project.priority}</span>
-                            <span>Progress: {project.progress}%</span>
+                            <span>Trạng thái: {project.status}</span>
+                            <span>Ưu tiên: {project.priority}</span>
+                            <span>Tiến độ: {project.progress}%</span>
                         </div>
                     </div>
                 )}

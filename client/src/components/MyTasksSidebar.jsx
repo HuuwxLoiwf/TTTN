@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { CheckSquareIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 function MyTasksSidebar() {
 
-    const user = { id: 'user_1' }
+    const { user } = useUser();
 
     const { currentWorkspace } = useSelector((state) => state.workspace);
     const [showMyTasks, setShowMyTasks] = useState(false);
@@ -30,7 +31,7 @@ function MyTasksSidebar() {
         const userId = user?.id || '';
         if (!userId || !currentWorkspace) return;
         const currentWorkspaceTasks = currentWorkspace.projects.flatMap((project) => {
-            return project.tasks.filter((task) => task?.assignee?.id === userId);
+            return project.tasks.filter((task) => task?.assigneeId === userId);
         });
 
         setMyTasks(currentWorkspaceTasks);
@@ -45,7 +46,7 @@ function MyTasksSidebar() {
             <div onClick={toggleMyTasks} className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800" >
                 <div className="flex items-center gap-2">
                     <CheckSquareIcon className="w-4 h-4 text-gray-500 dark:text-zinc-400" />
-                    <h3 className="text-sm font-medium text-gray-700 dark:text-zinc-300">My Tasks</h3>
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-zinc-300">Công việc của tôi</h3>
                     <span className="bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-xs px-2 py-0.5 rounded">
                         {myTasks.length}
                     </span>
@@ -62,7 +63,7 @@ function MyTasksSidebar() {
                     <div className="space-y-1">
                         {myTasks.length === 0 ? (
                             <div className="px-3 py-2 text-xs text-gray-500 dark:text-zinc-500 text-center">
-                                No tasks assigned
+                                Chưa có công việc nào
                             </div>
                         ) : (
                             myTasks.map((task, index) => (

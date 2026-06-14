@@ -47,7 +47,7 @@ const ProjectCalendar = ({ tasks }) => {
                 <div className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-zinc-900 dark:text-white text-md flex gap-2 items-center max-sm:hidden">
-                            <CalendarIcon className="size-5" /> Task Calendar
+                            <CalendarIcon className="size-5" /> Lịch công việc
                         </h2>
                         <div className="flex gap-2 items-center">
                             <button onClick={() => handleMonthChange("prev")}>
@@ -61,7 +61,7 @@ const ProjectCalendar = ({ tasks }) => {
                     </div>
 
                     <div className="grid grid-cols-7 text-xs text-zinc-600 dark:text-zinc-400 mb-2 text-center">
-                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                        {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((day) => (
                             <div key={day}>{day}</div>
                         ))}
                     </div>
@@ -82,7 +82,7 @@ const ProjectCalendar = ({ tasks }) => {
                                 >
                                     <span>{format(day, "d")}</span>
                                     {dayTasks.length > 0 && (
-                                        <span className="text-[10px] text-blue-700 dark:text-blue-400">{dayTasks.length} tasks</span>
+                                        <span className="text-[10px] text-blue-700 dark:text-blue-400">{dayTasks.length} cv</span>
                                     )}
                                 </button>
                             );
@@ -94,7 +94,7 @@ const ProjectCalendar = ({ tasks }) => {
                 {getTasksForDate(selectedDate).length > 0 && (
                     <div className=" not-dark:bg-white mt-6 dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-4">
                         <h3 className="text-zinc-900 dark:text-white text-lg mb-3">
-                            Tasks for {format(selectedDate, "MMM d, yyyy")}
+                            Công việc ngày {format(selectedDate, "dd/MM/yyyy")}
                         </h3>
                         <div className="space-y-3">
                             {getTasksForDate(selectedDate).map((task) => (
@@ -109,11 +109,11 @@ const ProjectCalendar = ({ tasks }) => {
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400">
-                                        <span className="capitalize">{task.priority.toLowerCase()} priority</span>
+                                        <span>Ưu tiên: {task.priority.toLowerCase()}</span>
                                         {task.assignee && (
                                             <span className="flex items-center gap-1">
                                                 <User className="w-3 h-3" />
-                                                {task.assignee.name}
+                                                {task.assignee.name || task.assignee.email}
                                             </span>
                                         )}
                                     </div>
@@ -129,10 +129,10 @@ const ProjectCalendar = ({ tasks }) => {
                 {/* Upcoming Tasks */}
                 <div className="bg-white dark:bg-zinc-950 dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-4">
                     <h3 className="text-zinc-900 dark:text-white text-sm flex items-center gap-2 mb-3">
-                        <Clock className="w-4 h-4" /> Upcoming Tasks
+                        <Clock className="w-4 h-4" /> Công việc sắp đến hạn
                     </h3>
                     {upcomingTasks.length === 0 ? (
-                        <p className="text-zinc-500 dark:text-zinc-400 text-sm text-center">No upcoming tasks</p>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm text-center">Không có công việc sắp đến hạn</p>
                     ) : (
                         <div className="space-y-2">
                             {upcomingTasks.map((task) => (
@@ -146,7 +146,7 @@ const ProjectCalendar = ({ tasks }) => {
                                             {task.type}
                                         </span>
                                     </div>
-                                    <p className="text-xs text-zinc-600 dark:text-zinc-400">{format(task.due_date, "MMM d")}</p>
+                                    <p className="text-xs text-zinc-600 dark:text-zinc-400">{format(task.due_date, "dd/MM")}</p>
                                 </div>
                             ))}
                         </div>
@@ -157,7 +157,7 @@ const ProjectCalendar = ({ tasks }) => {
                 {overdueTasks.length > 0 && (
                     <div className="bg-white dark:bg-zinc-950  border border-red-300 dark:border-red-500 border-l-4 rounded-lg p-4">
                         <h3 className="text-red-700 dark:text-red-400 text-sm flex items-center gap-2 mb-3">
-                            <Clock className="w-4 h-4" /> Overdue Tasks ({overdueTasks.length})
+                            <Clock className="w-4 h-4" /> Công việc quá hạn ({overdueTasks.length})
                         </h3>
                         <div className="space-y-2">
                             {overdueTasks.slice(0, 5).map((task) => (
@@ -169,13 +169,13 @@ const ProjectCalendar = ({ tasks }) => {
                                         </span>
                                     </div>
                                     <p className="text-xs text-red-600 dark:text-red-300">
-                                        Due {format(task.due_date, "MMM d")}
+                                        Hạn: {format(task.due_date, "dd/MM")}
                                     </p>
                                 </div>
                             ))}
                             {overdueTasks.length > 5 && (
                                 <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
-                                    +{overdueTasks.length - 5} more
+                                    +{overdueTasks.length - 5} công việc khác
                                 </p>
                             )}
                         </div>

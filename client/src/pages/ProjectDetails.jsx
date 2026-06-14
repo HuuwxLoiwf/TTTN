@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, LayoutDashboard, FolderOpen } from "lucide-react";
 import ProjectAnalytics from "../components/ProjectAnalytics";
 import ProjectSettings from "../components/ProjectSettings";
 import CreateTaskDialog from "../components/CreateTaskDialog";
 import ProjectCalendar from "../components/ProjectCalendar";
 import ProjectTasks from "../components/ProjectTasks";
+import ProjectKanban from "../components/ProjectKanban";
+import ProjectFiles from "../components/ProjectFiles";
+import { addTask, updateTask, deleteTask } from "../features/workspaceSlice";
+import { joinProject, leaveProject, getSocket } from "../lib/socket";
 
 export default function ProjectDetail() {
 
@@ -15,6 +19,7 @@ export default function ProjectDetail() {
     const id = searchParams.get('id');
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const projects = useSelector((state) => state?.workspace?.currentWorkspace?.projects || []);
 
     const [project, setProject] = useState(null);
@@ -34,6 +39,39 @@ export default function ProjectDetail() {
         }
     }, [id, projects]);
 
+    // Realtime: join project room and listen for events
+    useEffect(() => {
+        if (!id) return;
+        joinProject(id);
+        const socket = getSocket();
+
+        const onTaskCreated = (task) => {
+            dispatch(addTask({ ...task, projectId: id }));
+        };
+        const onTaskUpdated = (task) => {
+            dispatch(updateTask({ ...task, projectId: id }));
+        };
+        const onTaskDeleted = ({ id: taskId }) => {
+            dispatch(deleteTask([taskId]));
+        };
+        const onBulkDeleted = ({ ids }) => {
+            dispatch(deleteTask(ids));
+        };
+
+        socket.on("task:created", onTaskCreated);
+        socket.on("task:updated", onTaskUpdated);
+        socket.on("task:deleted", onTaskDeleted);
+        socket.on("tasks:bulkDeleted", onBulkDeleted);
+
+        return () => {
+            leaveProject(id);
+            socket.off("task:created", onTaskCreated);
+            socket.off("task:updated", onTaskUpdated);
+            socket.off("task:deleted", onTaskDeleted);
+            socket.off("tasks:bulkDeleted", onBulkDeleted);
+        };
+    }, [id]);
+
     const statusColors = {
         PLANNING: "bg-zinc-200 text-zinc-900 dark:bg-zinc-600 dark:text-zinc-200",
         ACTIVE: "bg-emerald-200 text-emerald-900 dark:bg-emerald-500 dark:text-emerald-900",
@@ -45,9 +83,9 @@ export default function ProjectDetail() {
     if (!project) {
         return (
             <div className="p-6 text-center text-zinc-900 dark:text-zinc-200">
-                <p className="text-3xl md:text-5xl mt-40 mb-10">Project not found</p>
+                <p className="text-3xl md:text-5xl mt-40 mb-10">Không tìm thấy dự án</p>
                 <button onClick={() => navigate('/projects')} className="mt-4 px-4 py-2 rounded bg-zinc-200 text-zinc-900 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-white dark:hover:bg-zinc-600" >
-                    Back to Projects
+                    Quay lại Dự án
                 </button>
             </div>
         );
@@ -70,17 +108,17 @@ export default function ProjectDetail() {
                 </div>
                 <button onClick={() => setShowCreateTask(true)} className="flex items-center gap-2 px-5 py-2 text-sm rounded bg-gradient-to-br from-blue-500 to-blue-600 text-white" >
                     <PlusIcon className="size-4" />
-                    New Task
+                    Công việc mới
                 </button>
             </div>
 
             {/* Info Cards */}
             <div className="grid grid-cols-2 sm:flex flex-wrap gap-6">
                 {[
-                    { label: "Total Tasks", value: tasks.length, color: "text-zinc-900 dark:text-white" },
-                    { label: "Completed", value: tasks.filter((t) => t.status === "DONE").length, color: "text-emerald-700 dark:text-emerald-400" },
-                    { label: "In Progress", value: tasks.filter((t) => t.status === "IN_PROGRESS" || t.status === "TODO").length, color: "text-amber-700 dark:text-amber-400" },
-                    { label: "Team Members", value: project.members?.length || 0, color: "text-blue-700 dark:text-blue-400" },
+                    { label: "Tổng công việc", value: tasks.length, color: "text-zinc-900 dark:text-white" },
+                    { label: "Hoàn thành", value: tasks.filter((t) => t.status === "DONE").length, color: "text-emerald-700 dark:text-emerald-400" },
+                    { label: "Đang thực hiện", value: tasks.filter((t) => t.status === "IN_PROGRESS" || t.status === "TODO").length, color: "text-amber-700 dark:text-amber-400" },
+                    { label: "Thành viên", value: project.members?.length || 0, color: "text-blue-700 dark:text-blue-400" },
                 ].map((card, idx) => (
                     <div key={idx} className=" dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex justify-between sm:min-w-60 p-4 py-2.5 rounded">
                         <div>
@@ -96,10 +134,12 @@ export default function ProjectDetail() {
             <div>
                 <div className="inline-flex flex-wrap max-sm:grid grid-cols-3 gap-2 border border-zinc-200 dark:border-zinc-800 rounded overflow-hidden">
                     {[
-                        { key: "tasks", label: "Tasks", icon: FileStackIcon },
-                        { key: "calendar", label: "Calendar", icon: CalendarIcon },
-                        { key: "analytics", label: "Analytics", icon: BarChart3Icon },
-                        { key: "settings", label: "Settings", icon: SettingsIcon },
+                        { key: "tasks", label: "Công việc", icon: FileStackIcon },
+                        { key: "kanban", label: "Kanban", icon: LayoutDashboard },
+                        { key: "calendar", label: "Lịch", icon: CalendarIcon },
+                        { key: "analytics", label: "Phân tích", icon: BarChart3Icon },
+                        { key: "files", label: "Tài liệu", icon: FolderOpen },
+                        { key: "settings", label: "Cài đặt", icon: SettingsIcon },
                     ].map((tabItem) => (
                         <button key={tabItem.key} onClick={() => { setActiveTab(tabItem.key); setSearchParams({ id: id, tab: tabItem.key }) }} className={`flex items-center gap-2 px-4 py-2 text-sm transition-all ${activeTab === tabItem.key ? "bg-zinc-100 dark:bg-zinc-800/80" : "hover:bg-zinc-50 dark:hover:bg-zinc-700"}`} >
                             <tabItem.icon className="size-3.5" />
@@ -110,22 +150,32 @@ export default function ProjectDetail() {
 
                 <div className="mt-6">
                     {activeTab === "tasks" && (
-                        <div className=" dark:bg-zinc-900/40 rounded max-w-6xl">
+                        <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
                             <ProjectTasks tasks={tasks} />
                         </div>
                     )}
+                    {activeTab === "kanban" && (
+                        <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
+                            <ProjectKanban tasks={tasks} />
+                        </div>
+                    )}
                     {activeTab === "analytics" && (
-                        <div className=" dark:bg-zinc-900/40 rounded max-w-6xl">
+                        <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
                             <ProjectAnalytics tasks={tasks} project={project} />
                         </div>
                     )}
                     {activeTab === "calendar" && (
-                        <div className=" dark:bg-zinc-900/40 rounded max-w-6xl">
+                        <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
                             <ProjectCalendar tasks={tasks} />
                         </div>
                     )}
+                    {activeTab === "files" && (
+                        <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
+                            <ProjectFiles projectId={id} />
+                        </div>
+                    )}
                     {activeTab === "settings" && (
-                        <div className=" dark:bg-zinc-900/40 rounded max-w-6xl">
+                        <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
                             <ProjectSettings project={project} />
                         </div>
                     )}

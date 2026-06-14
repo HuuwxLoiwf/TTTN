@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { CheckCircle, Clock, AlertTriangle, Users, ArrowRightIcon } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, Users, Download, ArrowRightIcon } from "lucide-react";
+import { format } from "date-fns";
 
 // Colors for charts and priorities
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
@@ -54,28 +55,28 @@ const ProjectAnalytics = ({ project, tasks }) => {
 
     const metrics = [
         {
-            label: "Completion Rate",
+            label: "Tỷ lệ hoàn thành",
             value: `${completionRate}%`,
             color: "text-emerald-600 dark:text-emerald-400",
             icon: <CheckCircle className="size-5 text-emerald-600 dark:text-emerald-400" />,
             bg: "bg-emerald-200 dark:bg-emerald-500/10",
         },
         {
-            label: "Active Tasks",
+            label: "Đang thực hiện",
             value: stats.inProgress,
             color: "text-blue-600 dark:text-blue-400",
             icon: <Clock className="size-5 text-blue-600 dark:text-blue-400" />,
             bg: "bg-blue-200 dark:bg-blue-500/10",
         },
         {
-            label: "Overdue Tasks",
+            label: "Công việc quá hạn",
             value: stats.overdue,
             color: "text-red-600 dark:text-red-400",
             icon: <AlertTriangle className="size-5 text-red-600 dark:text-red-400" />,
             bg: "bg-red-200 dark:bg-red-500/10",
         },
         {
-            label: "Team Size",
+            label: "Quy mô nhóm",
             value: project?.members?.length || 0,
             color: "text-purple-600 dark:text-purple-400",
             icon: <Users className="size-5 text-purple-600 dark:text-purple-400" />,
@@ -83,8 +84,40 @@ const ProjectAnalytics = ({ project, tasks }) => {
         },
     ];
 
+    const exportCSV = () => {
+        const headers = ["Tiêu đề", "Loại", "Trạng thái", "Ưu tiên", "Người thực hiện", "Hạn chót", "Ngày tạo"];
+        const rows = tasks.map((t) => [
+            `"${t.title}"`,
+            t.type,
+            t.status,
+            t.priority,
+            `"${t.assignee?.name || t.assignee?.email || ""}"`,
+            t.due_date ? format(new Date(t.due_date), "dd/MM/yyyy") : "",
+            t.createdAt ? format(new Date(t.createdAt), "dd/MM/yyyy") : "",
+        ]);
+        const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+        const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${project?.name || "bao-cao"}-${format(new Date(), "yyyy-MM-dd")}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="space-y-6">
+            {/* Export Button */}
+            <div className="flex justify-end">
+                <button
+                    onClick={exportCSV}
+                    className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                >
+                    <Download className="size-4" />
+                    Xuất báo cáo CSV
+                </button>
+            </div>
+
             {/* Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {metrics.map((m, i) => (
@@ -107,7 +140,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
             <div className="grid lg:grid-cols-2 gap-6">
                 {/* Tasks by Status */}
                 <div className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-6">
-                    <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Tasks by Status</h2>
+                    <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Công việc theo trạng thái</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={statusData}>
                             <XAxis
@@ -124,7 +157,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
 
                 {/* Tasks by Type */}
                 <div className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-6">
-                    <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Tasks by Type</h2>
+                    <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Công việc theo loại</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
                             <Pie
@@ -147,7 +180,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
 
             {/* Priority Breakdown */}
             <div className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-6">
-                <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Tasks by Priority</h2>
+                <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Công việc theo độ ưu tiên</h2>
                 <div className="space-y-4">
                     {priorityData.map((p) => (
                         <div key={p.name} className="space-y-2">
@@ -157,7 +190,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
                                     <span className="text-zinc-900 dark:text-zinc-200 capitalize">{p.name.toLowerCase()}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-zinc-600 dark:text-zinc-400 text-sm">{p.value} tasks</span>
+                                    <span className="text-zinc-600 dark:text-zinc-400 text-sm">{p.value} công việc</span>
                                     <span className="px-2 py-0.5 border border-zinc-400 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 text-xs rounded">
                                         {p.percentage}%
                                     </span>

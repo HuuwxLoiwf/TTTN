@@ -18,7 +18,7 @@ const ProjectCard = ({ project }) => {
                         {project.name}
                     </h3>
                     <p className="text-gray-500 dark:text-zinc-400 text-sm line-clamp-2 mb-3">
-                        {project.description || "No description"}
+                        {project.description || "Chưa có mô tả"}
                     </p>
                 </div>
             </div>
@@ -28,14 +28,14 @@ const ProjectCard = ({ project }) => {
                     {project.status.replace("_", " ")}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-zinc-500 capitalize">
-                    {project.priority} priority
+                    Ưu tiên: {project.priority}
                 </span>
             </div>
 
             {/* Progress */}
             <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-500 dark:text-zinc-500">Progress</span>
+                    <span className="text-gray-500 dark:text-zinc-500">Tiến độ</span>
                     <span className="text-gray-400 dark:text-zinc-400">{project.progress || 0}%</span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-zinc-800 h-1.5 rounded">

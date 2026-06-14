@@ -2,7 +2,6 @@ import { SearchIcon, PanelLeft } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleTheme } from '../features/themeSlice'
 import { MoonIcon, SunIcon } from 'lucide-react'
-import { assets } from '../assets/assets'
 import { UserButton } from '@clerk/clerk-react'
 
 const Navbar = ({ setIsSidebarOpen }) => {
@@ -25,7 +24,7 @@ const Navbar = ({ setIsSidebarOpen }) => {
                         <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400 size-3.5" />
                         <input
                             type="text"
-                            placeholder="Search projects, tasks..."
+                            placeholder="Tìm kiếm dự án, công việc..."
                             className="pl-8 pr-4 py-2 w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
                         />
                     </div>

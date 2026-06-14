@@ -3,7 +3,9 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
 import { deleteTask, updateTask } from "../features/workspaceSlice";
+import { apiFetch } from "../lib/api";
 import { Bug, CalendarIcon, GitCommit, MessageSquare, Square, Trash, XIcon, Zap } from "lucide-react";
 
 const typeIcons = {
@@ -23,6 +25,7 @@ const priorityTexts = {
 const ProjectTasks = ({ tasks }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { getToken } = useAuth();
     const [selectedTasks, setSelectedTasks] = useState([]);
 
     const [filters, setFilters] = useState({
@@ -55,41 +58,40 @@ const ProjectTasks = ({ tasks }) => {
     };
 
     const handleStatusChange = async (taskId, newStatus) => {
+        const loadingToast = toast.loading("Đang cập nhật trạng thái...");
         try {
-            toast.loading("Updating status...");
-
-            //  Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-
-            let updatedTask = structuredClone(tasks.find((t) => t.id === taskId));
-            updatedTask.status = newStatus;
+            const token = await getToken();
+            const updatedTask = await apiFetch(token, `/tasks/${taskId}`, {
+                method: 'PUT',
+                body: { status: newStatus },
+            });
             dispatch(updateTask(updatedTask));
-
-            toast.dismissAll();
-            toast.success("Task status updated successfully");
+            toast.dismiss(loadingToast);
+            toast.success("Đã cập nhật trạng thái");
         } catch (error) {
-            toast.dismissAll();
-            toast.error(error?.response?.data?.message || error.message);
+            toast.dismiss(loadingToast);
+            toast.error(error.message);
         }
     };
 
     const handleDelete = async () => {
+        if (!selectedTasks.length) return;
+        const confirmed = window.confirm("Bạn có chắc chắn muốn xóa các công việc đã chọn?");
+        if (!confirmed) return;
+        const loadingToast = toast.loading("Đang xóa công việc...");
         try {
-            const confirm = window.confirm("Are you sure you want to delete the selected tasks?");
-            if (!confirm) return;
-
-            toast.loading("Deleting tasks...");
-
-            //  Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-
+            const token = await getToken();
+            await apiFetch(token, `/tasks/bulk-delete`, {
+                method: 'POST',
+                body: { ids: selectedTasks },
+            });
             dispatch(deleteTask(selectedTasks));
-
-            toast.dismissAll();
-            toast.success("Tasks deleted successfully");
+            setSelectedTasks([]);
+            toast.dismiss(loadingToast);
+            toast.success("Xóa công việc thành công");
         } catch (error) {
-            toast.dismissAll();
-            toast.error(error?.response?.data?.message || error.message);
+            toast.dismiss(loadingToast);
+            toast.error(error.message);
         }
     };
 
@@ -100,27 +102,28 @@ const ProjectTasks = ({ tasks }) => {
                 {["status", "type", "priority", "assignee"].map((name) => {
                     const options = {
                         status: [
-                            { label: "All Statuses", value: "" },
-                            { label: "To Do", value: "TODO" },
-                            { label: "In Progress", value: "IN_PROGRESS" },
-                            { label: "Done", value: "DONE" },
+                            { label: "Tất cả trạng thái", value: "" },
+                            { label: "Chờ làm", value: "TODO" },
+                            { label: "Đang làm", value: "IN_PROGRESS" },
+                            { label: "Đang review", value: "REVIEW" },
+                            { label: "Hoàn thành", value: "DONE" },
                         ],
                         type: [
-                            { label: "All Types", value: "" },
-                            { label: "Task", value: "TASK" },
-                            { label: "Bug", value: "BUG" },
-                            { label: "Feature", value: "FEATURE" },
-                            { label: "Improvement", value: "IMPROVEMENT" },
-                            { label: "Other", value: "OTHER" },
+                            { label: "Tất cả loại", value: "" },
+                            { label: "Nhiệm vụ", value: "TASK" },
+                            { label: "Lỗi", value: "BUG" },
+                            { label: "Tính năng", value: "FEATURE" },
+                            { label: "Cải tiến", value: "IMPROVEMENT" },
+                            { label: "Khác", value: "OTHER" },
                         ],
                         priority: [
-                            { label: "All Priorities", value: "" },
-                            { label: "Low", value: "LOW" },
-                            { label: "Medium", value: "MEDIUM" },
-                            { label: "High", value: "HIGH" },
+                            { label: "Tất cả ưu tiên", value: "" },
+                            { label: "Thấp", value: "LOW" },
+                            { label: "Trung bình", value: "MEDIUM" },
+                            { label: "Cao", value: "HIGH" },
                         ],
                         assignee: [
-                            { label: "All Assignees", value: "" },
+                            { label: "Tất cả người thực hiện", value: "" },
                             ...assigneeList.map((n) => ({ label: n, value: n })),
                         ],
                     };
@@ -136,13 +139,13 @@ const ProjectTasks = ({ tasks }) => {
                 {/* Reset filters */}
                 {(filters.status || filters.type || filters.priority || filters.assignee) && (
                     <button type="button" onClick={() => setFilters({ status: "", type: "", priority: "", assignee: "" })} className="px-3 py-1 flex items-center gap-2 rounded bg-gradient-to-br from-purple-400 to-purple-500 text-zinc-100 dark:text-zinc-200 text-sm transition-colors" >
-                        <XIcon className="size-3" /> Reset
+                        <XIcon className="size-3" /> Đặt lại
                     </button>
                 )}
 
                 {selectedTasks.length > 0 && (
                     <button type="button" onClick={handleDelete} className="px-3 py-1 flex items-center gap-2 rounded bg-gradient-to-br from-indigo-400 to-indigo-500 text-zinc-100 dark:text-zinc-200 text-sm transition-colors" >
-                        <Trash className="size-3" /> Delete
+                        <Trash className="size-3" /> Xóa
                     </button>
                 )}
             </div>
@@ -158,12 +161,12 @@ const ProjectTasks = ({ tasks }) => {
                                     <th className="pl-2 pr-1">
                                         <input onChange={() => selectedTasks.length > 1 ? setSelectedTasks([]) : setSelectedTasks(tasks.map((t) => t.id))} checked={selectedTasks.length === tasks.length} type="checkbox" className="size-3 accent-zinc-600 dark:accent-zinc-500" />
                                     </th>
-                                    <th className="px-4 pl-0 py-3">Title</th>
-                                    <th className="px-4 py-3">Type</th>
-                                    <th className="px-4 py-3">Priority</th>
-                                    <th className="px-4 py-3">Status</th>
-                                    <th className="px-4 py-3">Assignee</th>
-                                    <th className="px-4 py-3">Due Date</th>
+                                    <th className="px-4 pl-0 py-3">Tiêu đề</th>
+                                    <th className="px-4 py-3">Loại</th>
+                                    <th className="px-4 py-3">Ưu tiên</th>
+                                    <th className="px-4 py-3">Trạng thái</th>
+                                    <th className="px-4 py-3">Người thực hiện</th>
+                                    <th className="px-4 py-3">Hạn chót</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -191,9 +194,10 @@ const ProjectTasks = ({ tasks }) => {
                                                 </td>
                                                 <td onClick={e => e.stopPropagation()} className="px-4 py-2">
                                                     <select name="status" onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="group-hover:ring ring-zinc-100 outline-none px-2 pr-4 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200 cursor-pointer" >
-                                                        <option value="TODO">To Do</option>
-                                                        <option value="IN_PROGRESS">In Progress</option>
-                                                        <option value="DONE">Done</option>
+                                                        <option value="TODO">Chờ làm</option>
+                                                        <option value="IN_PROGRESS">Đang làm</option>
+                                                        <option value="REVIEW">Đang review</option>
+                                                        <option value="DONE">Hoàn thành</option>
                                                     </select>
                                                 </td>
                                                 <td className="px-4 py-2">
@@ -214,7 +218,7 @@ const ProjectTasks = ({ tasks }) => {
                                 ) : (
                                     <tr>
                                         <td colSpan="7" className="text-center text-zinc-500 dark:text-zinc-400 py-6">
-                                            No tasks found for the selected filters.
+                                            Không tìm thấy công việc với bộ lọc đã chọn.
                                         </td>
                                     </tr>
                                 )}
@@ -248,11 +252,12 @@ const ProjectTasks = ({ tasks }) => {
                                         </div>
 
                                         <div>
-                                            <label className="text-zinc-600 dark:text-zinc-400 text-xs">Status</label>
+                                            <label className="text-zinc-600 dark:text-zinc-400 text-xs">Trạng thái</label>
                                             <select name="status" onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="w-full mt-1 bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-300 dark:ring-zinc-700 outline-none px-2 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200" >
-                                                <option value="TODO">To Do</option>
-                                                <option value="IN_PROGRESS">In Progress</option>
-                                                <option value="DONE">Done</option>
+                                                <option value="TODO">Chờ làm</option>
+                                                <option value="IN_PROGRESS">Đang làm</option>
+                                                <option value="REVIEW">Đang review</option>
+                                                <option value="DONE">Hoàn thành</option>
                                             </select>
                                         </div>
 
@@ -270,7 +275,7 @@ const ProjectTasks = ({ tasks }) => {
                             })
                         ) : (
                             <p className="text-center text-zinc-500 dark:text-zinc-400 py-4">
-                                No tasks found for the selected filters.
+                                Không tìm thấy công việc với bộ lọc đã chọn.
                             </p>
                         )}
                     </div>

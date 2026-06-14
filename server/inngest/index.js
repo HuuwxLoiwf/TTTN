@@ -55,4 +55,71 @@ const syncUserUpdate = inngest.createFunction(
     }
 );
 
-export const functions = [syncUserCreation, syncUserDeletion, syncUserUpdate];
+// Sync workspace creation
+const syncWorkspaceCreation = inngest.createFunction(
+    {
+        id: "sync/workspace-creation",
+        triggers: [{ event: "clerk/organization.created" }]
+    },
+    async ({ event }) => {
+        const { data } = event;
+        await prisma.workspace.create({
+            data: {
+                id: data.id,
+                name: data.name,
+                slug: data.slug,
+                ownerId: data.created_by,
+                image_url: data.image_url,
+            }
+        });
+        await prisma.workspaceMember.create({
+            data: {
+                userId: data.created_by,
+                workspaceId: data.id,
+                role: "ADMIN",
+            }
+        });
+    }
+);
+
+// Sync workspace update
+const syncWorkspaceUpdate = inngest.createFunction(
+    {
+        id: "sync/workspace-update",
+        triggers: [{ event: "clerk/organization.updated" }]
+    },
+    async ({ event }) => {
+        const { data } = event;
+        await prisma.workspace.update({
+            where: { id: data.id },
+            data: {
+                name: data.name,
+                slug: data.slug,
+                image_url: data.image_url,
+            }
+        });
+    }
+);
+
+// Sync workspace deletion
+const syncWorkspaceDeletion = inngest.createFunction(
+    {
+        id: "sync/workspace-deletion",
+        triggers: [{ event: "clerk/organization.deleted" }]
+    },
+    async ({ event }) => {
+        const { data } = event;
+        await prisma.workspace.delete({
+            where: { id: data.id }
+        });
+    }
+);
+
+export const functions = [
+    syncUserCreation,
+    syncUserDeletion,
+    syncUserUpdate,
+    syncWorkspaceCreation,
+    syncWorkspaceUpdate,
+    syncWorkspaceDeletion,
+];

@@ -4,19 +4,61 @@ import Sidebar from '../components/Sidebar'
 import { Outlet } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadTheme } from '../features/themeSlice'
+import { setWorkspaces, setCurrentWorkspace, setLoading } from '../features/workspaceSlice'
+import { apiFetch } from '../lib/api'
 import { Loader2Icon } from 'lucide-react'
-import { useUser, SignIn } from '@clerk/clerk-react'
+import { useUser, useAuth, SignIn } from '@clerk/clerk-react'
 
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const { loading } = useSelector((state) => state.workspace)
     const dispatch = useDispatch()
     const { user, isLoaded } = useUser()
+    const { getToken } = useAuth()
 
-    // Initial load of theme
     useEffect(() => {
         dispatch(loadTheme())
     }, [])
+
+    useEffect(() => {
+        if (!isLoaded || !user) return;
+
+        const loadWorkspaces = async () => {
+            dispatch(setLoading(true));
+            try {
+                const token = await getToken();
+                // Sync user to DB first (upsert) so FK constraints work
+                await apiFetch(token, '/users/sync', {
+                    method: 'POST',
+                    body: {
+                        name: user.fullName || user.username || user.emailAddresses?.[0]?.emailAddress || 'User',
+                        email: user.primaryEmailAddress?.emailAddress || user.emailAddresses?.[0]?.emailAddress || '',
+                        image: user.imageUrl || '',
+                    },
+                });
+                const workspaces = await apiFetch(token, '/workspaces');
+                dispatch(setWorkspaces(workspaces));
+                const savedId = localStorage.getItem('currentWorkspaceId');
+                if (savedId && workspaces.find((w) => w.id === savedId)) {
+                    dispatch(setCurrentWorkspace(savedId));
+                } else if (workspaces.length > 0) {
+                    dispatch(setCurrentWorkspace(workspaces[0].id));
+                }
+            } catch (e) {
+                console.error('Không thể tải không gian làm việc:', e);
+            } finally {
+                dispatch(setLoading(false));
+            }
+        };
+
+        loadWorkspaces();
+    }, [isLoaded, user])
+
+    if (!isLoaded) return (
+        <div className='flex items-center justify-center h-screen bg-white dark:bg-zinc-950'>
+            <Loader2Icon className="size-7 text-blue-500 animate-spin" />
+        </div>
+    )
 
     if (!user) {
         return (
