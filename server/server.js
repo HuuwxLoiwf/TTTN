@@ -4,7 +4,7 @@ import 'dotenv/config';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { clerkMiddleware } from '@clerk/express';
+import { verifyToken } from '@clerk/backend';
 import { serve } from 'inngest/express';
 import { inngest, functions } from './inngest/index.js';
 import { initSocket } from './socket.js';
@@ -30,10 +30,23 @@ if (!process.env.VERCEL) {
 
 app.use(express.json());
 app.use(cors({ origin: true }));
-app.use(clerkMiddleware({
-    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
-    secretKey: process.env.CLERK_SECRET_KEY,
-}));
+
+// Manual JWT verification — more reliable than clerkMiddleware on Vercel serverless
+app.use(async (req, res, next) => {
+    req.auth = { userId: null };
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) return next();
+    try {
+        const token = authHeader.slice(7);
+        const payload = await verifyToken(token, {
+            secretKey: process.env.CLERK_SECRET_KEY,
+        });
+        req.auth = { userId: payload.sub, sessionId: payload.sid };
+    } catch (err) {
+        console.error('[Auth] verifyToken failed:', err.message);
+    }
+    next();
+});
 
 // Static file serving only works locally (Vercel has no persistent filesystem)
 if (!process.env.VERCEL) {
