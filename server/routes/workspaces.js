@@ -8,15 +8,16 @@ import {
   inviteMember,
   removeMember,
 } from "../controllers/workspaceController.js";
+import { requireAuth, requireMember } from "../middleware/authz.js";
 
 const router = Router();
 
-router.get("/", getWorkspaces);
-router.get("/:id", getWorkspace);
-router.post("/", createWorkspace);
-router.put("/:id", updateWorkspace);
-router.delete("/:id", deleteWorkspace);
-router.post("/:id/members", inviteMember);
-router.delete("/:id/members/:memberId", removeMember);
+router.get("/", requireAuth, getWorkspaces);
+router.get("/:id", requireMember({ from: "workspace", param: "id" }), getWorkspace);
+router.post("/", requireAuth, createWorkspace);
+router.put("/:id", requireMember({ from: "workspace", param: "id", role: "ADMIN" }), updateWorkspace);
+router.delete("/:id", requireMember({ from: "workspace", param: "id", role: "ADMIN" }), deleteWorkspace);
+router.post("/:id/members", requireMember({ from: "workspace", param: "id", role: "ADMIN" }), inviteMember);
+router.delete("/:id/members/:memberId", requireMember({ from: "workspace", param: "id", role: "ADMIN" }), removeMember);
 
 export default router;

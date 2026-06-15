@@ -1,2 +1,10 @@
 node_modules
-.env 
+.env
+.env.*
+
+# Build output (Vercel/Railway tự build lại)
+client/dist
+dist
+
+# File upload của người dùng — không commit
+server/uploads

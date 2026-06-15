@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import prisma from '../configs/prisma.js';
+import { notifyUser, logActivity } from '../utils/notify.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Vercel's /var/task is read-only; use /tmp on serverless, local uploads/ otherwise
@@ -63,6 +64,72 @@ export const uploadFile = async (req, res) => {
             include: { uploader: { select: { id: true, name: true, email: true } } },
         });
         res.status(201).json(file);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Admin/trưởng dự án đánh giá tài liệu: APPROVED hoặc REJECTED + ghi chú
+export const reviewFile = async (req, res) => {
+    try {
+        const userId = req.auth?.userId;
+        const { id } = req.params;
+        const { reviewStatus, reviewNote } = req.body;
+
+        if (!["APPROVED", "REJECTED"].includes(reviewStatus)) {
+            return res.status(400).json({ error: "Trạng thái đánh giá không hợp lệ" });
+        }
+
+        const file = await prisma.file.findUnique({
+            where: { id },
+            select: { id: true, fileName: true, uploadedBy: true, projectId: true },
+        });
+        if (!file) return res.status(404).json({ error: 'File không tồn tại' });
+
+        // Chỉ ADMIN workspace hoặc trưởng dự án mới được đánh giá
+        if (file.projectId) {
+            const project = await prisma.project.findUnique({
+                where: { id: file.projectId },
+                select: { workspaceId: true, team_lead: true },
+            });
+            const membership = project && await prisma.workspaceMember.findUnique({
+                where: { userId_workspaceId: { userId, workspaceId: project.workspaceId } },
+                select: { role: true },
+            });
+            const allowed = membership?.role === "ADMIN" || project?.team_lead === userId;
+            if (!allowed) return res.status(403).json({ error: "Chỉ quản trị viên hoặc trưởng dự án mới được đánh giá tài liệu" });
+        }
+
+        const updated = await prisma.file.update({
+            where: { id },
+            data: {
+                reviewStatus,
+                reviewNote: reviewNote || null,
+                reviewedBy: userId,
+                reviewedAt: new Date(),
+            },
+            include: { uploader: { select: { id: true, name: true, email: true } } },
+        });
+
+        // Thông báo cho người upload
+        const statusText = reviewStatus === "APPROVED" ? "Đạt yêu cầu" : "Chưa đạt — cần làm lại";
+        notifyUser({
+            userId: file.uploadedBy,
+            actorId: userId,
+            title: `Tài liệu được đánh giá: ${statusText}`,
+            message: `"${file.fileName}" — ${statusText}${reviewNote ? `: ${reviewNote}` : ""}`,
+        });
+        if (file.projectId) {
+            logActivity({
+                projectId: file.projectId,
+                userId,
+                action: `đã đánh giá tài liệu "${file.fileName}" → ${statusText}`,
+                entityType: "FILE",
+                entityId: file.id,
+            });
+        }
+
+        res.json(updated);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

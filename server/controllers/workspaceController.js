@@ -1,4 +1,5 @@
 import prisma from "../configs/prisma.js";
+import { notifyUser, logActivity } from "../utils/notify.js";
 
 export const getWorkspaces = async (req, res) => {
   try {
@@ -148,6 +149,26 @@ export const inviteMember = async (req, res) => {
       },
       include: { user: true },
     });
+
+    const workspace = await prisma.workspace.findUnique({
+      where: { id },
+      select: { name: true },
+    });
+
+    notifyUser({
+      userId: user.id,
+      actorId: req.auth?.userId,
+      title: "Bạn được mời vào không gian làm việc",
+      message: `Bạn được mời vào ${workspace?.name || "không gian làm việc"}`,
+    });
+    logActivity({
+      workspaceId: id,
+      userId: req.auth?.userId,
+      action: `đã mời ${user.name || user.email} vào không gian làm việc`,
+      entityType: "WORKSPACE",
+      entityId: id,
+    });
+
     res.status(201).json(member);
   } catch (error) {
     res.status(500).json({ error: error.message });

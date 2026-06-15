@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { toggleTheme } from '../features/themeSlice'
 import { MoonIcon, SunIcon } from 'lucide-react'
 import { UserButton } from '@clerk/clerk-react'
+import NotificationBell from './NotificationBell'
 
 const Navbar = ({ setIsSidebarOpen }) => {
 
@@ -41,6 +42,9 @@ const Navbar = ({ setIsSidebarOpen }) => {
                                 : (<SunIcon className="size-4 text-yellow-400" />)
                         }
                     </button>
+
+                    {/* Notifications */}
+                    <NotificationBell />
 
                     {/* User Button */}
                     <UserButton/>

@@ -1,9 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { UploadCloud, File, Trash2, Download, FileImage, FileText, FileArchive } from "lucide-react";
-import { apiFetch } from "../lib/api";
+import { UploadCloud, File, Trash2, Download, FileImage, FileText, FileArchive, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { apiFetch, API_BASE_URL } from "../lib/api";
 import { format } from "date-fns";
+
+const reviewBadge = {
+    PENDING: { label: "Chờ duyệt", cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", Icon: Clock },
+    APPROVED: { label: "Đạt yêu cầu", cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400", Icon: CheckCircle2 },
+    REJECTED: { label: "Chưa đạt", cls: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", Icon: XCircle },
+};
 
 const getFileIcon = (fileName) => {
     const ext = fileName.split(".").pop().toLowerCase();
@@ -21,6 +28,14 @@ const formatSize = (bytes) => {
 
 const ProjectFiles = ({ projectId }) => {
     const { getToken } = useAuth();
+    const { user } = useUser();
+    const { currentWorkspace } = useSelector((state) => state.workspace);
+
+    // Admin workspace hoặc trưởng dự án mới được đánh giá tài liệu
+    const project = currentWorkspace?.projects?.find((p) => p.id === projectId);
+    const isAdmin = currentWorkspace?.members?.some((m) => m.userId === user?.id && m.role === "ADMIN");
+    const canReview = isAdmin || project?.team_lead === user?.id;
+
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
@@ -53,7 +68,7 @@ const ProjectFiles = ({ projectId }) => {
                 formData.append("file", file);
                 formData.append("projectId", projectId);
 
-                const res = await fetch(`/api/files/upload`, {
+                const res = await fetch(`${API_BASE_URL}/files/upload`, {
                     method: "POST",
                     headers: { Authorization: `Bearer ${token}` },
                     body: formData,
@@ -96,6 +111,24 @@ const ProjectFiles = ({ projectId }) => {
         }
     };
 
+    const handleReview = async (fileId, reviewStatus) => {
+        let reviewNote = "";
+        if (reviewStatus === "REJECTED") {
+            reviewNote = window.prompt("Ghi chú: cần thực hiện lại những gì?") ?? "";
+        }
+        try {
+            const token = await getToken();
+            const updated = await apiFetch(token, `/files/${fileId}/review`, {
+                method: "PUT",
+                body: { reviewStatus, reviewNote },
+            });
+            setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, ...updated } : f)));
+            toast.success(reviewStatus === "APPROVED" ? "Đã đánh giá: Đạt" : "Đã đánh giá: Chưa đạt");
+        } catch (err) {
+            toast.error("Đánh giá thất bại: " + err.message);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Upload Zone */}
@@ -135,38 +168,72 @@ const ProjectFiles = ({ projectId }) => {
                     <div className="grid gap-2">
                         {files.map((file) => {
                             const Icon = getFileIcon(file.fileName);
+                            const badge = reviewBadge[file.reviewStatus] || reviewBadge.PENDING;
+                            const BadgeIcon = badge.Icon;
                             return (
                                 <div
                                     key={file.id}
-                                    className="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/60 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                                    className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/60 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                                 >
-                                    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex-shrink-0">
-                                        <Icon className="size-5 text-blue-600 dark:text-blue-400" />
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex-shrink-0">
+                                            <Icon className="size-5 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{file.fileName}</p>
+                                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium flex-shrink-0 ${badge.cls}`}>
+                                                    <BadgeIcon className="size-3" /> {badge.label}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                                                {file.uploader?.name || file.uploader?.email} &bull; {format(new Date(file.createdAt), "dd/MM/yyyy HH:mm")}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                            <a
+                                                href={file.fileUrl}
+                                                download={file.fileName}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="p-1.5 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-500 dark:text-zinc-400 transition-colors"
+                                            >
+                                                <Download className="size-4" />
+                                            </a>
+                                            <button
+                                                onClick={() => handleDelete(file.id)}
+                                                className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                            >
+                                                <Trash2 className="size-4" />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{file.fileName}</p>
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-500">
-                                            {file.uploader?.name || file.uploader?.email} &bull; {format(new Date(file.createdAt), "dd/MM/yyyy HH:mm")}
+
+                                    {/* Ghi chú đánh giá (nếu chưa đạt) */}
+                                    {file.reviewStatus === "REJECTED" && file.reviewNote && (
+                                        <p className="mt-2 ml-12 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded px-2 py-1">
+                                            <strong>Cần làm lại:</strong> {file.reviewNote}
                                         </p>
-                                    </div>
-                                    <div className="flex items-center gap-2 flex-shrink-0">
-                                        <a
-                                            href={file.fileUrl}
-                                            download={file.fileName}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="p-1.5 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-500 dark:text-zinc-400 transition-colors"
-                                        >
-                                            <Download className="size-4" />
-                                        </a>
-                                        <button
-                                            onClick={() => handleDelete(file.id)}
-                                            className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                        >
-                                            <Trash2 className="size-4" />
-                                        </button>
-                                    </div>
+                                    )}
+
+                                    {/* Nút đánh giá — chỉ admin/trưởng dự án */}
+                                    {canReview && (
+                                        <div className="mt-2 ml-12 flex gap-2">
+                                            <button
+                                                onClick={() => handleReview(file.id, "APPROVED")}
+                                                className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                            >
+                                                <CheckCircle2 className="size-3.5" /> Đạt
+                                            </button>
+                                            <button
+                                                onClick={() => handleReview(file.id, "REJECTED")}
+                                                className="flex items-center gap-1 px-2 py-1 rounded text-xs border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                            >
+                                                <XCircle className="size-3.5" /> Chưa đạt
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}

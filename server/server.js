@@ -17,19 +17,28 @@ import commentRoutes from './routes/comments.js';
 import activityRoutes from './routes/activities.js';
 import notificationRoutes from './routes/notifications.js';
 import fileRoutes from './routes/files.js';
+import memberRequestRoutes from './routes/memberRequests.js';
+import departmentRoutes from './routes/departments.js';
+import projectMessageRoutes from './routes/projectMessages.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const httpServer = http.createServer(app);
 
+// CLIENT_URL = domain frontend (Vercel). Nhiều domain ngăn cách bằng dấu phẩy.
+// Chưa set → phản chiếu mọi origin (tiện khi mới deploy).
+const allowedOrigins = process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map((o) => o.trim())
+    : true;
+
 // Socket.io requires persistent connections — not supported on Vercel serverless
 if (!process.env.VERCEL) {
-    initSocket(httpServer);
+    initSocket(httpServer, allowedOrigins);
 }
 
 app.use(express.json());
-app.use(cors({ origin: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 // Manual JWT verification — more reliable than clerkMiddleware on Vercel serverless
 app.use(async (req, res, next) => {
@@ -75,6 +84,9 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/files', fileRoutes);
+app.use('/api/member-requests', memberRequestRoutes);
+app.use('/api/departments', departmentRoutes);
+app.use('/api/project-messages', projectMessageRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -5,12 +5,13 @@ import {
   markAllAsRead,
   createNotification,
 } from "../controllers/notificationController.js";
+import { requireAuth } from "../middleware/authz.js";
 
 const router = Router();
 
-router.get("/", getNotifications);
-router.post("/", createNotification);
-router.put("/:id/read", markAsRead);
-router.put("/read-all", markAllAsRead);
+router.get("/", requireAuth, getNotifications);
+router.post("/", requireAuth, createNotification);
+router.put("/read-all", requireAuth, markAllAsRead);
+router.put("/:id/read", requireAuth, markAsRead);
 
 export default router;

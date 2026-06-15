@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { format } from "date-fns";
 import { useDispatch } from "react-redux";
 import { useAuth } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
-import { CalendarIcon, Bug, Zap, Square, GitCommit, MessageSquare } from "lucide-react";
-import { apiFetch } from "../lib/api";
+import { CalendarIcon, Bug, Zap, Square, GitCommit, MessageSquare, Paperclip } from "lucide-react";
+import { apiFetch, API_BASE_URL } from "../lib/api";
 import { updateTask } from "../features/workspaceSlice";
 
 const COLUMNS = [
@@ -32,6 +32,34 @@ const PRIORITY_LABEL = { LOW: "Thấp", MEDIUM: "TB", HIGH: "Cao" };
 
 const TaskCard = ({ task, onDragStart }) => {
     const { icon: Icon, color } = TYPE_ICONS[task.type] || {};
+    const { getToken } = useAuth();
+    const fileInputRef = useRef(null);
+    const [uploading, setUploading] = useState(false);
+
+    const handleAttach = async (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = "";
+        if (!file) return;
+        setUploading(true);
+        try {
+            const token = await getToken();
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("taskId", task.id);
+            const res = await fetch(`${API_BASE_URL}/files/upload`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
+            });
+            if (!res.ok) throw new Error(await res.text());
+            toast.success(`Đã đính kèm "${file.name}"`);
+        } catch (err) {
+            toast.error("Đính kèm thất bại: " + err.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
     return (
         <div
             draggable
@@ -40,7 +68,19 @@ const TaskCard = ({ task, onDragStart }) => {
         >
             <div className="flex items-start justify-between gap-2 mb-2">
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 leading-snug">{task.title}</p>
-                {Icon && <Icon className={`size-4 flex-shrink-0 mt-0.5 ${color}`} />}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        title="Đính kèm tài liệu"
+                        className="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-400 hover:text-blue-500 disabled:opacity-50"
+                    >
+                        <Paperclip className="size-3.5" />
+                    </button>
+                    {Icon && <Icon className={`size-4 mt-0.5 ${color}`} />}
+                </div>
+                <input ref={fileInputRef} type="file" className="hidden" onChange={handleAttach} />
             </div>
 
             {task.description && (

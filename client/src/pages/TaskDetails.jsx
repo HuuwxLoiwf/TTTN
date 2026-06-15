@@ -6,6 +6,7 @@ import { useSearchParams } from "react-router-dom";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { CalendarIcon, MessageCircle, PenIcon } from "lucide-react";
 import { apiFetch } from "../lib/api";
+import { joinProject, leaveProject, getSocket } from "../lib/socket";
 
 const TaskDetails = () => {
 
@@ -72,12 +73,25 @@ const TaskDetails = () => {
     useEffect(() => { fetchTaskDetails(); }, [taskId, currentWorkspace]);
 
     useEffect(() => {
-        if (taskId && task) {
-            fetchComments();
-            const interval = setInterval(() => { fetchComments(); }, 15000);
-            return () => clearInterval(interval);
-        }
-    }, [taskId, task]);
+        if (!taskId || !task || !projectId) return;
+        fetchComments();
+
+        // Realtime: nghe bình luận mới trong room dự án
+        joinProject(projectId);
+        const socket = getSocket();
+        const onCommentAdded = ({ taskId: incomingTaskId, comment }) => {
+            if (incomingTaskId !== taskId) return;
+            setComments((prev) =>
+                prev.some((c) => c.id === comment.id) ? prev : [...prev, comment]
+            );
+        };
+        socket.on("comment:added", onCommentAdded);
+
+        return () => {
+            leaveProject(projectId);
+            socket.off("comment:added", onCommentAdded);
+        };
+    }, [taskId, task, projectId]);
 
     if (loading) return <div className="text-gray-500 dark:text-zinc-400 px-4 py-6">Đang tải chi tiết công việc...</div>;
     if (!task) return <div className="text-red-500 px-4 py-6">Không tìm thấy công việc.</div>;
@@ -97,8 +111,8 @@ const TaskDetails = () => {
                                 {comments.map((comment) => (
                                     <div key={comment.id} className={`sm:max-w-4/5 dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-900 border border-gray-300 dark:border-zinc-700 p-3 rounded-md ${comment.user?.id === user?.id ? "ml-auto" : "mr-auto"}`} >
                                         <div className="flex items-center gap-2 mb-1 text-sm text-gray-500 dark:text-zinc-400">
-                                            {comment.user?.image_url && (
-                                                <img src={comment.user.image_url} alt="avatar" className="size-5 rounded-full" />
+                                            {comment.user?.image && (
+                                                <img src={comment.user.image} alt="avatar" className="size-5 rounded-full" />
                                             )}
                                             <span className="font-medium text-gray-900 dark:text-white">{comment.user?.name || comment.user?.email || "Người dùng"}</span>
                                             <span className="text-xs text-gray-400 dark:text-zinc-600">
@@ -157,8 +171,8 @@ const TaskDetails = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-zinc-300">
                         <div className="flex items-center gap-2">
-                            {task.assignee?.image_url && (
-                                <img src={task.assignee.image_url} className="size-5 rounded-full" alt="avatar" />
+                            {task.assignee?.image && (
+                                <img src={task.assignee.image} className="size-5 rounded-full" alt="avatar" />
                             )}
                             {task.assignee?.name || task.assignee?.email || "Chưa giao"}
                         </div>

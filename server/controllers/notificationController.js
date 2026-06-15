@@ -18,12 +18,15 @@ export const getNotifications = async (req, res) => {
 
 export const markAsRead = async (req, res) => {
   try {
+    const userId = req.auth?.userId;
     const { id } = req.params;
-    const notification = await prisma.notification.update({
-      where: { id },
+    // Chỉ cho đánh dấu thông báo của chính mình
+    const result = await prisma.notification.updateMany({
+      where: { id, userId },
       data: { isRead: true },
     });
-    res.json(notification);
+    if (result.count === 0) return res.status(404).json({ error: "Không tìm thấy thông báo" });
+    res.json({ message: "Đã đánh dấu đã đọc" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

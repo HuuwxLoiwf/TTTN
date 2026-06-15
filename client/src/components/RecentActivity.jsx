@@ -1,37 +1,71 @@
 import { useEffect, useState } from "react";
-import { GitCommit, MessageSquare, Clock, Bug, Zap, Square } from "lucide-react";
-import { format } from "date-fns";
+import { Clock, Activity as ActivityIcon, Trash2 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { vi } from "date-fns/locale";
 import { useSelector } from "react-redux";
-
-const typeIcons = {
-    BUG: { icon: Bug, color: "text-red-500 dark:text-red-400" },
-    FEATURE: { icon: Zap, color: "text-blue-500 dark:text-blue-400" },
-    TASK: { icon: Square, color: "text-green-500 dark:text-green-400" },
-    IMPROVEMENT: { icon: MessageSquare, color: "text-amber-500 dark:text-amber-400" },
-    OTHER: { icon: GitCommit, color: "text-purple-500 dark:text-purple-400" },
-};
-
-const statusColors = {
-    TODO: "bg-zinc-200 text-zinc-800 dark:bg-zinc-600 dark:text-zinc-200",
-    IN_PROGRESS: "bg-amber-200 text-amber-800 dark:bg-amber-500 dark:text-amber-900",
-    DONE: "bg-emerald-200 text-emerald-800 dark:bg-emerald-500 dark:text-emerald-900",
-};
+import { useAuth, useUser } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
+import { apiFetch } from "../lib/api";
+import { getSocket, joinWorkspace, leaveWorkspace } from "../lib/socket";
 
 const RecentActivity = () => {
-    const [tasks, setTasks] = useState([]);
+    const [activities, setActivities] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { currentWorkspace } = useSelector((state) => state.workspace);
+    const { getToken } = useAuth();
+    const { user } = useUser();
 
-    const getTasksFromCurrentWorkspace = () => {
+    // Người dùng hiện tại có phải ADMIN của workspace không
+    const isAdmin = currentWorkspace?.members?.some(
+        (m) => m.userId === user?.id && m.role === "ADMIN"
+    );
 
-        if (!currentWorkspace) return;
-
-        const tasks = currentWorkspace.projects.flatMap((project) => project.tasks.map((task) => task));
-        setTasks(tasks);
+    const fetchActivities = async () => {
+        if (!currentWorkspace?.id) return;
+        setLoading(true);
+        try {
+            const token = await getToken();
+            const data = await apiFetch(token, `/activities/workspace/${currentWorkspace.id}`);
+            setActivities(data);
+        } catch {
+            /* silent */
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        getTasksFromCurrentWorkspace();
-    }, [currentWorkspace]);
+        fetchActivities();
+    }, [currentWorkspace?.id]);
+
+    // Realtime: nghe hoạt động mới trong workspace
+    useEffect(() => {
+        if (!currentWorkspace?.id) return;
+        joinWorkspace(currentWorkspace.id);
+        const socket = getSocket();
+        const onNew = (activity) => {
+            setActivities((prev) =>
+                prev.some((a) => a.id === activity.id) ? prev : [activity, ...prev]
+            );
+        };
+        socket.on("activity:new", onNew);
+        return () => {
+            leaveWorkspace(currentWorkspace.id);
+            socket.off("activity:new", onNew);
+        };
+    }, [currentWorkspace?.id]);
+
+    const handleDelete = async (id) => {
+        const prev = activities;
+        setActivities((a) => a.filter((x) => x.id !== id)); // optimistic
+        try {
+            const token = await getToken();
+            await apiFetch(token, `/activities/${id}`, { method: "DELETE" });
+        } catch (err) {
+            setActivities(prev); // revert
+            toast.error(err.message || "Xóa hoạt động thất bại");
+        }
+    };
 
     return (
         <div className="bg-white dark:bg-zinc-950 dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 rounded-lg transition-all overflow-hidden">
@@ -40,7 +74,9 @@ const RecentActivity = () => {
             </div>
 
             <div className="p-0">
-                {tasks.length === 0 ? (
+                {loading ? (
+                    <div className="p-12 text-center text-zinc-500 dark:text-zinc-400 text-sm">Đang tải...</div>
+                ) : activities.length === 0 ? (
                     <div className="p-12 text-center">
                         <div className="w-16 h-16 mx-auto mb-4 bg-zinc-200 dark:bg-zinc-800 rounded-full flex items-center justify-center">
                             <Clock className="w-8 h-8 text-zinc-600 dark:text-zinc-500" />
@@ -49,44 +85,37 @@ const RecentActivity = () => {
                     </div>
                 ) : (
                     <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                        {tasks.map((task) => {
-                            const TypeIcon = typeIcons[task.type]?.icon || Square;
-                            const iconColor = typeIcons[task.type]?.color || "text-gray-500 dark:text-gray-400";
-
-                            return (
-                                <div key={task.id} className="p-6 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg">
-                                            <TypeIcon className={`w-4 h-4 ${iconColor}`} />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between mb-2">
-                                                <h4 className="text-zinc-800 dark:text-zinc-200 truncate">
-                                                    {task.title}
-                                                </h4>
-                                                <span className={`ml-2 px-2 py-1 rounded text-xs ${statusColors[task.status] || "bg-zinc-300 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300"}`}>
-                                                    {task.status.replace("_", " ")}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-                                                <span className="capitalize">{task.type.toLowerCase()}</span>
-                                                {task.assignee && (
-                                                    <div className="flex items-center gap-1">
-                                                        <div className="w-4 h-4 bg-zinc-300 dark:bg-zinc-700 rounded-full flex items-center justify-center text-[10px] text-zinc-800 dark:text-zinc-200">
-                                                            {task.assignee.name[0].toUpperCase()}
-                                                        </div>
-                                                        {task.assignee.name}
-                                                    </div>
-                                                )}
-                                                <span>
-                                                    {format(new Date(task.updatedAt), "MMM d, h:mm a")}
-                                                </span>
-                                            </div>
-                                        </div>
+                        {activities.map((act) => (
+                            <div key={act.id} className="group p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg flex-shrink-0">
+                                        {act.user?.image ? (
+                                            <img src={act.user.image} alt="" className="w-4 h-4 rounded-full" />
+                                        ) : (
+                                            <ActivityIcon className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                                        )}
                                     </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm text-zinc-800 dark:text-zinc-200">
+                                            <span className="font-medium">{act.user?.name || act.user?.email || "Người dùng"}</span>{" "}
+                                            <span className="text-zinc-600 dark:text-zinc-400">{act.action}</span>
+                                        </p>
+                                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
+                                            {formatDistanceToNow(new Date(act.createdAt), { addSuffix: true, locale: vi })}
+                                        </p>
+                                    </div>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => handleDelete(act.id)}
+                                            className="p-1.5 rounded opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/30 text-zinc-400 hover:text-red-500 transition-all flex-shrink-0"
+                                            title="Xóa hoạt động (quản trị viên)"
+                                        >
+                                            <Trash2 className="size-4" />
+                                        </button>
+                                    )}
                                 </div>
-                            );
-                        })}
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>

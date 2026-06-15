@@ -1,17 +1,58 @@
 import { format } from "date-fns";
-import { Plus, Save } from "lucide-react";
+import { Plus, Save, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useAuth } from "@clerk/clerk-react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import { apiFetch } from "../lib/api";
-import { updateProject } from "../features/workspaceSlice";
+import { updateProject, removeProject } from "../features/workspaceSlice";
 import AddProjectMember from "./AddProjectMember";
+import PendingMemberRequests from "./PendingMemberRequests";
 
 export default function ProjectSettings({ project }) {
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { getToken } = useAuth();
+    const { user } = useUser();
+    const { currentWorkspace } = useSelector((state) => state.workspace);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // Chỉ ADMIN của workspace mới được xóa dự án (khớp phân quyền backend)
+    const isAdmin = currentWorkspace?.members?.some(
+        (m) => m.userId === user?.id && m.role === "ADMIN"
+    );
+    // Admin hoặc trưởng dự án mới được duyệt yêu cầu thành viên
+    const canReview = isAdmin || project?.team_lead === user?.id;
+
+    // Sau khi duyệt yêu cầu: tải lại dự án để cập nhật danh sách thành viên
+    const refetchProject = async () => {
+        try {
+            const token = await getToken();
+            const updated = await apiFetch(token, `/projects/${project.id}`);
+            dispatch(updateProject(updated));
+        } catch {
+            /* silent */
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!project) return;
+        if (!window.confirm(`Xóa dự án "${project.name}"? Toàn bộ công việc, bình luận, tài liệu sẽ bị xóa vĩnh viễn.`)) return;
+        setIsDeleting(true);
+        try {
+            const token = await getToken();
+            await apiFetch(token, `/projects/${project.id}`, { method: "DELETE" });
+            dispatch(removeProject(project.id));
+            toast.success("Đã xóa dự án");
+            navigate("/projects");
+        } catch (err) {
+            toast.error("Xóa thất bại: " + err.message);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     const [formData, setFormData] = useState({
         name: "",
@@ -20,7 +61,6 @@ export default function ProjectSettings({ project }) {
         priority: "MEDIUM",
         start_date: "",
         end_date: "",
-        progress: 0,
     });
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -58,7 +98,6 @@ export default function ProjectSettings({ project }) {
                 priority: project.priority || "MEDIUM",
                 start_date: project.start_date ? format(new Date(project.start_date), "yyyy-MM-dd") : "",
                 end_date: project.end_date ? format(new Date(project.end_date), "yyyy-MM-dd") : "",
-                progress: project.progress || 0,
             });
         }
     }, [project]);
@@ -120,10 +159,12 @@ export default function ProjectSettings({ project }) {
                         </div>
                     </div>
 
-                    {/* Progress */}
+                    {/* Progress — tự động tính theo % công việc hoàn thành */}
                     <div className="space-y-2">
-                        <label className={labelClasses}>Tiến độ: {formData.progress}%</label>
-                        <input type="range" min="0" max="100" step="5" value={formData.progress} onChange={(e) => setFormData({ ...formData, progress: Number(e.target.value) })} className="w-full accent-blue-500 dark:accent-blue-400" />
+                        <label className={labelClasses}>Tiến độ: {project.progress || 0}% <span className="text-xs text-zinc-400">(tự động theo công việc hoàn thành)</span></label>
+                        <div className="w-full h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all" style={{ width: `${project.progress || 0}%` }} />
+                        </div>
                     </div>
 
                     {/* Save Button */}
@@ -158,6 +199,29 @@ export default function ProjectSettings({ project }) {
                         </div>
                     )}
                 </div>
+
+                {/* Yêu cầu chờ duyệt — chỉ admin/trưởng dự án */}
+                {canReview && (
+                    <PendingMemberRequests projectId={project.id} onApproved={refetchProject} />
+                )}
+
+                {/* Vùng nguy hiểm — chỉ ADMIN */}
+                {isAdmin && (
+                    <div className="rounded-lg border border-red-300 dark:border-red-900/50 p-6 bg-red-50/50 dark:bg-red-900/10">
+                        <h2 className="text-lg font-medium text-red-700 dark:text-red-400 mb-1">Vùng nguy hiểm</h2>
+                        <p className="text-sm text-red-600/80 dark:text-red-400/70 mb-4">
+                            Xóa dự án là hành động không thể hoàn tác. Toàn bộ công việc, bình luận và tài liệu sẽ bị xóa.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="flex items-center gap-2 text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded disabled:opacity-50"
+                        >
+                            <Trash2 className="size-4" /> {isDeleting ? "Đang xóa..." : "Xóa dự án"}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

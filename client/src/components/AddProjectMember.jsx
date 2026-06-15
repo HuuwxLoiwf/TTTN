@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Mail, UserPlus } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import { apiFetch } from "../lib/api";
 
@@ -13,9 +13,17 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }) => {
 
     const currentWorkspace = useSelector((state) => state.workspace?.currentWorkspace || null);
     const { getToken } = useAuth();
+    const { user } = useUser();
 
     const project = currentWorkspace?.projects.find((p) => p.id === id);
     const projectMembersEmails = project?.members.map((member) => member.user.email) || [];
+
+    // Admin workspace hoặc trưởng dự án → thêm thẳng; còn lại → gửi yêu cầu duyệt
+    const isWsAdmin = currentWorkspace?.members?.some(
+        (m) => m.userId === user?.id && m.role === "ADMIN"
+    );
+    const isLead = project?.team_lead === user?.id;
+    const canAddDirectly = isWsAdmin || isLead;
 
     const [email, setEmail] = useState('');
     const [isAdding, setIsAdding] = useState(false);
@@ -26,15 +34,23 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }) => {
         setIsAdding(true);
         try {
             const token = await getToken();
-            await apiFetch(token, `/projects/${project.id}/members`, {
-                method: 'POST',
-                body: { email },
-            });
+            if (canAddDirectly) {
+                await apiFetch(token, `/projects/${project.id}/members`, {
+                    method: 'POST',
+                    body: { email },
+                });
+                toast.success("Thêm thành viên thành công!");
+            } else {
+                await apiFetch(token, `/member-requests/project/${project.id}`, {
+                    method: 'POST',
+                    body: { email },
+                });
+                toast.success("Đã gửi yêu cầu thêm thành viên. Chờ quản trị viên duyệt.");
+            }
             setIsDialogOpen(false);
             setEmail('');
-            toast.success("Thêm thành viên thành công!");
         } catch (err) {
-            toast.error("Thêm thành viên thất bại: " + err.message);
+            toast.error("Thất bại: " + err.message);
         } finally {
             setIsAdding(false);
         }
@@ -48,11 +64,16 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }) => {
                 {/* Header */}
                 <div className="mb-4">
                     <h2 className="text-xl font-bold flex items-center gap-2">
-                        <UserPlus className="size-5 text-zinc-900 dark:text-zinc-200" /> Thêm thành viên dự án
+                        <UserPlus className="size-5 text-zinc-900 dark:text-zinc-200" /> {canAddDirectly ? "Thêm thành viên dự án" : "Yêu cầu thêm thành viên"}
                     </h2>
                     {project && (
                         <p className="text-sm text-zinc-700 dark:text-zinc-400">
-                            Thêm vào dự án: <span className="text-blue-600 dark:text-blue-400">{project.name}</span>
+                            {canAddDirectly ? "Thêm vào dự án" : "Gửi yêu cầu cho dự án"}: <span className="text-blue-600 dark:text-blue-400">{project.name}</span>
+                        </p>
+                    )}
+                    {!canAddDirectly && (
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                            Bạn không phải quản trị viên — yêu cầu sẽ được gửi tới quản trị viên/trưởng dự án để duyệt.
                         </p>
                     )}
                 </div>
@@ -83,7 +104,7 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }) => {
                             Hủy
                         </button>
                         <button type="submit" disabled={isAdding || !project || !email} className="px-5 py-2 text-sm rounded bg-gradient-to-br from-blue-500 to-blue-600 hover:opacity-90 text-white disabled:opacity-50 transition" >
-                            {isAdding ? "Đang thêm..." : "Thêm thành viên"}
+                            {isAdding ? "Đang xử lý..." : canAddDirectly ? "Thêm thành viên" : "Gửi yêu cầu"}
                         </button>
                     </div>
                 </form>

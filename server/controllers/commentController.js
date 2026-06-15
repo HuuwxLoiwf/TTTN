@@ -1,6 +1,7 @@
 import prisma from "../configs/prisma.js";
 import { emitToProject } from "../socket.js";
 import { sendCommentNotificationEmail } from "../utils/emailService.js";
+import { notifyUser, logActivity } from "../utils/notify.js";
 
 export const getComments = async (req, res) => {
   try {
@@ -37,14 +38,30 @@ export const createComment = async (req, res) => {
     if (task) {
       emitToProject(task.projectId, "comment:added", { taskId, comment });
 
+      logActivity({
+        projectId: task.projectId,
+        userId,
+        action: `đã bình luận trên "${task.title}"`,
+        entityType: "TASK",
+        entityId: taskId,
+      });
+
       // Notify task assignee if different from commenter
-      if (task.assigneeId !== userId && task.assignee?.email) {
-        sendCommentNotificationEmail({
-          to: task.assignee.email,
-          commenterName: comment.user?.name || comment.user?.email || "Thành viên",
-          taskTitle: task.title,
-          commentContent: content,
-        }).catch(() => {});
+      if (task.assigneeId && task.assigneeId !== userId) {
+        notifyUser({
+          userId: task.assigneeId,
+          actorId: userId,
+          title: "Bình luận mới",
+          message: `${comment.user?.name || "Thành viên"} đã bình luận trên "${task.title}"`,
+        });
+        if (task.assignee?.email) {
+          sendCommentNotificationEmail({
+            to: task.assignee.email,
+            commenterName: comment.user?.name || comment.user?.email || "Thành viên",
+            taskTitle: task.title,
+            commentContent: content,
+          }).catch(() => {});
+        }
       }
     }
 
@@ -57,6 +74,11 @@ export const createComment = async (req, res) => {
 export const deleteComment = async (req, res) => {
   try {
     const { id } = req.params;
+    // requireMember({ from: "comment" }) đã gắn commentOwnerId + memberRole
+    const isOwner = req.commentOwnerId === req.auth?.userId;
+    if (!isOwner && req.memberRole !== "ADMIN") {
+      return res.status(403).json({ error: "Chỉ tác giả hoặc quản trị viên mới được xóa bình luận" });
+    }
     await prisma.comment.delete({ where: { id } });
     res.json({ message: "Comment deleted" });
   } catch (error) {

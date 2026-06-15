@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, LayoutDashboard, FolderOpen } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, LayoutDashboard, FolderOpen, MessagesSquare } from "lucide-react";
 import ProjectAnalytics from "../components/ProjectAnalytics";
 import ProjectSettings from "../components/ProjectSettings";
 import CreateTaskDialog from "../components/CreateTaskDialog";
@@ -9,7 +9,8 @@ import ProjectCalendar from "../components/ProjectCalendar";
 import ProjectTasks from "../components/ProjectTasks";
 import ProjectKanban from "../components/ProjectKanban";
 import ProjectFiles from "../components/ProjectFiles";
-import { addTask, updateTask, deleteTask } from "../features/workspaceSlice";
+import ProjectChat from "../components/ProjectChat";
+import { addTask, updateTask, deleteTask, setProjectProgress } from "../features/workspaceSlice";
 import { joinProject, leaveProject, getSocket } from "../lib/socket";
 
 export default function ProjectDetail() {
@@ -57,11 +58,15 @@ export default function ProjectDetail() {
         const onBulkDeleted = ({ ids }) => {
             dispatch(deleteTask(ids));
         };
+        const onProgress = ({ projectId, progress }) => {
+            dispatch(setProjectProgress({ projectId, progress }));
+        };
 
         socket.on("task:created", onTaskCreated);
         socket.on("task:updated", onTaskUpdated);
         socket.on("task:deleted", onTaskDeleted);
         socket.on("tasks:bulkDeleted", onBulkDeleted);
+        socket.on("project:progress", onProgress);
 
         return () => {
             leaveProject(id);
@@ -69,6 +74,7 @@ export default function ProjectDetail() {
             socket.off("task:updated", onTaskUpdated);
             socket.off("task:deleted", onTaskDeleted);
             socket.off("tasks:bulkDeleted", onBulkDeleted);
+            socket.off("project:progress", onProgress);
         };
     }, [id]);
 
@@ -139,6 +145,7 @@ export default function ProjectDetail() {
                         { key: "calendar", label: "Lịch", icon: CalendarIcon },
                         { key: "analytics", label: "Phân tích", icon: BarChart3Icon },
                         { key: "files", label: "Tài liệu", icon: FolderOpen },
+                        { key: "chat", label: "Thảo luận", icon: MessagesSquare },
                         { key: "settings", label: "Cài đặt", icon: SettingsIcon },
                     ].map((tabItem) => (
                         <button key={tabItem.key} onClick={() => { setActiveTab(tabItem.key); setSearchParams({ id: id, tab: tabItem.key }) }} className={`flex items-center gap-2 px-4 py-2 text-sm transition-all ${activeTab === tabItem.key ? "bg-zinc-100 dark:bg-zinc-800/80" : "hover:bg-zinc-50 dark:hover:bg-zinc-700"}`} >
@@ -172,6 +179,11 @@ export default function ProjectDetail() {
                     {activeTab === "files" && (
                         <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
                             <ProjectFiles projectId={id} />
+                        </div>
+                    )}
+                    {activeTab === "chat" && (
+                        <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
+                            <ProjectChat projectId={id} />
                         </div>
                     )}
                     {activeTab === "settings" && (

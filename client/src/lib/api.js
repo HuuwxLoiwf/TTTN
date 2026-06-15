@@ -4,6 +4,9 @@ const BASE_URL = import.meta.env.VITE_API_URL
     ? `${import.meta.env.VITE_API_URL}/api`
     : '/api';
 
+// Exported for multipart/FormData uploads that can't use apiFetch (it forces JSON)
+export const API_BASE_URL = BASE_URL;
+
 export const apiFetch = async (token, path, options = {}) => {
     const { body, method = 'GET', ...rest } = options;
     const res = await fetch(`${BASE_URL}${path}`, {
