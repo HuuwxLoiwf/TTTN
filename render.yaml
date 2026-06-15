@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: tttn-backend
+    runtime: node
+    rootDir: server
+    plan: free
+    region: singapore
+    buildCommand: npm install
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      # Điền giá trị trong Render Dashboard (đánh dấu sync:false để không lộ secret trong repo)
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLIENT_URL
+        sync: false
