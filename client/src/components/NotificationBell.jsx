@@ -26,7 +26,17 @@ const NotificationBell = () => {
     };
 
     useEffect(() => {
-        fetchNotifications();
+        // Quét task sắp/quá hạn để tạo nhắc nhở, rồi tải danh sách thông báo
+        const init = async () => {
+            try {
+                const token = await getToken();
+                await apiFetch(token, "/notifications/check-due");
+            } catch {
+                /* bỏ qua nếu lỗi */
+            }
+            fetchNotifications();
+        };
+        init();
     }, []);
 
     // Realtime: join personal room and listen for new notifications

@@ -69,8 +69,10 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-zinc-900 dark:text-zinc-200">Vai trò</label>
                         <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className="w-full rounded border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 py-2 px-3 mt-1 focus:outline-none focus:border-blue-500 text-sm" >
-                            <option value="MEMBER">Thành viên</option>
-                            <option value="ADMIN">Quản trị viên</option>
+                            <option value="ADMIN">Quản trị viên — toàn quyền</option>
+                            <option value="MANAGER">Quản lý — quản lý dự án & phòng ban</option>
+                            <option value="MEMBER">Thành viên — làm việc bình thường</option>
+                            <option value="VIEWER">Người xem — chỉ xem</option>
                         </select>
                     </div>
 

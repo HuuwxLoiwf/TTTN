@@ -11,8 +11,8 @@ const router = Router();
 
 // Xem: mọi thành viên workspace. Tạo/sửa/xóa: chỉ ADMIN.
 router.get("/workspace/:workspaceId", requireMember({ from: "workspace", param: "workspaceId" }), getDepartments);
-router.post("/workspace/:workspaceId", requireMember({ from: "workspace", param: "workspaceId", role: "ADMIN" }), createDepartment);
-router.put("/:id", requireMember({ from: "department", param: "id", role: "ADMIN" }), updateDepartment);
-router.delete("/:id", requireMember({ from: "department", param: "id", role: "ADMIN" }), deleteDepartment);
+router.post("/workspace/:workspaceId", requireMember({ from: "workspace", param: "workspaceId", role: ["ADMIN", "MANAGER"] }), createDepartment);
+router.put("/:id", requireMember({ from: "department", param: "id", role: ["ADMIN", "MANAGER"] }), updateDepartment);
+router.delete("/:id", requireMember({ from: "department", param: "id", role: ["ADMIN", "MANAGER"] }), deleteDepartment);
 
 export default router;

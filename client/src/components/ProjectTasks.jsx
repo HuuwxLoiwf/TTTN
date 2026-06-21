@@ -1,9 +1,9 @@
 import { format } from "date-fns";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { deleteTask, updateTask } from "../features/workspaceSlice";
 import { apiFetch } from "../lib/api";
 import { Bug, CalendarIcon, GitCommit, MessageSquare, Square, Trash, XIcon, Zap } from "lucide-react";
@@ -26,7 +26,14 @@ const ProjectTasks = ({ tasks }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { getToken } = useAuth();
+    const { user } = useUser();
+    const { currentWorkspace } = useSelector((state) => state.workspace);
     const [selectedTasks, setSelectedTasks] = useState([]);
+
+    // Quyền đổi trạng thái: chỉ quản trị viên (ADMIN)
+    const myRole = currentWorkspace?.members?.find((m) => m.userId === user?.id)?.role;
+    const isAdmin = myRole === "ADMIN";
+    const canChangeStatus = () => isAdmin;
 
     const [filters, setFilters] = useState({
         status: "",
@@ -34,6 +41,7 @@ const ProjectTasks = ({ tasks }) => {
         priority: "",
         assignee: "",
     });
+    const [sortBy, setSortBy] = useState("created_desc");
 
     const assigneeList = useMemo(
         () => Array.from(new Set(tasks.map((t) => t.assignee?.name).filter(Boolean))),
@@ -41,7 +49,8 @@ const ProjectTasks = ({ tasks }) => {
     );
 
     const filteredTasks = useMemo(() => {
-        return tasks.filter((task) => {
+        const priorityRank = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+        const filtered = tasks.filter((task) => {
             const { status, type, priority, assignee } = filters;
             return (
                 (!status || task.status === status) &&
@@ -50,7 +59,28 @@ const ProjectTasks = ({ tasks }) => {
                 (!assignee || task.assignee?.name === assignee)
             );
         });
-    }, [filters, tasks]);
+
+        const sorted = [...filtered];
+        switch (sortBy) {
+            case "created_asc":
+                sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                break;
+            case "due_asc": // hạn gần nhất trước, task không có hạn xuống cuối
+                sorted.sort((a, b) => {
+                    if (!a.due_date) return 1;
+                    if (!b.due_date) return -1;
+                    return new Date(a.due_date) - new Date(b.due_date);
+                });
+                break;
+            case "priority_desc":
+                sorted.sort((a, b) => (priorityRank[b.priority] || 0) - (priorityRank[a.priority] || 0));
+                break;
+            case "created_desc":
+            default:
+                sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+        return sorted;
+    }, [filters, tasks, sortBy]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -136,6 +166,14 @@ const ProjectTasks = ({ tasks }) => {
                     );
                 })}
 
+                {/* Sắp xếp */}
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border not-dark:bg-white border-zinc-300 dark:border-zinc-800 outline-none px-3 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200">
+                    <option value="created_desc">Mới nhất</option>
+                    <option value="created_asc">Cũ nhất</option>
+                    <option value="due_asc">Hạn chót gần nhất</option>
+                    <option value="priority_desc">Ưu tiên cao → thấp</option>
+                </select>
+
                 {/* Reset filters */}
                 {(filters.status || filters.type || filters.priority || filters.assignee) && (
                     <button type="button" onClick={() => setFilters({ status: "", type: "", priority: "", assignee: "" })} className="px-3 py-1 flex items-center gap-2 rounded bg-gradient-to-br from-purple-400 to-purple-500 text-zinc-100 dark:text-zinc-200 text-sm transition-colors" >
@@ -193,7 +231,7 @@ const ProjectTasks = ({ tasks }) => {
                                                     </span>
                                                 </td>
                                                 <td onClick={e => e.stopPropagation()} className="px-4 py-2">
-                                                    <select name="status" onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="group-hover:ring ring-zinc-100 outline-none px-2 pr-4 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200 cursor-pointer" >
+                                                    <select name="status" disabled={!canChangeStatus(task)} onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 outline-none px-2 pr-4 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" >
                                                         <option value="TODO">Chờ làm</option>
                                                         <option value="IN_PROGRESS">Đang làm</option>
                                                         <option value="REVIEW">Đang review</option>
@@ -209,7 +247,7 @@ const ProjectTasks = ({ tasks }) => {
                                                 <td className="px-4 py-2">
                                                     <div className="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
                                                         <CalendarIcon className="size-4" />
-                                                        {format(new Date(task.due_date), "dd MMMM")}
+                                                        {task.due_date ? format(new Date(task.due_date), "dd MMMM") : "-"}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -253,7 +291,7 @@ const ProjectTasks = ({ tasks }) => {
 
                                         <div>
                                             <label className="text-zinc-600 dark:text-zinc-400 text-xs">Trạng thái</label>
-                                            <select name="status" onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="w-full mt-1 bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-300 dark:ring-zinc-700 outline-none px-2 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200" >
+                                            <select name="status" disabled={!canChangeStatus(task)} onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="w-full mt-1 bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-300 dark:ring-zinc-700 outline-none px-2 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200 disabled:opacity-50" >
                                                 <option value="TODO">Chờ làm</option>
                                                 <option value="IN_PROGRESS">Đang làm</option>
                                                 <option value="REVIEW">Đang review</option>
@@ -268,7 +306,7 @@ const ProjectTasks = ({ tasks }) => {
 
                                         <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                                             <CalendarIcon className="size-4" />
-                                            {format(new Date(task.due_date), "dd MMMM")}
+                                            {task.due_date ? format(new Date(task.due_date), "dd MMMM") : "-"}
                                         </div>
                                     </div>
                                 );

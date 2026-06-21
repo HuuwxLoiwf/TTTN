@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/project.dart';
 import '../models/task.dart';
+import '../services/api_service.dart';
 
 class ProjectAnalytics extends StatelessWidget {
   final List<Task> tasks;
@@ -40,7 +41,9 @@ class ProjectAnalytics extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Analytics', style: theme.textTheme.titleMedium),
+          Text('Phân tích', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 12),
+          _AiAnalysisCard(projectId: project.id),
           const SizedBox(height: 24),
           Row(
             children: [
@@ -244,6 +247,62 @@ class _StatusBar extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// Thẻ phân tích AI (gọi Gemini qua backend)
+class _AiAnalysisCard extends StatefulWidget {
+  final String projectId;
+  const _AiAnalysisCard({required this.projectId});
+
+  @override
+  State<_AiAnalysisCard> createState() => _AiAnalysisCardState();
+}
+
+class _AiAnalysisCardState extends State<_AiAnalysisCard> {
+  String? _result;
+  bool _loading = false;
+
+  Future<void> _run() async {
+    setState(() => _loading = true);
+    try {
+      final r = await apiService.analyzeProject(widget.projectId);
+      setState(() => _result = r);
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("AI: $e")));
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ElevatedButton.icon(
+            onPressed: _loading ? null : _run,
+            icon: const Icon(Icons.auto_awesome, size: 16),
+            label: Text(_loading ? "Đang phân tích..." : "Phân tích AI"),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, foregroundColor: Colors.white),
+          ),
+        ),
+        if (_result != null)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.purple.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.purple.withValues(alpha: 0.3)),
+            ),
+            child: Text(_result!),
+          ),
+      ],
     );
   }
 }

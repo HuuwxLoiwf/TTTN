@@ -40,7 +40,7 @@ class WorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addProject(Project project) async {
+  Future<void> addProject(Project project, {String? departmentId}) async {
     try {
       final created = await apiService.createProject(
         _currentWorkspace!.id,
@@ -51,6 +51,7 @@ class WorkspaceProvider extends ChangeNotifier {
           'status': project.status,
           'start_date': project.startDate?.toIso8601String(),
           'end_date': project.endDate?.toIso8601String(),
+          'departmentId': departmentId,
           'team_members': [],
         },
       );

@@ -175,6 +175,32 @@ export const inviteMember = async (req, res) => {
   }
 };
 
+export const updateMemberRole = async (req, res) => {
+  try {
+    const { id, memberId } = req.params;
+    const { role } = req.body;
+    if (!["ADMIN", "MANAGER", "MEMBER", "VIEWER"].includes(role)) {
+      return res.status(400).json({ error: "Vai trò không hợp lệ" });
+    }
+
+    // Không cho hạ cấp chính chủ sở hữu workspace
+    const workspace = await prisma.workspace.findUnique({ where: { id }, select: { ownerId: true } });
+    const member = await prisma.workspaceMember.findUnique({ where: { id: memberId }, select: { userId: true } });
+    if (workspace?.ownerId === member?.userId && role !== "ADMIN") {
+      return res.status(400).json({ error: "Không thể đổi vai trò của chủ sở hữu" });
+    }
+
+    const updated = await prisma.workspaceMember.update({
+      where: { id: memberId, workspaceId: id },
+      data: { role },
+      include: { user: true },
+    });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const removeMember = async (req, res) => {
   try {
     const { id, memberId } = req.params;

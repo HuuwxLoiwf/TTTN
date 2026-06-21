@@ -36,6 +36,22 @@ const workspaceSlice = createSlice({
         deleteWorkspace: (state, action) => {
             state.workspaces = state.workspaces.filter((w) => w.id !== action.payload);
         },
+        setWorkspaceMember: (state, action) => {
+            // action.payload = member object (đã cập nhật)
+            const upd = (members) => members.map((m) => (m.id === action.payload.id ? action.payload : m));
+            if (state.currentWorkspace) state.currentWorkspace.members = upd(state.currentWorkspace.members);
+            state.workspaces = state.workspaces.map((w) =>
+                w.id === state.currentWorkspace?.id ? { ...w, members: upd(w.members) } : w
+            );
+        },
+        removeWorkspaceMember: (state, action) => {
+            // action.payload = memberId
+            const rm = (members) => members.filter((m) => m.id !== action.payload);
+            if (state.currentWorkspace) state.currentWorkspace.members = rm(state.currentWorkspace.members);
+            state.workspaces = state.workspaces.map((w) =>
+                w.id === state.currentWorkspace?.id ? { ...w, members: rm(w.members) } : w
+            );
+        },
         addProject: (state, action) => {
             if (state.currentWorkspace) {
                 state.currentWorkspace.projects.push(action.payload);
@@ -176,6 +192,8 @@ export const {
     addProject,
     removeProject,
     setProjectProgress,
+    setWorkspaceMember,
+    removeWorkspaceMember,
     addTask,
     updateTask,
     deleteTask,

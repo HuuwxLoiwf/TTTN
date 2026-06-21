@@ -3,14 +3,16 @@ import { NavLink } from 'react-router-dom'
 import MyTasksSidebar from './MyTasksSidebar'
 import ProjectSidebar from './ProjectsSidebar'
 import WorkspaceDropdown from './WorkspaceDropdown'
-import { FolderOpenIcon, LayoutDashboardIcon, SettingsIcon, UsersIcon } from 'lucide-react'
+import { FolderOpenIcon, LayoutDashboardIcon, SettingsIcon, UsersIcon, ListTodoIcon, ShieldCheckIcon } from 'lucide-react'
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     const menuItems = [
         { name: 'Bảng điều khiển', href: '/', icon: LayoutDashboardIcon },
+        { name: 'Công việc của tôi', href: '/my-tasks', icon: ListTodoIcon },
         { name: 'Dự án', href: '/projects', icon: FolderOpenIcon },
         { name: 'Nhóm', href: '/team', icon: UsersIcon },
+        { name: 'Nhật ký kiểm toán', href: '/audit-log', icon: ShieldCheckIcon },
     ]
 
     const sidebarRef = useRef(null);
@@ -42,10 +44,10 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                                 <p className='text-sm truncate'>{item.name}</p>
                             </NavLink>
                         ))}
-                        <button className='flex w-full items-center gap-3 py-2 px-4 text-gray-800 dark:text-zinc-100 cursor-pointer rounded hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-all'>
+                        <NavLink to="/settings" className={({ isActive }) => `flex w-full items-center gap-3 py-2 px-4 text-gray-800 dark:text-zinc-100 cursor-pointer rounded transition-all ${isActive ? 'bg-gray-100 dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-800/50' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/60'}`}>
                             <SettingsIcon size={16} />
                             <p className='text-sm truncate'>Cài đặt</p>
-                        </button>
+                        </NavLink>
                     </div>
                     <MyTasksSidebar />
                     <ProjectSidebar />

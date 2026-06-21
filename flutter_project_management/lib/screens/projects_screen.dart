@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/project.dart';
+import '../models/department.dart';
 import '../providers/workspace_provider.dart';
+import '../services/api_service.dart';
 import '../widgets/project_card.dart';
+import '../widgets/department_manager.dart';
 import 'project_details_screen.dart';
 
 class ProjectsScreen extends StatefulWidget {
@@ -194,6 +197,23 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
   String _priority = 'MEDIUM';
   DateTime? _startDate;
   DateTime? _endDate;
+  String? _departmentId;
+  List<Department> _departments = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDepartments();
+  }
+
+  Future<void> _loadDepartments() async {
+    final ws = context.read<WorkspaceProvider>().currentWorkspace;
+    if (ws == null) return;
+    try {
+      final d = await apiService.getDepartments(ws.id);
+      if (mounted) setState(() => _departments = d);
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -286,6 +306,42 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
               Row(
                 children: [
                   Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _departmentId,
+                      decoration: const InputDecoration(labelText: 'Phòng ban *'),
+                      items: _departments
+                          .map((d) => DropdownMenuItem(value: d.id, child: Text(d.name)))
+                          .toList(),
+                      onChanged: (v) => setState(() => _departmentId = v),
+                      validator: (v) => v == null ? 'Bắt buộc chọn phòng ban' : null,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Quản lý phòng ban',
+                    icon: const Icon(Icons.business),
+                    onPressed: () async {
+                      final ws = context.read<WorkspaceProvider>().currentWorkspace;
+                      if (ws == null) return;
+                      await showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (_) => DepartmentManagerSheet(workspaceId: ws.id),
+                      );
+                      _loadDepartments();
+                    },
+                  ),
+                ],
+              ),
+              if (_departments.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 4),
+                  child: Text('Chưa có phòng ban. Bấm nút tòa nhà để tạo trước.',
+                      style: TextStyle(fontSize: 12, color: Colors.orange)),
+                ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
                     child: InkWell(
                       onTap: () async {
                         final date = await showDatePicker(
@@ -349,9 +405,9 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
                           status: _status,
                           startDate: _startDate,
                           endDate: _endDate,
-                          teamLead: 'user_1',
+                          teamLead: apiService.currentUserId ?? '',
                           workspaceId: ws.currentWorkspace?.id ?? '',
-                        ));
+                        ), departmentId: _departmentId);
                         Navigator.pop(context);
                       }
                     },

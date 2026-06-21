@@ -1,16 +1,60 @@
 import { useEffect, useState } from "react";
-import { UsersIcon, Search, UserPlus, Shield, Activity } from "lucide-react";
+import { UsersIcon, Search, UserPlus, Shield, Activity, Trash2 } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
 import InviteMemberDialog from "../components/InviteMemberDialog";
-import { useSelector } from "react-redux";
+import { apiFetch } from "../lib/api";
+import { setWorkspaceMember, removeWorkspaceMember } from "../features/workspaceSlice";
+
+const ROLE_OPTIONS = [
+    { value: "ADMIN", label: "Quản trị viên" },
+    { value: "MANAGER", label: "Quản lý" },
+    { value: "MEMBER", label: "Thành viên" },
+    { value: "VIEWER", label: "Người xem" },
+];
 
 const Team = () => {
 
+    const dispatch = useDispatch();
+    const { getToken } = useAuth();
+    const { user: currentUser } = useUser();
     const [tasks, setTasks] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [users, setUsers] = useState([]);
     const currentWorkspace = useSelector((state) => state?.workspace?.currentWorkspace || null);
     const projects = currentWorkspace?.projects || [];
+
+    const isAdmin = currentWorkspace?.members?.some((m) => m.userId === currentUser?.id && m.role === "ADMIN");
+
+    const handleRoleChange = async (member, role) => {
+        try {
+            const token = await getToken();
+            const updated = await apiFetch(token, `/workspaces/${currentWorkspace.id}/members/${member.id}`, {
+                method: "PUT",
+                body: { role },
+            });
+            dispatch(setWorkspaceMember(updated));
+            setUsers((prev) => prev.map((m) => (m.id === member.id ? { ...m, role } : m)));
+            toast.success("Đã cập nhật vai trò");
+        } catch (err) {
+            toast.error("Cập nhật thất bại: " + err.message);
+        }
+    };
+
+    const handleRemove = async (member) => {
+        if (!window.confirm(`Gỡ ${member.user?.name || member.user?.email} khỏi không gian làm việc?`)) return;
+        try {
+            const token = await getToken();
+            await apiFetch(token, `/workspaces/${currentWorkspace.id}/members/${member.id}`, { method: "DELETE" });
+            dispatch(removeWorkspaceMember(member.id));
+            setUsers((prev) => prev.filter((m) => m.id !== member.id));
+            toast.success("Đã gỡ thành viên");
+        } catch (err) {
+            toast.error("Gỡ thất bại: " + err.message);
+        }
+    };
 
     const filteredUsers = users.filter(
         (user) =>
@@ -123,6 +167,9 @@ const Team = () => {
                                         <th className="px-6 py-2.5 text-left font-medium text-sm">
                                             Vai trò
                                         </th>
+                                        {isAdmin && (
+                                            <th className="px-6 py-2.5 text-left font-medium text-sm">Thao tác</th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
@@ -154,6 +201,28 @@ const Team = () => {
                                                     {user.role || "User"}
                                                 </span>
                                             </td>
+                                            {isAdmin && (
+                                                <td className="px-6 py-2.5 whitespace-nowrap">
+                                                    {user.userId === currentUser?.id ? (
+                                                        <span className="text-xs text-zinc-400">Bạn</span>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2">
+                                                            <select
+                                                                value={user.role}
+                                                                onChange={(e) => handleRoleChange(user, e.target.value)}
+                                                                className="text-xs rounded border border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 px-2 py-1"
+                                                            >
+                                                                {ROLE_OPTIONS.map((o) => (
+                                                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                                                ))}
+                                                            </select>
+                                                            <button onClick={() => handleRemove(user)} className="p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30">
+                                                                <Trash2 className="size-4" />
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>

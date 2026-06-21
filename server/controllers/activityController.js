@@ -43,6 +43,22 @@ export const deleteActivity = async (req, res) => {
   }
 };
 
+// Nhật ký kiểm toán (audit log) chi tiết của workspace
+export const getAuditLogs = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const logs = await prisma.auditLog.findMany({
+      where: { workspaceId },
+      include: { user: { select: { id: true, name: true, email: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    });
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const createActivity = async (req, res) => {
   try {
     const userId = req.auth?.userId;

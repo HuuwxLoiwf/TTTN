@@ -7,6 +7,8 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 import { CalendarIcon, MessageCircle, PenIcon } from "lucide-react";
 import { apiFetch } from "../lib/api";
 import { joinProject, leaveProject, getSocket } from "../lib/socket";
+import TimeTracker from "../components/TimeTracker";
+import SubtaskChecklist from "../components/SubtaskChecklist";
 
 const TaskDetails = () => {
 
@@ -133,7 +135,7 @@ const TaskDetails = () => {
                         <textarea
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Viết bình luận..."
+                            placeholder="Viết bình luận... (@email để nhắc ai đó)"
                             className="w-full dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-md p-2 text-sm text-gray-900 dark:text-zinc-200 resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
                             rows={3}
                         />
@@ -182,6 +184,12 @@ const TaskDetails = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Subtask / checklist */}
+                <SubtaskChecklist taskId={taskId} />
+
+                {/* Time tracking */}
+                <TimeTracker taskId={taskId} />
 
                 {/* Project Info */}
                 {project && (

@@ -72,8 +72,18 @@ export const requireMember = ({ from = "workspace", param = "id", role } = {}) =
             if (!membership) {
                 return res.status(403).json({ error: "Bạn không phải thành viên của không gian làm việc này" });
             }
-            if (role === "ADMIN" && membership.role !== "ADMIN") {
-                return res.status(403).json({ error: "Chỉ quản trị viên mới được thực hiện" });
+
+            // role có thể là chuỗi hoặc mảng vai trò được phép
+            if (role) {
+                const allowed = Array.isArray(role) ? role : [role];
+                if (!allowed.includes(membership.role)) {
+                    return res.status(403).json({ error: "Bạn không đủ quyền thực hiện thao tác này" });
+                }
+            }
+
+            // VIEWER chỉ được xem (GET). Chặn mọi thao tác ghi.
+            if (membership.role === "VIEWER" && req.method !== "GET") {
+                return res.status(403).json({ error: "Vai trò Người xem chỉ có quyền xem" });
             }
 
             req.workspaceId = workspaceId;

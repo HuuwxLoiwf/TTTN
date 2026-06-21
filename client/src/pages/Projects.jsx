@@ -16,7 +16,13 @@ export default function Projects() {
     const [filters, setFilters] = useState({
         status: "ALL",
         priority: "ALL",
+        department: "ALL",
     });
+
+    // Danh sách phòng ban xuất hiện trong các dự án
+    const departments = Array.from(
+        new Map(projects.filter((p) => p.department).map((p) => [p.department.id, p.department])).values()
+    );
 
     const filterProjects = () => {
         let filtered = projects;
@@ -37,6 +43,10 @@ export default function Projects() {
             filtered = filtered.filter(
                 (project) => project.priority === filters.priority
             );
+        }
+
+        if (filters.department !== "ALL") {
+            filtered = filtered.filter((project) => project.departmentId === filters.department);
         }
 
         setFilteredProjects(filtered);
@@ -79,6 +89,12 @@ export default function Projects() {
                     <option value="HIGH">Cao</option>
                     <option value="MEDIUM">Trung bình</option>
                     <option value="LOW">Thấp</option>
+                </select>
+                <select value={filters.department} onChange={(e) => setFilters({ ...filters, department: e.target.value })} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white text-sm" >
+                    <option value="ALL">Tất cả phòng ban</option>
+                    {departments.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
                 </select>
             </div>
 

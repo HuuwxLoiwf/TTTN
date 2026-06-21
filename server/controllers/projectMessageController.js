@@ -1,17 +1,29 @@
 import prisma from "../configs/prisma.js";
 import { emitToProject } from "../socket.js";
+import { notifyMentions } from "../utils/notify.js";
 
-// Lấy lịch sử chat nhóm dự án (mới nhất ở cuối)
+// Lấy lịch sử chat nhóm dự án, phân trang theo cursor.
+// ?before=<ISO date> để lấy 30 tin cũ hơn mốc đó (cuộn lên).
+// Trả về { messages: [cũ→mới], hasMore } để client biết còn tin cũ không.
+const PAGE_SIZE = 30;
 export const getMessages = async (req, res) => {
     try {
         const { projectId } = req.params;
+        const { before } = req.query;
+
         const messages = await prisma.projectMessage.findMany({
-            where: { projectId },
+            where: {
+                projectId,
+                ...(before ? { createdAt: { lt: new Date(before) } } : {}),
+            },
             include: { user: { select: { id: true, name: true, email: true, image: true } } },
-            orderBy: { createdAt: "asc" },
-            take: 200,
+            orderBy: { createdAt: "desc" }, // lấy mới nhất trước rồi đảo lại
+            take: PAGE_SIZE + 1, // +1 để biết còn tin cũ hơn không
         });
-        res.json(messages);
+
+        const hasMore = messages.length > PAGE_SIZE;
+        const page = hasMore ? messages.slice(0, PAGE_SIZE) : messages;
+        res.json({ messages: page.reverse(), hasMore }); // đảo về thứ tự cũ→mới
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -24,15 +36,28 @@ export const sendMessage = async (req, res) => {
         if (!userId) return res.status(401).json({ error: "Chưa đăng nhập" });
 
         const { projectId } = req.params;
-        const { content } = req.body;
-        if (!content?.trim()) return res.status(400).json({ error: "Nội dung không được để trống" });
+        const { content, fileUrl, fileName } = req.body;
+        if (!content?.trim() && !fileUrl) {
+            return res.status(400).json({ error: "Nội dung không được để trống" });
+        }
 
         const message = await prisma.projectMessage.create({
-            data: { projectId, userId, content: content.trim() },
+            data: {
+                projectId,
+                userId,
+                content: content?.trim() || "",
+                fileUrl: fileUrl || null,
+                fileName: fileName || null,
+            },
             include: { user: { select: { id: true, name: true, email: true, image: true } } },
         });
 
         emitToProject(projectId, "projectMessage:new", message);
+
+        if (content?.trim()) {
+            notifyMentions({ content, projectId, actorId: userId, contextLabel: "thảo luận nhóm dự án" });
+        }
+
         res.status(201).json(message);
     } catch (error) {
         res.status(500).json({ error: error.message });

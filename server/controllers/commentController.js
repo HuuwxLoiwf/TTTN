@@ -1,7 +1,7 @@
 import prisma from "../configs/prisma.js";
 import { emitToProject } from "../socket.js";
 import { sendCommentNotificationEmail } from "../utils/emailService.js";
-import { notifyUser, logActivity } from "../utils/notify.js";
+import { notifyUser, logActivity, notifyMentions } from "../utils/notify.js";
 
 export const getComments = async (req, res) => {
   try {
@@ -44,6 +44,14 @@ export const createComment = async (req, res) => {
         action: `đã bình luận trên "${task.title}"`,
         entityType: "TASK",
         entityId: taskId,
+      });
+
+      // Thông báo người được @mention
+      notifyMentions({
+        content,
+        projectId: task.projectId,
+        actorId: userId,
+        contextLabel: `bình luận trên "${task.title}"`,
       });
 
       // Notify task assignee if different from commenter

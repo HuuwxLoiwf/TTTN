@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/project.dart';
 import '../providers/workspace_provider.dart';
+import '../services/api_service.dart';
 import '../widgets/project_tasks.dart';
 import '../widgets/project_calendar.dart';
 import '../widgets/project_analytics.dart';
 import '../widgets/project_settings.dart';
 import '../widgets/create_task_dialog.dart';
+import '../widgets/project_chat.dart';
+import '../widgets/project_files.dart';
+import '../widgets/project_gantt.dart';
 
 class ProjectDetailsScreen extends StatefulWidget {
   final String projectId;
@@ -129,36 +133,25 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                _TabButton(
-                  label: 'Tasks',
-                  icon: Icons.list_alt,
-                  isActive: _activeTab == 'tasks',
-                  onTap: () => setState(() => _activeTab = 'tasks'),
-                ),
-                const SizedBox(width: 4),
-                _TabButton(
-                  label: 'Calendar',
-                  icon: Icons.calendar_month,
-                  isActive: _activeTab == 'calendar',
-                  onTap: () => setState(() => _activeTab = 'calendar'),
-                ),
-                const SizedBox(width: 4),
-                _TabButton(
-                  label: 'Analytics',
-                  icon: Icons.bar_chart,
-                  isActive: _activeTab == 'analytics',
-                  onTap: () => setState(() => _activeTab = 'analytics'),
-                ),
-                const SizedBox(width: 4),
-                _TabButton(
-                  label: 'Settings',
-                  icon: Icons.settings,
-                  isActive: _activeTab == 'settings',
-                  onTap: () => setState(() => _activeTab = 'settings'),
-                ),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _TabButton(label: 'Công việc', icon: Icons.list_alt, isActive: _activeTab == 'tasks', onTap: () => setState(() => _activeTab = 'tasks')),
+                  const SizedBox(width: 4),
+                  _TabButton(label: 'Lịch', icon: Icons.calendar_month, isActive: _activeTab == 'calendar', onTap: () => setState(() => _activeTab = 'calendar')),
+                  const SizedBox(width: 4),
+                  _TabButton(label: 'Timeline', icon: Icons.timeline, isActive: _activeTab == 'timeline', onTap: () => setState(() => _activeTab = 'timeline')),
+                  const SizedBox(width: 4),
+                  _TabButton(label: 'Phân tích', icon: Icons.bar_chart, isActive: _activeTab == 'analytics', onTap: () => setState(() => _activeTab = 'analytics')),
+                  const SizedBox(width: 4),
+                  _TabButton(label: 'Tài liệu', icon: Icons.folder, isActive: _activeTab == 'files', onTap: () => setState(() => _activeTab = 'files')),
+                  const SizedBox(width: 4),
+                  _TabButton(label: 'Thảo luận', icon: Icons.forum, isActive: _activeTab == 'chat', onTap: () => setState(() => _activeTab = 'chat')),
+                  const SizedBox(width: 4),
+                  _TabButton(label: 'Cài đặt', icon: Icons.settings, isActive: _activeTab == 'settings', onTap: () => setState(() => _activeTab = 'settings')),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -177,11 +170,22 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   }
 
   Widget _buildTabContent(Project project) {
+    final ws = context.read<WorkspaceProvider>();
+    final myId = apiService.currentUserId;
+    final isAdmin = ws.currentWorkspace?.members.any((m) => m.userId == myId && m.role == 'ADMIN') ?? false;
+    final canReview = isAdmin || project.teamLead == myId;
+
     switch (_activeTab) {
       case 'calendar':
         return ProjectCalendar(tasks: project.tasks);
+      case 'timeline':
+        return ProjectGantt(tasks: project.tasks);
       case 'analytics':
         return ProjectAnalytics(tasks: project.tasks, project: project);
+      case 'files':
+        return ProjectFiles(projectId: project.id, canReview: canReview);
+      case 'chat':
+        return ProjectChat(projectId: project.id);
       case 'settings':
         return ProjectSettings(project: project);
       default:

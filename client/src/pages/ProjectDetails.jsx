@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, LayoutDashboard, FolderOpen, MessagesSquare } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, LayoutDashboard, FolderOpen, MessagesSquare, GanttChartIcon } from "lucide-react";
 import ProjectAnalytics from "../components/ProjectAnalytics";
 import ProjectSettings from "../components/ProjectSettings";
 import CreateTaskDialog from "../components/CreateTaskDialog";
@@ -10,6 +10,7 @@ import ProjectTasks from "../components/ProjectTasks";
 import ProjectKanban from "../components/ProjectKanban";
 import ProjectFiles from "../components/ProjectFiles";
 import ProjectChat from "../components/ProjectChat";
+import ProjectGantt from "../components/ProjectGantt";
 import { addTask, updateTask, deleteTask, setProjectProgress } from "../features/workspaceSlice";
 import { joinProject, leaveProject, getSocket } from "../lib/socket";
 
@@ -143,6 +144,7 @@ export default function ProjectDetail() {
                         { key: "tasks", label: "Công việc", icon: FileStackIcon },
                         { key: "kanban", label: "Kanban", icon: LayoutDashboard },
                         { key: "calendar", label: "Lịch", icon: CalendarIcon },
+                        { key: "timeline", label: "Timeline", icon: GanttChartIcon },
                         { key: "analytics", label: "Phân tích", icon: BarChart3Icon },
                         { key: "files", label: "Tài liệu", icon: FolderOpen },
                         { key: "chat", label: "Thảo luận", icon: MessagesSquare },
@@ -174,6 +176,11 @@ export default function ProjectDetail() {
                     {activeTab === "calendar" && (
                         <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
                             <ProjectCalendar tasks={tasks} />
+                        </div>
+                    )}
+                    {activeTab === "timeline" && (
+                        <div className="dark:bg-zinc-900/40 rounded max-w-6xl p-4 border border-zinc-200 dark:border-zinc-800">
+                            <ProjectGantt tasks={tasks} />
                         </div>
                     )}
                     {activeTab === "files" && (

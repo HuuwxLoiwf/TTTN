@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/comment.dart';
 import '../providers/workspace_provider.dart';
+import '../services/api_service.dart';
+import '../widgets/subtask_checklist.dart';
+import '../widgets/time_tracker.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
   final String projectId;
@@ -20,7 +23,7 @@ class TaskDetailsScreen extends StatefulWidget {
 
 class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   final _commentController = TextEditingController();
-  final currentUserId = 'user_1';
+  final currentUserId = apiService.currentUserId ?? '';
 
   @override
   void initState() {
@@ -200,7 +203,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
             ),
             const SizedBox(width: 24),
             Expanded(
-              child: Column(
+              child: SingleChildScrollView(
+                child: Column(
                 children: [
                   Container(
                     width: double.infinity,
@@ -290,7 +294,12 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                         ],
                       ),
                     ),
+                  const SizedBox(height: 12),
+                  SubtaskChecklist(taskId: widget.taskId),
+                  const SizedBox(height: 12),
+                  TimeTracker(taskId: widget.taskId),
                 ],
+              ),
               ),
             ),
           ],

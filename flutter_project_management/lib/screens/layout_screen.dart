@@ -8,6 +8,8 @@ import 'projects_screen.dart';
 import 'project_details_screen.dart';
 import 'task_details_screen.dart';
 import 'team_screen.dart';
+import 'notifications_screen.dart';
+import 'audit_log_screen.dart';
 
 class LayoutScreen extends StatefulWidget {
   const LayoutScreen({super.key});
@@ -32,6 +34,8 @@ class _LayoutScreenState extends State<LayoutScreen> {
     const DashboardScreen(),
     const ProjectsScreen(),
     const TeamScreen(),
+    const NotificationsScreen(),
+    const AuditLogScreen(),
   ];
 
   void _navigateToPage(int index) {

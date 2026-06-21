@@ -77,6 +77,11 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!currentWorkspace) return;
+        // Bắt buộc chọn phòng ban
+        if (!formData.departmentId) {
+            toast.error("Vui lòng chọn phòng ban cho dự án");
+            return;
+        }
         // Chặn ngày bắt đầu trong quá khứ
         if (formData.start_date && formData.start_date < today) {
             toast.error("Ngày bắt đầu không được trước ngày hôm nay");
@@ -112,8 +117,8 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
     if (!isDialogOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur flex items-center justify-center text-left z-50">
-            <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 w-full max-w-lg text-zinc-900 dark:text-zinc-200 relative">
+        <div className="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur flex items-center justify-center text-left z-50 p-4">
+            <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 w-full max-w-lg text-zinc-900 dark:text-zinc-200 relative max-h-[90vh] overflow-y-auto">
                 <button className="absolute top-3 right-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200" onClick={() => setIsDialogOpen(false)} >
                     <XIcon className="size-5" />
                 </button>
@@ -164,17 +169,22 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                     {/* Phòng ban */}
                     <div>
                         <div className="flex items-center justify-between mb-1">
-                            <label className="block text-sm">Phòng ban</label>
+                            <label className="block text-sm">Phòng ban <span className="text-red-500">*</span></label>
                             <button type="button" onClick={() => setShowDeptManager(true)} className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
                                 <Building2 className="size-3" /> Quản lý
                             </button>
                         </div>
-                        <select value={formData.departmentId} onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })} className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm">
-                            <option value="">Không có / Chưa phân</option>
+                        <select required value={formData.departmentId} onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })} className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm">
+                            <option value="">-- Chọn phòng ban --</option>
                             {departments.map((d) => (
                                 <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
                         </select>
+                        {departments.length === 0 && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                Chưa có phòng ban. Bấm "Quản lý" để tạo trước khi tạo dự án.
+                            </p>
+                        )}
                     </div>
 
                     {/* Dates */}

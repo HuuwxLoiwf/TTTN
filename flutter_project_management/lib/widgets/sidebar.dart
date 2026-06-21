@@ -27,9 +27,11 @@ class Sidebar extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     final menuItems = [
-      _MenuItem(icon: Icons.dashboard, label: 'Dashboard', index: 0),
-      _MenuItem(icon: Icons.folder_open, label: 'Projects', index: 1),
-      _MenuItem(icon: Icons.people, label: 'Team', index: 2),
+      _MenuItem(icon: Icons.dashboard, label: 'Bảng điều khiển', index: 0),
+      _MenuItem(icon: Icons.folder_open, label: 'Dự án', index: 1),
+      _MenuItem(icon: Icons.people, label: 'Nhóm', index: 2),
+      _MenuItem(icon: Icons.notifications, label: 'Thông báo', index: 3),
+      _MenuItem(icon: Icons.shield, label: 'Nhật ký kiểm toán', index: 4),
     ];
 
     return Container(

@@ -65,6 +65,9 @@ export const createTask = async (req, res) => {
     const { projectId } = req.params;
     const { title, description, type, priority, status, assigneeId, due_date } = req.body;
 
+    if (!title?.trim()) return res.status(400).json({ error: "Tiêu đề công việc là bắt buộc" });
+    if (title.length > 200) return res.status(400).json({ error: "Tiêu đề quá dài (tối đa 200 ký tự)" });
+
     const task = await prisma.task.create({
       data: {
         title,
@@ -132,6 +135,13 @@ export const updateTask = async (req, res) => {
       select: { status: true, assigneeId: true },
     });
 
+    // Chỉ ADMIN mới được đổi trạng thái công việc
+    if (status !== undefined && status !== prev?.status) {
+      if (req.memberRole !== "ADMIN") {
+        return res.status(403).json({ error: "Chỉ quản trị viên mới được đổi trạng thái" });
+      }
+    }
+
     const task = await prisma.task.update({
       where: { id },
       data: {
@@ -193,13 +203,39 @@ export const deleteTask = async (req, res) => {
 
 export const bulkDeleteTasks = async (req, res) => {
   try {
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ error: "Chưa đăng nhập" });
+
     const { ids } = req.body;
-    const tasks = await prisma.task.findMany({ where: { id: { in: ids } }, select: { projectId: true } });
-    await prisma.task.deleteMany({ where: { id: { in: ids } } });
-    const projectIds = [...new Set(tasks.map((t) => t.projectId))];
-    projectIds.forEach((pid) => emitToProject(pid, "tasks:bulkDeleted", { ids }));
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "Danh sách công việc trống" });
+    }
+
+    // Lấy workspace của từng task, chỉ giữ task thuộc workspace user là thành viên
+    const tasks = await prisma.task.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, projectId: true, project: { select: { workspaceId: true } } },
+    });
+
+    const workspaceIds = [...new Set(tasks.map((t) => t.project?.workspaceId).filter(Boolean))];
+    const memberships = await prisma.workspaceMember.findMany({
+      where: { userId, workspaceId: { in: workspaceIds } },
+      select: { workspaceId: true },
+    });
+    const allowedWs = new Set(memberships.map((m) => m.workspaceId));
+
+    const allowedTasks = tasks.filter((t) => allowedWs.has(t.project?.workspaceId));
+    const allowedIds = allowedTasks.map((t) => t.id);
+
+    if (allowedIds.length === 0) {
+      return res.status(403).json({ error: "Bạn không có quyền xóa các công việc này" });
+    }
+
+    await prisma.task.deleteMany({ where: { id: { in: allowedIds } } });
+    const projectIds = [...new Set(allowedTasks.map((t) => t.projectId))];
+    projectIds.forEach((pid) => emitToProject(pid, "tasks:bulkDeleted", { ids: allowedIds }));
     await Promise.all(projectIds.map((pid) => recalcProjectProgress(pid)));
-    res.json({ message: `${ids.length} tasks deleted` });
+    res.json({ message: `${allowedIds.length} tasks deleted` });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

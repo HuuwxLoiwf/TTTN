@@ -2,6 +2,7 @@ import http from 'http';
 import express from 'express';
 import 'dotenv/config';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { verifyToken } from '@clerk/backend';
@@ -20,6 +21,9 @@ import fileRoutes from './routes/files.js';
 import memberRequestRoutes from './routes/memberRequests.js';
 import departmentRoutes from './routes/departments.js';
 import projectMessageRoutes from './routes/projectMessages.js';
+import timeLogRoutes from './routes/timeLogs.js';
+import subtaskRoutes from './routes/subtasks.js';
+import aiRoutes from './routes/ai.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -39,6 +43,15 @@ if (!process.env.VERCEL) {
 
 app.use(express.json());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
+
+// Rate limiting: chống spam/lạm dụng API (300 request / 15 phút / IP)
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Quá nhiều yêu cầu, vui lòng thử lại sau' },
+});
 
 // Manual JWT verification — more reliable than clerkMiddleware on Vercel serverless
 app.use(async (req, res, next) => {
@@ -75,18 +88,21 @@ app.get('/api/debug', (req, res) => {
     });
 });
 
-app.use('/api/inngest', serve({ client: inngest, functions }));
-app.use('/api/users', userRoutes);
-app.use('/api/workspaces', workspaceRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/tasks', taskRoutes);
-app.use('/api/comments', commentRoutes);
-app.use('/api/activities', activityRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/files', fileRoutes);
-app.use('/api/member-requests', memberRequestRoutes);
-app.use('/api/departments', departmentRoutes);
-app.use('/api/project-messages', projectMessageRoutes);
+app.use('/api/inngest', serve({ client: inngest, functions })); // webhook — KHÔNG giới hạn
+app.use('/api/users', apiLimiter, userRoutes);
+app.use('/api/workspaces', apiLimiter, workspaceRoutes);
+app.use('/api/projects', apiLimiter, projectRoutes);
+app.use('/api/tasks', apiLimiter, taskRoutes);
+app.use('/api/comments', apiLimiter, commentRoutes);
+app.use('/api/activities', apiLimiter, activityRoutes);
+app.use('/api/notifications', apiLimiter, notificationRoutes);
+app.use('/api/files', apiLimiter, fileRoutes);
+app.use('/api/member-requests', apiLimiter, memberRequestRoutes);
+app.use('/api/departments', apiLimiter, departmentRoutes);
+app.use('/api/project-messages', apiLimiter, projectMessageRoutes);
+app.use('/api/time-logs', apiLimiter, timeLogRoutes);
+app.use('/api/subtasks', apiLimiter, subtaskRoutes);
+app.use('/api/ai', apiLimiter, aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 

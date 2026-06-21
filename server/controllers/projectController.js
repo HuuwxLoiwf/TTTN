@@ -1,5 +1,5 @@
 import prisma from "../configs/prisma.js";
-import { notifyUser, logActivity } from "../utils/notify.js";
+import { notifyUser, logActivity, logAudit } from "../utils/notify.js";
 
 export const getProjects = async (req, res) => {
   try {
@@ -53,6 +53,14 @@ export const createProject = async (req, res) => {
 
     const { workspaceId } = req.params;
     const { name, description, priority, status, start_date, end_date, team_members, departmentId } = req.body;
+
+    if (!name?.trim()) return res.status(400).json({ error: "Tên dự án là bắt buộc" });
+    if (name.length > 200) return res.status(400).json({ error: "Tên dự án quá dài" });
+
+    // Bắt buộc có phòng ban
+    if (!departmentId) {
+      return res.status(400).json({ error: "Vui lòng chọn phòng ban cho dự án" });
+    }
 
     // Chặn ngày bắt đầu trong quá khứ (so theo ngày, bỏ giờ)
     if (start_date) {
@@ -113,6 +121,14 @@ export const createProject = async (req, res) => {
       entityType: "PROJECT",
       entityId: project.id,
     });
+    logAudit({
+      workspaceId,
+      userId,
+      action: "CREATE",
+      entityType: "PROJECT",
+      entityId: project.id,
+      entityName: project.name,
+    });
 
     res.status(201).json(fullProject);
   } catch (error) {
@@ -122,8 +138,15 @@ export const createProject = async (req, res) => {
 
 export const updateProject = async (req, res) => {
   try {
+    const userId = req.auth?.userId;
     const { id } = req.params;
     const { name, description, priority, status, start_date, end_date, progress, departmentId } = req.body;
+
+    const before = await prisma.project.findUnique({
+      where: { id },
+      select: { name: true, status: true, priority: true },
+    });
+
     const project = await prisma.project.update({
       where: { id },
       data: {
@@ -142,6 +165,24 @@ export const updateProject = async (req, res) => {
         owner: true,
       },
     });
+
+    // Ghi audit các trường thay đổi
+    const changes = {};
+    if (name !== undefined && name !== before?.name) changes.name = { old: before?.name, new: name };
+    if (status !== undefined && status !== before?.status) changes.status = { old: before?.status, new: status };
+    if (priority !== undefined && priority !== before?.priority) changes.priority = { old: before?.priority, new: priority };
+    if (Object.keys(changes).length > 0) {
+      logAudit({
+        workspaceId: project.workspaceId,
+        userId,
+        action: "UPDATE",
+        entityType: "PROJECT",
+        entityId: id,
+        entityName: project.name,
+        changes,
+      });
+    }
+
     res.json(project);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -150,8 +191,20 @@ export const updateProject = async (req, res) => {
 
 export const deleteProject = async (req, res) => {
   try {
+    const userId = req.auth?.userId;
     const { id } = req.params;
+    const proj = await prisma.project.findUnique({ where: { id }, select: { name: true, workspaceId: true } });
     await prisma.project.delete({ where: { id } });
+    if (proj) {
+      logAudit({
+        workspaceId: proj.workspaceId,
+        userId,
+        action: "DELETE",
+        entityType: "PROJECT",
+        entityId: id,
+        entityName: proj.name,
+      });
+    }
     res.json({ message: "Project deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
