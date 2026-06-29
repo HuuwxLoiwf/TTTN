@@ -41,21 +41,19 @@
 ## 🚀 Getting Started <a name="-getting-started"></a>
 
 First, install the dependencies. We recommend using `npm` for this project.
-
+Go to client and server by:
+```bash
+cd server || cd client
+```
+Then install all dependencies
 ```bash
 npm install
 ```
 
-Then, run the development server:
+Then, run the development server by run.bat:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+.\run.bat
 ```
 
 Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
