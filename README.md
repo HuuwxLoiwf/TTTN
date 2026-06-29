@@ -37,6 +37,7 @@
 - **Styling:** Tailwind CSS
 - **UI Components:** Lucide React for icons
 - **State Management:** Redux Toolkit
+- **Database:** Neon + prisma
 
 ## 🚀 Getting Started <a name="-getting-started"></a>
 
