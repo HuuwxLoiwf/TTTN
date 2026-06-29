@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "../context/AuthContext";
 import { format } from "date-fns";
 import { ShieldCheck, Plus, Pencil, Trash2 } from "lucide-react";
 import { apiFetch } from "../lib/api";

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "../context/AuthContext";
 import { XIcon, Plus, Trash2, Building2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { apiFetch } from "../lib/api";

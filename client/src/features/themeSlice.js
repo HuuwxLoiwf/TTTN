@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    theme: "light",
+    theme: "dark",
 };
 
 const themeSlice = createSlice({
@@ -18,12 +18,13 @@ const themeSlice = createSlice({
             state.theme = action.payload;
         },
         loadTheme: (state) => {
-            const theme = localStorage.getItem("theme");
-            if (theme) {
-                state.theme = theme;
-                if (theme === "dark") {
-                    document.documentElement.classList.add("dark");
-                }
+            // Mặc định dark nếu chưa từng chọn
+            const theme = localStorage.getItem("theme") || "dark";
+            state.theme = theme;
+            if (theme === "dark") {
+                document.documentElement.classList.add("dark");
+            } else {
+                document.documentElement.classList.remove("dark");
             }
         },
     },

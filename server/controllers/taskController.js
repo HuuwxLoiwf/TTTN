@@ -63,7 +63,7 @@ export const createTask = async (req, res) => {
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { projectId } = req.params;
-    const { title, description, type, priority, status, assigneeId, due_date } = req.body;
+    const { title, description, type, priority, status, assigneeId, due_date, phaseId } = req.body;
 
     if (!title?.trim()) return res.status(400).json({ error: "Tiêu đề công việc là bắt buộc" });
     if (title.length > 200) return res.status(400).json({ error: "Tiêu đề quá dài (tối đa 200 ký tự)" });
@@ -77,6 +77,7 @@ export const createTask = async (req, res) => {
         status: status || "TODO",
         assigneeId: assigneeId || userId || null,
         due_date: due_date ? new Date(due_date) : null,
+        ...(phaseId ? { phaseId } : {}),
         projectId,
       },
       include: { assignee: true },
@@ -128,7 +129,7 @@ export const updateTask = async (req, res) => {
   try {
     const userId = req.auth?.userId;
     const { id } = req.params;
-    const { title, description, status, type, priority, assigneeId, due_date } = req.body;
+    const { title, description, status, type, priority, assigneeId, due_date, phaseId } = req.body;
 
     const prev = await prisma.task.findUnique({
       where: { id },
@@ -152,6 +153,7 @@ export const updateTask = async (req, res) => {
         ...(priority !== undefined && { priority }),
         ...(assigneeId !== undefined && { assigneeId }),
         ...(due_date !== undefined && { due_date: new Date(due_date) }),
+        ...(phaseId !== undefined && { phaseId: phaseId || null }),
       },
       include: { assignee: true },
     });

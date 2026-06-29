@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "../context/AuthContext";
 import { Clock, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";

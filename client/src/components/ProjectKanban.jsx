@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
 import { useDispatch } from "react-redux";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { CalendarIcon, Bug, Zap, Square, GitCommit, MessageSquare, Paperclip } from "lucide-react";
 import { apiFetch, API_BASE_URL } from "../lib/api";

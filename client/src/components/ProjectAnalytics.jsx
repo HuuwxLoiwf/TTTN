@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Tooltip } from "recharts";
 import { CheckCircle, Clock, AlertTriangle, Users, Download, ArrowRightIcon, Timer, FileDown, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
@@ -246,7 +246,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
                 {metrics.map((m, i) => (
                     <div
                         key={i}
-                        className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-6"
+                        className="glass-card rounded-lg p-6"
                     >
                         <div className="flex items-center justify-between">
                             <div>
@@ -262,7 +262,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
             {/* Charts */}
             <div className="grid lg:grid-cols-2 gap-6">
                 {/* Tasks by Status */}
-                <div className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-6">
+                <div className="glass-card rounded-lg p-6">
                     <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Công việc theo trạng thái</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={statusData}>
@@ -279,7 +279,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
                 </div>
 
                 {/* Tasks by Type */}
-                <div className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-6">
+                <div className="glass-card rounded-lg p-6">
                     <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Công việc theo loại</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
@@ -303,7 +303,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
 
             {/* Báo cáo giờ làm theo thành viên */}
             {timeReport && timeReport.byUser.length > 0 && (
-                <div className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-6">
+                <div className="glass-card rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-zinc-900 dark:text-white font-medium flex items-center gap-2">
                             <Timer className="size-5 text-blue-500" /> Giờ làm theo thành viên
@@ -333,7 +333,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
 
             {/* Burndown chart */}
             {burndownData.length > 1 && (
-                <div className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-6">
+                <div className="glass-card rounded-lg p-6">
                     <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Biểu đồ Burndown (công việc còn lại)</h2>
                     <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={burndownData}>
@@ -347,7 +347,7 @@ const ProjectAnalytics = ({ project, tasks }) => {
             )}
 
             {/* Priority Breakdown */}
-            <div className="not-dark:bg-white dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-300 dark:border-zinc-800 rounded-lg p-6">
+            <div className="glass-card rounded-lg p-6">
                 <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Công việc theo độ ưu tiên</h2>
                 <div className="space-y-4">
                     {priorityData.map((p) => (

@@ -3,12 +3,14 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useAuth, useUser } from "@clerk/clerk-react";
-import { CalendarIcon, MessageCircle, PenIcon } from "lucide-react";
+import { useAuth, useUser } from "../context/AuthContext";
+import { CalendarIcon, MessageCircle, PenIcon, Edit2 } from "lucide-react";
 import { apiFetch } from "../lib/api";
 import { joinProject, leaveProject, getSocket } from "../lib/socket";
 import TimeTracker from "../components/TimeTracker";
 import SubtaskChecklist from "../components/SubtaskChecklist";
+import TaskFiles from "../components/TaskFiles";
+import EditTaskDialog from "../components/EditTaskDialog";
 
 const TaskDetails = () => {
 
@@ -24,6 +26,7 @@ const TaskDetails = () => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
     const [loading, setLoading] = useState(true);
+    const [showEdit, setShowEdit] = useState(false);
 
     const { currentWorkspace } = useSelector((state) => state.workspace);
 
@@ -151,7 +154,12 @@ const TaskDetails = () => {
                 {/* Task Info */}
                 <div className="p-5 rounded-md bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-800 ">
                     <div className="mb-3">
-                        <h1 className="text-lg font-medium text-gray-900 dark:text-zinc-100">{task.title}</h1>
+                        <div className="flex items-start justify-between gap-2">
+                            <h1 className="text-lg font-medium text-gray-900 dark:text-zinc-100">{task.title}</h1>
+                            <button onClick={() => setShowEdit(true)} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-shrink-0">
+                                <Edit2 className="size-3.5" /> Sửa
+                            </button>
+                        </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                             <span className="px-2 py-0.5 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-300 text-xs">
                                 {task.status}
@@ -185,6 +193,9 @@ const TaskDetails = () => {
                     </div>
                 </div>
 
+                {/* Tệp đính kèm */}
+                <TaskFiles taskId={taskId} />
+
                 {/* Subtask / checklist */}
                 <SubtaskChecklist taskId={taskId} />
 
@@ -207,6 +218,10 @@ const TaskDetails = () => {
                     </div>
                 )}
             </div>
+
+            {showEdit && (
+                <EditTaskDialog task={task} projectId={projectId} onClose={() => setShowEdit(false)} />
+            )}
         </div>
     );
 };

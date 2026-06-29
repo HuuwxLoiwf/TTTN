@@ -16,6 +16,28 @@ const createTransporter = () => {
 const APP_NAME = 'UMC Quản Lý Dự Án';
 const APP_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
+// Gửi mã OTP xác minh email. Trả true nếu gửi được, false nếu chưa cấu hình email.
+export const sendOtpEmail = async ({ to, name, otp }) => {
+    const transporter = createTransporter();
+    if (!transporter) return false; // chưa cấu hình email
+    await transporter.sendMail({
+        from: `"${APP_NAME}" <${process.env.EMAIL_USER}>`,
+        to,
+        subject: `[${APP_NAME}] Mã xác minh tài khoản: ${otp}`,
+        html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <h2 style="color: #2563eb;">Xác minh tài khoản</h2>
+                <p>Xin chào <strong>${name || to}</strong>,</p>
+                <p>Mã xác minh (OTP) của bạn là:</p>
+                <p style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #2563eb;">${otp}</p>
+                <p style="color:#6b7280;">Mã có hiệu lực trong 10 phút.</p>
+                <p style="color:#9ca3af; margin-top:24px; font-size:12px;">${APP_NAME}</p>
+            </div>
+        `,
+    });
+    return true;
+};
+
 export const sendTaskAssignedEmail = async ({ to, taskTitle, projectName, dueDate, assigneeName }) => {
     const transporter = createTransporter();
     if (!transporter) return; // email not configured, skip silently

@@ -3,7 +3,7 @@ import { Clock, Activity as ActivityIcon, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useSelector } from "react-redux";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { apiFetch } from "../lib/api";
 import { getSocket, joinWorkspace, leaveWorkspace } from "../lib/socket";
@@ -68,7 +68,7 @@ const RecentActivity = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-zinc-950 dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 rounded-lg transition-all overflow-hidden">
+        <div className="glass-card overflow-hidden">
             <div className="border-b border-zinc-200 dark:border-zinc-800 p-4">
                 <h2 className="text-lg text-zinc-800 dark:text-zinc-200">Hoạt động gần đây</h2>
             </div>

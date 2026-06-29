@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "../context/AuthContext";
 import { Send, MessagesSquare, Paperclip, FileText, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";

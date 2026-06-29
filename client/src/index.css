@@ -11,6 +11,67 @@
     display: none;
 }
 
+/* ===== Hiệu ứng cho trang đăng nhập ===== */
+@keyframes blob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -50px) scale(1.15); }
+    66% { transform: translate(-30px, 30px) scale(0.9); }
+}
+@keyframes float3d {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+}
+@keyframes glowpulse {
+    0%, 100% { box-shadow: 0 25px 60px -15px rgba(59,130,246,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset; }
+    50% { box-shadow: 0 30px 80px -10px rgba(139,92,246,0.6), 0 0 0 1px rgba(255,255,255,0.2) inset; }
+}
+.animate-glow { animation: glowpulse 5s ease-in-out infinite; }
+@keyframes spinslow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+@keyframes gradientmove {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+@keyframes fadeup {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-blob { animation: blob 14s ease-in-out infinite; }
+.animate-float3d { animation: float3d 7s ease-in-out infinite; transform-style: preserve-3d; }
+.animate-spinslow { animation: spinslow 30s linear infinite; }
+.animate-fadeup { animation: fadeup 0.7s ease-out both; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+.bg-animated-gradient {
+    background-size: 200% 200%;
+    animation: gradientmove 12s ease infinite;
+}
+.perspective-1000 { perspective: 1000px; }
+
+/* ===== Nền + thẻ glass dùng chung cho toàn app (dark) ===== */
+.dark body {
+    background-color: #060a18;
+}
+/* Thẻ kính mờ */
+.glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    transition: border-color 0.2s, transform 0.2s;
+}
+.glass-card:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+}
+/* Light mode glass tương đương */
+:root:not(.dark) .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
 @layer base {
     button {
         cursor: pointer;

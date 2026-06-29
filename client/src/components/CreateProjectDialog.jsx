@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { XIcon, Building2 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { apiFetch } from "../lib/api";
-import { addProject } from "../features/workspaceSlice";
+import { addProject, setWorkspaces, setCurrentWorkspace } from "../features/workspaceSlice";
 import DepartmentManager from "./DepartmentManager";
 
 const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
@@ -28,6 +28,44 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [memberEmail, setMemberEmail] = useState("");
+    const [pendingInvite, setPendingInvite] = useState(""); // email chưa thuộc workspace → cần mời
+    const [inviting, setInviting] = useState(false);
+
+    // Tải lại danh sách workspace + giữ workspace hiện tại (để thành viên mới hiện ngay)
+    const refreshWorkspaces = async () => {
+        const token = await getToken();
+        const workspaces = await apiFetch(token, "/workspaces");
+        dispatch(setWorkspaces(workspaces));
+        if (currentWorkspace?.id) dispatch(setCurrentWorkspace(currentWorkspace.id));
+    };
+
+    // Mời email chưa thuộc workspace vào workspace, rồi thêm luôn vào dự án
+    const inviteToWorkspace = async () => {
+        if (!pendingInvite || !currentWorkspace) return;
+        setInviting(true);
+        try {
+            const token = await getToken();
+            await apiFetch(token, `/workspaces/${currentWorkspace.id}/members`, {
+                method: "POST",
+                body: { email: pendingInvite, role: "MEMBER" },
+            });
+            await refreshWorkspaces();
+            // Thêm vào danh sách thành viên dự án
+            setFormData((prev) => ({
+                ...prev,
+                team_members: prev.team_members.includes(pendingInvite)
+                    ? prev.team_members
+                    : [...prev.team_members, pendingInvite],
+            }));
+            toast.success("Đã mời vào workspace và thêm vào dự án");
+            setPendingInvite("");
+            setMemberEmail("");
+        } catch (err) {
+            toast.error("Mời thất bại: " + err.message);
+        } finally {
+            setInviting(false);
+        }
+    };
     const [departments, setDepartments] = useState([]);
     const [showDeptManager, setShowDeptManager] = useState(false);
 
@@ -54,12 +92,12 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
             toast.error("Email không hợp lệ");
             return;
         }
-        // Chỉ cho phép email đã thuộc workspace (so khớp không phân biệt hoa/thường)
+        // Email chưa thuộc workspace → hiện nút mời thay vì báo lỗi cụt
         const match = currentWorkspace?.members?.find(
             (m) => m.user.email.toLowerCase() === input.toLowerCase()
         );
         if (!match) {
-            toast.error("Email này chưa thuộc không gian làm việc. Hãy mời họ vào workspace trước.");
+            setPendingInvite(input);
             return;
         }
         // Dùng email gốc trong DB để backend khớp chính xác
@@ -68,6 +106,7 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
             toast.error("Thành viên đã được thêm");
             return;
         }
+        setPendingInvite("");
         setFormData((prev) => ({ ...prev, team_members: [...prev.team_members, email] }));
         setMemberEmail("");
     };
@@ -242,7 +281,24 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                                     <option key={member.user.email} value={member.user.email} />
                                 ))}
                         </datalist>
-                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Chỉ thêm được email đã thuộc không gian làm việc.</p>
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Gõ email thành viên rồi bấm Thêm.</p>
+
+                        {/* Email chưa thuộc workspace → mời ngay tại đây, không cần thoát ra */}
+                        {pendingInvite && (
+                            <div className="mt-2 p-3 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+                                <p className="text-xs text-amber-700 dark:text-amber-400 mb-2">
+                                    <strong>{pendingInvite}</strong> chưa thuộc không gian làm việc.
+                                </p>
+                                <div className="flex gap-2">
+                                    <button type="button" onClick={inviteToWorkspace} disabled={inviting} className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs disabled:opacity-50">
+                                        {inviting ? "Đang mời..." : "Mời vào workspace + thêm vào dự án"}
+                                    </button>
+                                    <button type="button" onClick={() => setPendingInvite("")} className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 text-xs">
+                                        Bỏ qua
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {formData.team_members.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">

@@ -5,11 +5,11 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { verifyToken } from '@clerk/backend';
-import { serve } from 'inngest/express';
-import { inngest, functions } from './inngest/index.js';
+import jwt from 'jsonwebtoken';
 import { initSocket } from './socket.js';
+import { JWT_SECRET } from './controllers/authController.js';
 
+import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import workspaceRoutes from './routes/workspaces.js';
 import projectRoutes from './routes/projects.js';
@@ -24,6 +24,7 @@ import projectMessageRoutes from './routes/projectMessages.js';
 import timeLogRoutes from './routes/timeLogs.js';
 import subtaskRoutes from './routes/subtasks.js';
 import aiRoutes from './routes/ai.js';
+import phaseRoutes from './routes/phases.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -53,19 +54,17 @@ const apiLimiter = rateLimit({
     message: { error: 'Quá nhiều yêu cầu, vui lòng thử lại sau' },
 });
 
-// Manual JWT verification — more reliable than clerkMiddleware on Vercel serverless
-app.use(async (req, res, next) => {
+// Xác thực JWT tự ký (thay cho Clerk)
+app.use((req, res, next) => {
     req.auth = { userId: null };
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) return next();
     try {
         const token = authHeader.slice(7);
-        const payload = await verifyToken(token, {
-            secretKey: process.env.CLERK_SECRET_KEY,
-        });
-        req.auth = { userId: payload.sub, sessionId: payload.sid };
-    } catch (err) {
-        console.error('[Auth] verifyToken failed:', err.message);
+        const payload = jwt.verify(token, JWT_SECRET);
+        req.auth = { userId: payload.sub };
+    } catch {
+        // token sai/hết hạn → coi như chưa đăng nhập
     }
     next();
 });
@@ -88,7 +87,7 @@ app.get('/api/debug', (req, res) => {
     });
 });
 
-app.use('/api/inngest', serve({ client: inngest, functions })); // webhook — KHÔNG giới hạn
+app.use('/api/auth', apiLimiter, authRoutes);
 app.use('/api/users', apiLimiter, userRoutes);
 app.use('/api/workspaces', apiLimiter, workspaceRoutes);
 app.use('/api/projects', apiLimiter, projectRoutes);
@@ -103,6 +102,7 @@ app.use('/api/project-messages', apiLimiter, projectMessageRoutes);
 app.use('/api/time-logs', apiLimiter, timeLogRoutes);
 app.use('/api/subtasks', apiLimiter, subtaskRoutes);
 app.use('/api/ai', apiLimiter, aiRoutes);
+app.use('/api/phases', apiLimiter, phaseRoutes);
 
 const PORT = process.env.PORT || 5000;
 

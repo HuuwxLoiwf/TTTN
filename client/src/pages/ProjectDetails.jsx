@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, LayoutDashboard, FolderOpen, MessagesSquare, GanttChartIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, LayoutDashboard, FolderOpen, MessagesSquare, GanttChartIcon, LayersIcon } from "lucide-react";
 import ProjectAnalytics from "../components/ProjectAnalytics";
 import ProjectSettings from "../components/ProjectSettings";
 import CreateTaskDialog from "../components/CreateTaskDialog";
@@ -11,6 +11,7 @@ import ProjectKanban from "../components/ProjectKanban";
 import ProjectFiles from "../components/ProjectFiles";
 import ProjectChat from "../components/ProjectChat";
 import ProjectGantt from "../components/ProjectGantt";
+import ProjectPhases from "../components/ProjectPhases";
 import { addTask, updateTask, deleteTask, setProjectProgress } from "../features/workspaceSlice";
 import { joinProject, leaveProject, getSocket } from "../lib/socket";
 
@@ -22,7 +23,8 @@ export default function ProjectDetail() {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const projects = useSelector((state) => state?.workspace?.currentWorkspace?.projects || []);
+    const currentWorkspace = useSelector((state) => state?.workspace?.currentWorkspace);
+    const projects = useMemo(() => currentWorkspace?.projects || [], [currentWorkspace]);
 
     const [project, setProject] = useState(null);
     const [tasks, setTasks] = useState([]);
@@ -127,7 +129,7 @@ export default function ProjectDetail() {
                     { label: "Đang thực hiện", value: tasks.filter((t) => t.status === "IN_PROGRESS" || t.status === "TODO").length, color: "text-amber-700 dark:text-amber-400" },
                     { label: "Thành viên", value: project.members?.length || 0, color: "text-blue-700 dark:text-blue-400" },
                 ].map((card, idx) => (
-                    <div key={idx} className=" dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex justify-between sm:min-w-60 p-4 py-2.5 rounded">
+                    <div key={idx} className=" glass-card flex justify-between sm:min-w-60 p-4 py-2.5 rounded">
                         <div>
                             <div className="text-sm text-zinc-600 dark:text-zinc-400">{card.label}</div>
                             <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
@@ -142,6 +144,7 @@ export default function ProjectDetail() {
                 <div className="inline-flex flex-wrap max-sm:grid grid-cols-3 gap-2 border border-zinc-200 dark:border-zinc-800 rounded overflow-hidden">
                     {[
                         { key: "tasks", label: "Công việc", icon: FileStackIcon },
+                        { key: "phases", label: "Giai đoạn", icon: LayersIcon },
                         { key: "kanban", label: "Kanban", icon: LayoutDashboard },
                         { key: "calendar", label: "Lịch", icon: CalendarIcon },
                         { key: "timeline", label: "Timeline", icon: GanttChartIcon },
@@ -161,6 +164,11 @@ export default function ProjectDetail() {
                     {activeTab === "tasks" && (
                         <div className="dark:bg-zinc-900/40 rounded max-w-6xl">
                             <ProjectTasks tasks={tasks} />
+                        </div>
+                    )}
+                    {activeTab === "phases" && (
+                        <div className="max-w-6xl">
+                            <ProjectPhases projectId={id} tasks={tasks} />
                         </div>
                     )}
                     {activeTab === "kanban" && (

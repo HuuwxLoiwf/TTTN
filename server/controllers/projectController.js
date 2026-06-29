@@ -215,8 +215,27 @@ export const addProjectMember = async (req, res) => {
   try {
     const { id } = req.params;
     const { email } = req.body;
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Email không hợp lệ" });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) return res.status(404).json({ error: "Không tìm thấy người dùng với email này" });
+
+    const project = await prisma.project.findUnique({
+      where: { id },
+      select: { name: true, workspaceId: true },
+    });
+    if (!project) return res.status(404).json({ error: "Dự án không tồn tại" });
+
+    // BẮT BUỘC: người được thêm phải là thành viên của workspace chứa dự án
+    const inWorkspace = await prisma.workspaceMember.findUnique({
+      where: { userId_workspaceId: { userId: user.id, workspaceId: project.workspaceId } },
+    });
+    if (!inWorkspace) {
+      return res.status(400).json({ error: "Người này chưa thuộc không gian làm việc. Hãy mời họ vào workspace trước." });
+    }
 
     const existing = await prisma.projectMember.findUnique({
       where: { userId_projectId: { userId: user.id, projectId: id } },
@@ -226,11 +245,6 @@ export const addProjectMember = async (req, res) => {
     const member = await prisma.projectMember.create({
       data: { userId: user.id, projectId: id },
       include: { user: true },
-    });
-
-    const project = await prisma.project.findUnique({
-      where: { id },
-      select: { name: true, workspaceId: true },
     });
 
     notifyUser({

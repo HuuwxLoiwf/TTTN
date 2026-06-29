@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "../context/AuthContext";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { UploadCloud, File, Trash2, Download, FileImage, FileText, FileArchive, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { UploadCloud, File, Trash2, Download, FileImage, FileText, FileArchive, CheckCircle2, XCircle, Clock, Eye } from "lucide-react";
 import { apiFetch, API_BASE_URL } from "../lib/api";
 import { format } from "date-fns";
+import FilePreview, { canPreview } from "./FilePreview";
 
 const reviewBadge = {
     PENDING: { label: "Chờ duyệt", cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", Icon: Clock },
@@ -40,6 +41,7 @@ const ProjectFiles = ({ projectId }) => {
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [dragOver, setDragOver] = useState(false);
+    const [previewFile, setPreviewFile] = useState(null);
     const fileInputRef = useRef(null);
 
     const fetchFiles = async () => {
@@ -191,6 +193,15 @@ const ProjectFiles = ({ projectId }) => {
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2 flex-shrink-0">
+                                            {canPreview(file.fileName) && (
+                                                <button
+                                                    onClick={() => setPreviewFile(file)}
+                                                    className="p-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 text-zinc-500 dark:text-zinc-400 hover:text-blue-500 transition-colors"
+                                                    title="Xem trực tiếp"
+                                                >
+                                                    <Eye className="size-4" />
+                                                </button>
+                                            )}
                                             <a
                                                 href={file.fileUrl}
                                                 download={file.fileName}
@@ -240,6 +251,8 @@ const ProjectFiles = ({ projectId }) => {
                     </div>
                 )}
             </div>
+
+            {previewFile && <FilePreview file={previewFile} onClose={() => setPreviewFile(null)} />}
         </div>
     );
 };

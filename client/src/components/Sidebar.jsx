@@ -1,17 +1,30 @@
 import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useUser } from '../context/AuthContext'
 import MyTasksSidebar from './MyTasksSidebar'
 import ProjectSidebar from './ProjectsSidebar'
 import WorkspaceDropdown from './WorkspaceDropdown'
-import { FolderOpenIcon, LayoutDashboardIcon, SettingsIcon, UsersIcon, ListTodoIcon, ShieldCheckIcon } from 'lucide-react'
+import { FolderOpenIcon, LayoutDashboardIcon, SettingsIcon, UsersIcon, ListTodoIcon, ShieldCheckIcon, UserCheckIcon } from 'lucide-react'
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
+
+    const { user } = useUser();
+    const currentWorkspace = useSelector((state) => state?.workspace?.currentWorkspace);
+    // Là admin nếu là admin gốc hoặc ADMIN của workspace hiện tại
+    const isAdmin = user?.email === "admin@umc.com" ||
+        currentWorkspace?.members?.some((m) => m.userId === user?.id && m.role === "ADMIN");
 
     const menuItems = [
         { name: 'Bảng điều khiển', href: '/', icon: LayoutDashboardIcon },
         { name: 'Công việc của tôi', href: '/my-tasks', icon: ListTodoIcon },
         { name: 'Dự án', href: '/projects', icon: FolderOpenIcon },
         { name: 'Nhóm', href: '/team', icon: UsersIcon },
+    ]
+
+    // Các mục CHỈ admin mới thấy
+    const adminItems = [
+        { name: 'Duyệt tài khoản', href: '/pending-accounts', icon: UserCheckIcon },
         { name: 'Nhật ký kiểm toán', href: '/audit-log', icon: ShieldCheckIcon },
     ]
 
@@ -28,7 +41,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     }, [setIsSidebarOpen]);
 
     return (
-        <div ref={sidebarRef} className={`z-10 bg-white dark:bg-zinc-900 min-w-68 flex flex-col h-screen border-r border-gray-200 dark:border-zinc-800 max-sm:absolute transition-all ${isSidebarOpen ? 'left-0' : '-left-full'} `} >
+        <div ref={sidebarRef} className={`z-10 bg-white/70 dark:bg-white/5 backdrop-blur-xl min-w-68 flex flex-col h-screen border-r border-gray-200/50 dark:border-white/10 max-sm:absolute transition-all ${isSidebarOpen ? 'left-0' : '-left-full'} `} >
             <div className="px-5 py-3 border-b border-gray-200 dark:border-zinc-800">
                 <p className="text-sm font-bold text-blue-600 dark:text-blue-400 tracking-wide">UMC</p>
                 <p className="text-xs text-gray-500 dark:text-zinc-400">Quản Lý Dự Án</p>
@@ -44,7 +57,21 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                                 <p className='text-sm truncate'>{item.name}</p>
                             </NavLink>
                         ))}
-                        <NavLink to="/settings" className={({ isActive }) => `flex w-full items-center gap-3 py-2 px-4 text-gray-800 dark:text-zinc-100 cursor-pointer rounded transition-all ${isActive ? 'bg-gray-100 dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-800/50' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/60'}`}>
+
+                        {/* Mục chỉ dành cho admin */}
+                        {isAdmin && (
+                            <>
+                                <p className="px-4 pt-3 pb-1 text-[11px] uppercase font-semibold text-gray-400 dark:text-zinc-500">Quản trị</p>
+                                {adminItems.map((item) => (
+                                    <NavLink to={item.href} key={item.name} className={({ isActive }) => `flex items-center gap-3 py-2 px-4 text-gray-800 dark:text-zinc-100 cursor-pointer rounded transition-all ${isActive ? 'bg-gray-100 dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-800/50' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/60'}`} >
+                                        <item.icon size={16} />
+                                        <p className='text-sm truncate'>{item.name}</p>
+                                    </NavLink>
+                                ))}
+                            </>
+                        )}
+
+                        <NavLink to="/settings" className={({ isActive }) => `flex w-full items-center gap-3 py-2 px-4 text-gray-800 dark:text-zinc-100 cursor-pointer rounded transition-all mt-1 ${isActive ? 'bg-gray-100 dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-800/50' : 'hover:bg-gray-50 dark:hover:bg-zinc-800/60'}`}>
                             <SettingsIcon size={16} />
                             <p className='text-sm truncate'>Cài đặt</p>
                         </NavLink>

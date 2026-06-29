@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ListTodo, CalendarIcon, AlertTriangle } from "lucide-react";

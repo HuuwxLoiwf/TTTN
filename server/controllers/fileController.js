@@ -98,11 +98,36 @@ export const uploadFile = async (req, res) => {
             fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
         }
 
+        // Xác định dự án (kể cả khi đính kèm vào task) để kiểm tra quyền người upload
+        let resolvedProjectId = projectId || null;
+        if (!resolvedProjectId && taskId) {
+            const t = await prisma.task.findUnique({ where: { id: taskId }, select: { projectId: true } });
+            resolvedProjectId = t?.projectId || null;
+        }
+
+        // Nếu người upload là ADMIN workspace hoặc trưởng dự án → file tự ĐẠT, không cần duyệt
+        let autoApproved = false;
+        if (resolvedProjectId) {
+            const project = await prisma.project.findUnique({
+                where: { id: resolvedProjectId },
+                select: { workspaceId: true, team_lead: true },
+            });
+            if (project) {
+                const membership = await prisma.workspaceMember.findUnique({
+                    where: { userId_workspaceId: { userId, workspaceId: project.workspaceId } },
+                    select: { role: true },
+                });
+                autoApproved = membership?.role === "ADMIN" || project.team_lead === userId;
+            }
+        }
+
         const file = await prisma.file.create({
             data: {
                 fileName: req.file.originalname,
                 fileUrl,
                 uploadedBy: userId,
+                reviewStatus: autoApproved ? "APPROVED" : "PENDING",
+                ...(autoApproved ? { reviewedBy: userId, reviewedAt: new Date() } : {}),
                 ...(projectId ? { projectId } : {}),
                 ...(taskId ? { taskId } : {}),
             },

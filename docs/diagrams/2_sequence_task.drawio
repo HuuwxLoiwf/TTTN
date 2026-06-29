@@ -1,0 +1,77 @@
+<mxfile host="app.diagrams.net" version="24.0.0">
+  <diagram id="sequence" name="So do trinh tu - Tao cong viec">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="SƠ ĐỒ TRÌNH TỰ — TẠO &amp; CẬP NHẬT CÔNG VIỆC (REALTIME)" style="text;html=1;fontSize=15;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="350" y="10" width="640" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lifelines (head + duong doc) -->
+        <mxCell id="ll_user" value="Người dùng&#10;(Trình duyệt)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ln_user" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="75" y="120" as="sourcePoint" /><mxPoint x="75" y="820" as="targetPoint" /></mxGeometry></mxCell>
+
+        <mxCell id="ll_react" value=":React Client&#10;(apiFetch + socket)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="200" y="70" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ln_react" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="270" y="110" as="sourcePoint" /><mxPoint x="270" y="820" as="targetPoint" /></mxGeometry></mxCell>
+
+        <mxCell id="ll_api" value=":Express API&#10;(server.js)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="400" y="70" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ln_api" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="465" y="110" as="sourcePoint" /><mxPoint x="465" y="820" as="targetPoint" /></mxGeometry></mxCell>
+
+        <mxCell id="ll_authz" value=":Middleware&#10;requireMember" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="590" y="70" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ln_authz" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="655" y="110" as="sourcePoint" /><mxPoint x="655" y="820" as="targetPoint" /></mxGeometry></mxCell>
+
+        <mxCell id="ll_ctrl" value=":taskController" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="780" y="70" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ln_ctrl" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="845" y="110" as="sourcePoint" /><mxPoint x="845" y="820" as="targetPoint" /></mxGeometry></mxCell>
+
+        <mxCell id="ll_db" value=":Prisma /&#10;PostgreSQL" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="980" y="65" width="80" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="ln_db" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1020" y="120" as="sourcePoint" /><mxPoint x="1020" y="820" as="targetPoint" /></mxGeometry></mxCell>
+
+        <mxCell id="ll_socket" value=":Socket.io" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="70" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ln_socket" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1165" y="110" as="sourcePoint" /><mxPoint x="1165" y="820" as="targetPoint" /></mxGeometry></mxCell>
+
+        <mxCell id="ll_others" value="Client khác&#10;trong dự án" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="60" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ln_others" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1305" y="120" as="sourcePoint" /><mxPoint x="1305" y="820" as="targetPoint" /></mxGeometry></mxCell>
+
+        <!-- Messages -->
+        <mxCell id="m1" value="1: Nhấn &quot;Tạo công việc&quot; (nhập tiêu đề, người làm, hạn)" style="html=1;endArrow=block;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="75" y="150" as="sourcePoint" /><mxPoint x="270" y="150" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m2" value="2: POST /api/tasks/project/:id (kèm JWT)" style="html=1;endArrow=block;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="270" y="185" as="sourcePoint" /><mxPoint x="465" y="185" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m3" value="3: verifyToken (Clerk) → req.auth.userId" style="html=1;endArrow=block;dashed=0;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="465" y="220" as="sourcePoint" /><mxPoint x="655" y="220" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m4" value="4: Kiểm tra thành viên + vai trò workspace" style="html=1;endArrow=block;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="655" y="255" as="sourcePoint" /><mxPoint x="845" y="255" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m5" value="5: Kiểm tra hợp lệ (tiêu đề bắt buộc, ≤200 ký tự)" style="html=1;endArrow=block;rounded=0;dashed=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="845" y="290" as="sourcePoint" /><mxPoint x="900" y="290" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m6" value="6: INSERT Task (mặc định assignee = người tạo)" style="html=1;endArrow=block;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="845" y="320" as="sourcePoint" /><mxPoint x="1020" y="320" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m7" value="7: Task đã tạo" style="html=1;endArrow=open;dashed=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1020" y="350" as="sourcePoint" /><mxPoint x="845" y="350" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m8" value="8: emit &quot;task:created&quot; → room project:{id}" style="html=1;endArrow=block;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="845" y="385" as="sourcePoint" /><mxPoint x="1165" y="385" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m9" value="9: recalcProjectProgress() = % task DONE" style="html=1;endArrow=block;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="845" y="420" as="sourcePoint" /><mxPoint x="1020" y="420" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m10" value="10: emit &quot;project:progress&quot;" style="html=1;endArrow=block;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="845" y="455" as="sourcePoint" /><mxPoint x="1165" y="455" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m11" value="11: logActivity + notifyUser(người được giao)" style="html=1;endArrow=block;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="845" y="490" as="sourcePoint" /><mxPoint x="1020" y="490" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m12" value="12: emit &quot;notification:new&quot; → room user:{id}" style="html=1;endArrow=block;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="845" y="525" as="sourcePoint" /><mxPoint x="1165" y="525" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m13" value="13: 201 Created + dữ liệu Task" style="html=1;endArrow=open;dashed=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="845" y="560" as="sourcePoint" /><mxPoint x="270" y="560" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m14" value="14: Cập nhật Redux + hiển thị" style="html=1;endArrow=open;dashed=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="270" y="595" as="sourcePoint" /><mxPoint x="75" y="595" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m15" value="15: đẩy sự kiện task:created / project:progress" style="html=1;endArrow=block;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1165" y="630" as="sourcePoint" /><mxPoint x="1305" y="630" as="targetPoint" /></mxGeometry></mxCell>
+
+        <!-- Khung ghi chu -->
+        <mxCell id="note1" value="Lưu ý: Đổi TRẠNG THÁI công việc (PUT /tasks/:id) chỉ ADMIN được phép — controller chặn nếu req.memberRole ≠ ADMIN, sau đó cũng emit task:updated + recalcProjectProgress." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="200" y="680" width="700" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,109 @@
+<mxfile host="app.diagrams.net" version="24.0.0">
+  <diagram id="activity" name="So do hoat dong - Tao cong viec">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="1300" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="SƠ ĐỒ HOẠT ĐỘNG — TẠO &amp; CẬP NHẬT CÔNG VIỆC" style="text;html=1;fontSize=15;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="200" y="10" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Start -->
+        <mxCell id="start" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="420" y="60" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a1" value="Người dùng nhập thông tin công việc&#10;(tiêu đề, người làm, hạn, độ ưu tiên)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="320" y="120" width="230" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a2" value="Gửi POST /api/tasks kèm JWT (Clerk)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="320" y="200" width="230" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: token hop le -->
+        <mxCell id="d1" value="Token&#10;hợp lệ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="375" y="270" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="err1" value="Trả 401&#10;Chưa đăng nhập" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="620" y="280" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: la thanh vien -->
+        <mxCell id="d2" value="Là thành viên&#10;workspace?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="375" y="370" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="err2" value="Trả 403&#10;Không đủ quyền" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="620" y="380" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: hop le du lieu -->
+        <mxCell id="d3" value="Tiêu đề hợp lệ?&#10;(≤200 ký tự)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="375" y="470" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="err3" value="Trả 400&#10;Dữ liệu không hợp lệ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="620" y="480" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a3" value="Lưu Task vào CSDL (Prisma)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="320" y="580" width="230" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Fork -->
+        <mxCell id="fork" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="220" y="650" width="430" height="8" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p1" value="emit &quot;task:created&quot;&#10;→ room project" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="120" y="690" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="Tính lại tiến độ&#10;(% task DONE) + emit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="350" y="690" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="Ghi Activity +&#10;thông báo người được giao" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="560" y="690" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Join -->
+        <mxCell id="join" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="220" y="780" width="430" height="8" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a4" value="Trả 201 + dữ liệu Task cho client gọi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="320" y="810" width="230" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a5" value="Mọi client trong dự án nhận realtime → cập nhật giao diện (Redux)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="300" y="880" width="270" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- End -->
+        <mxCell id="end" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;shape=endState;" vertex="1" parent="1">
+          <mxGeometry x="420" y="960" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <mxCell id="f0" style="endArrow=block;html=1;" edge="1" parent="1" source="start" target="a1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f1" style="endArrow=block;html=1;" edge="1" parent="1" source="a1" target="a2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f2" style="endArrow=block;html=1;" edge="1" parent="1" source="a2" target="d1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f3" value="Không" style="endArrow=block;html=1;fontSize=10;" edge="1" parent="1" source="d1" target="err1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f4" value="Có" style="endArrow=block;html=1;fontSize=10;" edge="1" parent="1" source="d1" target="d2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f5" value="Không" style="endArrow=block;html=1;fontSize=10;" edge="1" parent="1" source="d2" target="err2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f6" value="Có" style="endArrow=block;html=1;fontSize=10;" edge="1" parent="1" source="d2" target="d3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f7" value="Không" style="endArrow=block;html=1;fontSize=10;" edge="1" parent="1" source="d3" target="err3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f8" value="Có" style="endArrow=block;html=1;fontSize=10;" edge="1" parent="1" source="d3" target="a3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f9" style="endArrow=block;html=1;" edge="1" parent="1" source="a3" target="fork"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f10" style="endArrow=block;html=1;" edge="1" parent="1" source="fork" target="p1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f11" style="endArrow=block;html=1;" edge="1" parent="1" source="fork" target="p2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f12" style="endArrow=block;html=1;" edge="1" parent="1" source="fork" target="p3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f13" style="endArrow=block;html=1;" edge="1" parent="1" source="p1" target="join"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f14" style="endArrow=block;html=1;" edge="1" parent="1" source="p2" target="join"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f15" style="endArrow=block;html=1;" edge="1" parent="1" source="p3" target="join"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f16" style="endArrow=block;html=1;" edge="1" parent="1" source="join" target="a4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f17" style="endArrow=block;html=1;" edge="1" parent="1" source="a4" target="a5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f18" style="endArrow=block;html=1;" edge="1" parent="1" source="a5" target="end"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -13,6 +13,7 @@ const TaskDetails = lazy(() => import("./pages/TaskDetails"));
 const MyTasks = lazy(() => import("./pages/MyTasks"));
 const AuditLog = lazy(() => import("./pages/AuditLog"));
 const Settings = lazy(() => import("./pages/Settings"));
+const PendingAccounts = lazy(() => import("./pages/PendingAccounts"));
 
 const PageLoader = () => (
     <div className="flex items-center justify-center h-[60vh]">
@@ -32,6 +33,7 @@ const App = () => {
                     <Route path="my-tasks" element={<Suspense fallback={<PageLoader />}><MyTasks /></Suspense>} />
                     <Route path="audit-log" element={<Suspense fallback={<PageLoader />}><AuditLog /></Suspense>} />
                     <Route path="settings" element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>} />
+                    <Route path="pending-accounts" element={<Suspense fallback={<PageLoader />}><PendingAccounts /></Suspense>} />
                     <Route path="projectsDetail" element={<Suspense fallback={<PageLoader />}><ProjectDetails /></Suspense>} />
                     <Route path="taskDetails" element={<Suspense fallback={<PageLoader />}><TaskDetails /></Suspense>} />
                 </Route>

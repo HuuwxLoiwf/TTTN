@@ -20,6 +20,7 @@ export const getWorkspaces = async (req, res) => {
                   orderBy: { createdAt: "desc" },
                 },
                 owner: true,
+                department: true,
               },
             },
           },
@@ -50,6 +51,7 @@ export const getWorkspace = async (req, res) => {
               orderBy: { createdAt: "desc" },
             },
             owner: true,
+            department: true,
           },
         },
       },
@@ -91,6 +93,7 @@ export const createWorkspace = async (req, res) => {
           include: {
             members: { include: { user: true } },
             tasks: { include: { assignee: true } },
+            department: true,
           },
         },
       },
@@ -114,6 +117,7 @@ export const updateWorkspace = async (req, res) => {
           include: {
             members: { include: { user: true } },
             tasks: { include: { assignee: true } },
+            department: true,
           },
         },
       },
@@ -138,8 +142,19 @@ export const inviteMember = async (req, res) => {
   try {
     const { id } = req.params;
     const { email, role } = req.body;
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Email không hợp lệ" });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) return res.status(404).json({ error: "Không tìm thấy người dùng với email này. Họ cần đăng ký tài khoản trước." });
+
+    // Đã là thành viên rồi?
+    const existing = await prisma.workspaceMember.findUnique({
+      where: { userId_workspaceId: { userId: user.id, workspaceId: id } },
+    });
+    if (existing) return res.status(400).json({ error: "Người này đã là thành viên không gian làm việc" });
 
     const member = await prisma.workspaceMember.create({
       data: {

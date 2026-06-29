@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { UsersIcon, Search, UserPlus, Shield, Activity, Trash2 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import InviteMemberDialog from "../components/InviteMemberDialog";
 import { apiFetch } from "../lib/api";
@@ -86,7 +86,7 @@ const Team = () => {
             {/* Stats Cards */}
             <div className="flex flex-wrap gap-4">
                 {/* Total Members */}
-                <div className="max-sm:w-full dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-gray-300 dark:border-zinc-800 rounded-lg p-6">
+                <div className="max-sm:w-full glass-card rounded-lg p-6">
                     <div className="flex items-center justify-between gap-8 md:gap-22">
                         <div>
                             <p className="text-sm text-gray-500 dark:text-zinc-400">Tổng thành viên</p>
@@ -99,7 +99,7 @@ const Team = () => {
                 </div>
 
                 {/* Active Projects */}
-                <div className="max-sm:w-full dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-gray-300 dark:border-zinc-800 rounded-lg p-6">
+                <div className="max-sm:w-full glass-card rounded-lg p-6">
                     <div className="flex items-center justify-between gap-8 md:gap-22">
                         <div>
                             <p className="text-sm text-gray-500 dark:text-zinc-400">Dự án đang hoạt động</p>
@@ -114,7 +114,7 @@ const Team = () => {
                 </div>
 
                 {/* Total Tasks */}
-                <div className="max-sm:w-full dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-gray-300 dark:border-zinc-800 rounded-lg p-6">
+                <div className="max-sm:w-full glass-card rounded-lg p-6">
                     <div className="flex items-center justify-between gap-8 md:gap-22">
                         <div>
                             <p className="text-sm text-gray-500 dark:text-zinc-400">Tổng công việc</p>

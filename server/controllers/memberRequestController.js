@@ -104,6 +104,14 @@ export const approveRequest = async (req, res) => {
         const { ok, project } = await isWorkspaceAdmin(userId, request.projectId);
         if (!ok) return res.status(403).json({ error: "Chỉ quản trị viên hoặc trưởng dự án mới được duyệt" });
 
+        // Người được duyệt phải còn là thành viên workspace
+        const inWorkspace = await prisma.workspaceMember.findUnique({
+            where: { userId_workspaceId: { userId: request.userId, workspaceId: project.workspaceId } },
+        });
+        if (!inWorkspace) {
+            return res.status(400).json({ error: "Người này không còn thuộc không gian làm việc" });
+        }
+
         // Tạo thành viên (bỏ qua nếu đã có)
         await prisma.projectMember.upsert({
             where: { userId_projectId: { userId: request.userId, projectId: request.projectId } },

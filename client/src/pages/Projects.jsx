@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Plus, Search, FolderOpen } from "lucide-react";
 import ProjectCard from "../components/ProjectCard";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 
 export default function Projects() {
-    
-    const projects = useSelector(
-        (state) => state?.workspace?.currentWorkspace?.projects || []
-    );
 
-    const [filteredProjects, setFilteredProjects] = useState([]);
+    // Lấy trực tiếp currentWorkspace để selector không tạo mảng mới mỗi render
+    const currentWorkspace = useSelector((state) => state?.workspace?.currentWorkspace);
+    const projects = useMemo(() => currentWorkspace?.projects || [], [currentWorkspace]);
+
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [filters, setFilters] = useState({
@@ -20,13 +19,16 @@ export default function Projects() {
     });
 
     // Danh sách phòng ban xuất hiện trong các dự án
-    const departments = Array.from(
-        new Map(projects.filter((p) => p.department).map((p) => [p.department.id, p.department])).values()
+    const departments = useMemo(
+        () => Array.from(
+            new Map(projects.filter((p) => p.department).map((p) => [p.department.id, p.department])).values()
+        ),
+        [projects]
     );
 
-    const filterProjects = () => {
+    // Lọc dự án bằng useMemo (không setState → không vòng lặp vô hạn)
+    const filteredProjects = useMemo(() => {
         let filtered = projects;
-
         if (searchTerm) {
             filtered = filtered.filter(
                 (project) =>
@@ -34,26 +36,16 @@ export default function Projects() {
                     project.description?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
-
         if (filters.status !== "ALL") {
             filtered = filtered.filter((project) => project.status === filters.status);
         }
-
         if (filters.priority !== "ALL") {
-            filtered = filtered.filter(
-                (project) => project.priority === filters.priority
-            );
+            filtered = filtered.filter((project) => project.priority === filters.priority);
         }
-
         if (filters.department !== "ALL") {
             filtered = filtered.filter((project) => project.departmentId === filters.department);
         }
-
-        setFilteredProjects(filtered);
-    };
-
-    useEffect(() => {
-        filterProjects();
+        return filtered;
     }, [projects, searchTerm, filters]);
 
     return (

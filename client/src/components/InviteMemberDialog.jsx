@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Mail, UserPlus } from "lucide-react";
-import { useSelector } from "react-redux";
-import { useAuth } from "@clerk/clerk-react";
+import { useSelector, useDispatch } from "react-redux";
+import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { apiFetch } from "../lib/api";
+import { setWorkspaces, setCurrentWorkspace } from "../features/workspaceSlice";
 
 const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }) => {
 
     const currentWorkspace = useSelector((state) => state.workspace?.currentWorkspace || null);
+    const dispatch = useDispatch();
     const { getToken } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
@@ -25,11 +27,16 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                 method: 'POST',
                 body: formData,
             });
+            // Cập nhật lại danh sách để thành viên mới hiện NGAY (không cần F5)
+            const workspaces = await apiFetch(token, "/workspaces");
+            dispatch(setWorkspaces(workspaces));
+            dispatch(setCurrentWorkspace(currentWorkspace.id));
+
             setIsDialogOpen(false);
             setFormData({ email: "", role: "MEMBER" });
-            toast.success("Gửi lời mời thành công!");
+            toast.success("Đã thêm thành viên!");
         } catch (err) {
-            toast.error("Gửi lời mời thất bại: " + err.message);
+            toast.error("Thêm thành viên thất bại: " + err.message);
         } finally {
             setIsSubmitting(false);
         }

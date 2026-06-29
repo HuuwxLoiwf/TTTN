@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import { CheckSquare, Square, Plus, Trash2 } from "lucide-react";
 import { apiFetch } from "../lib/api";
 

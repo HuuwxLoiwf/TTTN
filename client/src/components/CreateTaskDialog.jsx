@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { apiFetch } from "../lib/api";
@@ -16,6 +16,7 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
     const { getToken } = useAuth();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [phases, setPhases] = useState([]);
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -24,7 +25,19 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
         priority: "MEDIUM",
         assigneeId: "",
         due_date: "",
+        phaseId: "",
     });
+
+    useEffect(() => {
+        if (!showCreateTask || !projectId) return;
+        (async () => {
+            try {
+                const token = await getToken();
+                const data = await apiFetch(token, `/phases/project/${projectId}`);
+                setPhases(data);
+            } catch { /* silent */ }
+        })();
+    }, [showCreateTask, projectId]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,7 +51,7 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
             });
             dispatch(addTask({ ...task, projectId }));
             setShowCreateTask(false);
-            setFormData({ title: "", description: "", type: "TASK", status: "TODO", priority: "MEDIUM", assigneeId: "", due_date: "" });
+            setFormData({ title: "", description: "", type: "TASK", status: "TODO", priority: "MEDIUM", assigneeId: "", due_date: "", phaseId: "" });
             toast.success("Tạo công việc thành công!");
         } catch (err) {
             toast.error("Tạo công việc thất bại: " + err.message);
@@ -112,6 +125,19 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
                             </select>
                         </div>
                     </div>
+
+                    {/* Giai đoạn */}
+                    {phases.length > 0 && (
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium">Giai đoạn</label>
+                            <select value={formData.phaseId} onChange={(e) => setFormData({ ...formData, phaseId: e.target.value })} className="w-full rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-zinc-900 dark:text-zinc-200 text-sm mt-1">
+                                <option value="">Chưa phân giai đoạn</option>
+                                {phases.map((p) => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     {/* Due Date */}
                     <div className="space-y-1">

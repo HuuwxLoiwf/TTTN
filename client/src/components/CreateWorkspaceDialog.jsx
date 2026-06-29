@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../lib/api';
 import { addWorkspace } from '../features/workspaceSlice';
 import toast from 'react-hot-toast';

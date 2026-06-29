@@ -34,7 +34,7 @@ const DepartmentStats = () => {
     if (groups.length === 0) return null;
 
     return (
-        <div className="bg-white dark:bg-zinc-950 dark:bg-gradient-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+        <div className="glass-card overflow-hidden">
             <div className="border-b border-zinc-200 dark:border-zinc-800 p-4 flex items-center gap-2">
                 <Building2 className="size-5 text-blue-500" />
                 <h2 className="text-lg text-zinc-800 dark:text-zinc-200">Dự án theo phòng ban</h2>
