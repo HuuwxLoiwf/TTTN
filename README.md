@@ -42,11 +42,11 @@
 ## 🚀 Getting Started <a name="-getting-started"></a>
 
 First, install the dependencies. We recommend using `npm` for this project.
-Go to client and server by:
+Go to client and server in cmd by:
 ```bash
 cd server || cd client
 ```
-Then install all dependencies
+Then install all dependencies:
 ```bash
 npm install
 ```
