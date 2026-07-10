@@ -3,12 +3,17 @@ import { useAuth, useUser } from "../context/AuthContext";
 import { Send, MessagesSquare, Paperclip, FileText, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 import { apiFetch, API_BASE_URL } from "../lib/api";
 import { joinProject, leaveProject, getSocket } from "../lib/socket";
+import FilePreview, { canPreview } from "./FilePreview";
+import MentionPicker from "./MentionPicker";
 
 const ProjectChat = ({ projectId }) => {
     const { getToken } = useAuth();
     const { user } = useUser();
+    const { currentWorkspace } = useSelector((state) => state.workspace);
+    const projectMembers = currentWorkspace?.projects?.find((p) => p.id === projectId)?.members || [];
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
     const [loading, setLoading] = useState(true);
@@ -18,6 +23,7 @@ const ProjectChat = ({ projectId }) => {
     const fileInputRef = useRef(null);
     const [summary, setSummary] = useState("");
     const [summarizing, setSummarizing] = useState(false);
+    const [previewFile, setPreviewFile] = useState(null); // xem ảnh/PDF trong modal (có nút đóng)
 
     const handleSummarize = async () => {
         setSummarizing(true);
@@ -131,22 +137,22 @@ const ProjectChat = ({ projectId }) => {
     };
 
     return (
-        <div className="flex flex-col h-[70vh] border border-zinc-200 dark:border-zinc-800 rounded-lg">
-            <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-2">
+        <div className="flex flex-col h-[70vh] bg-surface-card rounded-lg shadow-spotify-md overflow-hidden">
+            <div className="px-4 py-3 border-b border-hairline flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                    <MessagesSquare className="size-5 text-blue-500" />
-                    <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Thảo luận nhóm dự án</h3>
+                    <MessagesSquare className="size-5 text-bmw-blue" />
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-body-strong">Thảo luận nhóm dự án</h3>
                 </div>
-                <button onClick={handleSummarize} disabled={summarizing} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 disabled:opacity-50">
+                <button onClick={handleSummarize} disabled={summarizing} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-surface-elevated text-gray-700 dark:text-body font-bold hover:bg-white/10 disabled:opacity-50 transition-colors">
                     <Sparkles className="size-3.5" /> {summarizing ? "Đang tóm tắt..." : "Tóm tắt AI"}
                 </button>
             </div>
 
             {summary && (
-                <div className="px-4 py-3 bg-purple-50 dark:bg-purple-900/10 border-b border-purple-200 dark:border-purple-900/30 text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                <div className="px-4 py-3 bg-surface-soft border-b border-hairline text-sm text-gray-700 dark:text-body whitespace-pre-wrap max-h-48 overflow-y-auto">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-1"><Sparkles className="size-3.5" /> Tóm tắt AI</span>
-                        <button onClick={() => setSummary("")} className="text-xs text-zinc-400 hover:text-zinc-600">Đóng</button>
+                        <span className="font-bold text-gray-700 dark:text-body-strong flex items-center gap-1"><Sparkles className="size-3.5" /> Tóm tắt AI</span>
+                        <button onClick={() => setSummary("")} className="text-xs text-gray-400 dark:text-muted hover:text-gray-600 dark:hover:text-body">Đóng</button>
                     </div>
                     {summary}
                 </div>
@@ -155,15 +161,15 @@ const ProjectChat = ({ projectId }) => {
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {hasMore && !loading && (
                     <div className="text-center">
-                        <button onClick={loadOlder} disabled={loadingMore} className="text-xs text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50">
+                        <button onClick={loadOlder} disabled={loadingMore} className="text-xs text-bmw-blue hover:underline disabled:opacity-50">
                             {loadingMore ? "Đang tải..." : "Tải tin nhắn cũ hơn"}
                         </button>
                     </div>
                 )}
                 {loading ? (
-                    <p className="text-center text-sm text-zinc-400">Đang tải...</p>
+                    <p className="text-center text-sm text-gray-400 dark:text-muted">Đang tải...</p>
                 ) : messages.length === 0 ? (
-                    <p className="text-center text-sm text-zinc-400 py-10">Chưa có tin nhắn. Bắt đầu trò chuyện với nhóm!</p>
+                    <p className="text-center text-sm text-gray-400 dark:text-muted py-10">Chưa có tin nhắn. Bắt đầu trò chuyện với nhóm!</p>
                 ) : (
                     messages.map((m) => {
                         const mine = m.user?.id === user?.id;
@@ -172,20 +178,32 @@ const ProjectChat = ({ projectId }) => {
                                 <div className={`max-w-[75%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
                                     <div className="flex items-center gap-1.5 mb-0.5">
                                         {!mine && m.user?.image && <img src={m.user.image} alt="" className="size-4 rounded-full" />}
-                                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                                        <span className="text-xs text-gray-500 dark:text-muted">
                                             {mine ? "Bạn" : m.user?.name || m.user?.email}
                                         </span>
-                                        <span className="text-[10px] text-zinc-400 dark:text-zinc-600">
+                                        <span className="text-[10px] text-gray-400 dark:text-muted">
                                             {format(new Date(m.createdAt), "HH:mm")}
                                         </span>
                                     </div>
-                                    <div className={`px-3 py-2 rounded-lg text-sm ${mine ? "bg-blue-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"}`}>
+                                    <div className={`px-3.5 py-2 text-sm rounded-2xl ${mine ? "bg-m-blue-light text-black" : "bg-surface-card text-gray-900 dark:text-ink"}`}>
                                         {m.content && <p>{m.content}</p>}
                                         {m.fileUrl && (
-                                            <a href={m.fileUrl} target="_blank" rel="noreferrer" className={`flex items-center gap-1.5 mt-1 underline ${mine ? "text-blue-100" : "text-blue-600 dark:text-blue-400"}`}>
-                                                <FileText className="size-3.5 flex-shrink-0" />
-                                                <span className="truncate">{m.fileName || "Tệp đính kèm"}</span>
-                                            </a>
+                                            canPreview(m.fileName || m.fileUrl) ? (
+                                                // Ảnh/PDF: mở modal xem trước ngay trong app (có nút đóng để quay về)
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPreviewFile({ fileName: m.fileName || "Tệp đính kèm", fileUrl: m.fileUrl })}
+                                                    className={`flex items-center gap-1.5 mt-1 underline ${mine ? "text-black" : "text-bmw-blue dark:text-bmw-blue"}`}
+                                                >
+                                                    <FileText className="size-3.5 flex-shrink-0" />
+                                                    <span className="truncate">{m.fileName || "Tệp đính kèm"}</span>
+                                                </button>
+                                            ) : (
+                                                <a href={m.fileUrl} target="_blank" rel="noreferrer" className={`flex items-center gap-1.5 mt-1 underline ${mine ? "text-black" : "text-bmw-blue dark:text-bmw-blue"}`}>
+                                                    <FileText className="size-3.5 flex-shrink-0" />
+                                                    <span className="truncate">{m.fileName || "Tệp đính kèm"}</span>
+                                                </a>
+                                            )
                                         )}
                                     </div>
                                 </div>
@@ -196,21 +214,26 @@ const ProjectChat = ({ projectId }) => {
                 <div ref={bottomRef} />
             </div>
 
-            <form onSubmit={handleSend} className="p-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
-                <button type="button" onClick={() => fileInputRef.current?.click()} title="Đính kèm tệp" className="px-2 rounded-lg text-zinc-500 hover:text-blue-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+            <form onSubmit={handleSend} className="p-3 border-t border-hairline flex gap-2 items-center">
+                <button type="button" onClick={() => fileInputRef.current?.click()} title="Đính kèm tệp" className="p-2 rounded-full text-gray-500 dark:text-muted hover:text-bmw-blue hover:bg-white/10 transition-colors">
                     <Paperclip className="size-4" />
                 </button>
                 <input ref={fileInputRef} type="file" className="hidden" onChange={handleAttach} />
-                <input
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Nhập tin nhắn... (@email để nhắc ai đó)"
-                    className="flex-1 px-3 py-2 rounded-lg dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-                <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 disabled:opacity-50" disabled={!text.trim()}>
+                <div className="flex-1 relative">
+                    <MentionPicker text={text} members={projectMembers} onPick={setText} />
+                    <input
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder="Nhập tin nhắn... (gõ @ để nhắc thành viên)"
+                        className="w-full px-4 py-2 bg-surface-card text-sm rounded-full shadow-spotify-inset focus:outline-none"
+                    />
+                </div>
+                <button type="submit" className="size-10 rounded-full bg-m-blue-light text-black flex items-center justify-center disabled:opacity-50 hover:scale-105 transition-transform flex-shrink-0" disabled={!text.trim()}>
                     <Send className="size-4" />
                 </button>
             </form>
+
+            {previewFile && <FilePreview file={previewFile} onClose={() => setPreviewFile(null)} />}
         </div>
     );
 };

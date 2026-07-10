@@ -1,6 +1,6 @@
 import prisma from "../configs/prisma.js";
 import { emitToProject } from "../socket.js";
-import { notifyMentions } from "../utils/notify.js";
+import { notifyMentions, notifyUser } from "../utils/notify.js";
 
 // Lấy lịch sử chat nhóm dự án, phân trang theo cursor.
 // ?before=<ISO date> để lấy 30 tin cũ hơn mốc đó (cuộn lên).
@@ -53,6 +53,25 @@ export const sendMessage = async (req, res) => {
         });
 
         emitToProject(projectId, "projectMessage:new", message);
+
+        // Thông báo cho TẤT CẢ thành viên dự án (trừ người gửi) về tin nhắn mới.
+        const [project, members] = await Promise.all([
+            prisma.project.findUnique({ where: { id: projectId }, select: { name: true, team_lead: true } }),
+            prisma.projectMember.findMany({ where: { projectId }, select: { userId: true } }),
+        ]);
+        const senderName = message.user?.name || message.user?.email || "Thành viên";
+        const preview = content?.trim() ? content.trim().slice(0, 60) : "đã gửi một tệp đính kèm";
+        const recipients = new Set(members.map((m) => m.userId));
+        if (project?.team_lead) recipients.add(project.team_lead); // đảm bảo cả trưởng dự án
+        recipients.delete(userId);
+        for (const rid of recipients) {
+            notifyUser({
+                userId: rid,
+                actorId: userId,
+                title: `Tin nhắn mới trong ${project?.name || "dự án"}`,
+                message: `${senderName}: ${preview}`,
+            });
+        }
 
         if (content?.trim()) {
             notifyMentions({ content, projectId, actorId: userId, contextLabel: "thảo luận nhóm dự án" });

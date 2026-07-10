@@ -48,7 +48,7 @@ export const getProjectTimeReport = async (req, res) => {
     try {
         const { projectId } = req.params;
         const logs = await prisma.timeLog.findMany({
-            where: { task: { projectId } },
+            where: { task: { projectId, deletedAt: null } },
             include: {
                 user: { select: { id: true, name: true, email: true } },
                 task: { select: { id: true, title: true } },

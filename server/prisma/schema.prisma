@@ -64,8 +64,11 @@ model User {
     image         String    @default("")
     emailVerified Boolean   @default(false)
     approved      Boolean   @default(false) // admin phải duyệt mới đăng nhập được
+    twoFactorEnabled Boolean @default(false) // bật 2FA: đăng nhập cần thêm OTP gửi qua email
     otpCode       String? // mã OTP xác minh email
     otpExpiresAt  DateTime?
+    resetToken       String? // token đặt lại mật khẩu (hash)
+    resetTokenExpiry DateTime?
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt
 
@@ -82,6 +85,7 @@ model User {
     projectMessages ProjectMessage[]
     timeLogs        TimeLog[]
     auditLogs       AuditLog[]
+    assignedPhases  Phase[]                @relation("PhaseAssignee")
 }
 
 model Workspace {
@@ -123,6 +127,7 @@ model WorkspaceMember {
     workspaceId String
     message     String        @default("")
     role        WorkspaceRole @default(MEMBER)
+    hourlyRate  Float? // đơn giá giờ công (VNĐ/giờ) — tính chi phí nhân công từ TimeLog
     user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
     workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -141,6 +146,8 @@ model Project {
     workspaceId  String
     departmentId String?
     progress     Int             @default(0)
+    budget       Float? // ngân sách dự án (VNĐ) — so với chi phí nhân công thực tế
+    deletedAt    DateTime? // soft-delete: khác null = đã xóa (trong thùng rác)
     createdAt    DateTime        @default(now())
     updatedAt    DateTime        @updatedAt
     members      ProjectMember[]
@@ -156,15 +163,20 @@ model Project {
 }
 
 model Phase {
-    id          String   @id @default(uuid())
+    id          String    @id @default(uuid())
     projectId   String
     name        String
     description String?
-    order       Int      @default(0) // thứ tự giai đoạn
-    createdAt   DateTime @default(now())
+    order       Int       @default(0) // thứ tự giai đoạn
+    startDate   DateTime? // giai đoạn bắt đầu khi nào
+    endDate     DateTime? // dự kiến kết thúc khi nào
+    assigneeId  String? // người phụ trách giai đoạn
+    createdAt   DateTime  @default(now())
 
-    project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-    tasks   Task[]
+    project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    assignee User?   @relation("PhaseAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+    tasks    Task[]
+    files    File[] // tài liệu nộp để hoàn thành giai đoạn
 }
 
 model ProjectMemberRequest {
@@ -217,6 +229,10 @@ model Task {
     assigneeId  String?
     phaseId     String?
     due_date    DateTime?
+    labels      String[]   @default([]) // nhãn/tag tùy chỉnh (VD: "khẩn", "frontend")
+    autoStatus  Boolean    @default(false) // bật tự động chuyển trạng thái theo thời gian
+    statusPlan  Json? // kế hoạch số ngày mỗi trạng thái { TODO, IN_PROGRESS, REVIEW, DONE } — null = chia đều
+    deletedAt   DateTime? // soft-delete
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @updatedAt
 
@@ -227,6 +243,21 @@ model Task {
     files    File[]
     timeLogs TimeLog[]
     subtasks Subtask[]
+
+    // Phụ thuộc: task này bị chặn bởi (blockedBy) / đang chặn (blocking) task khác
+    dependencies TaskDependency[] @relation("DependentTask") // task này phụ thuộc vào ...
+    dependents   TaskDependency[] @relation("BlockingTask")  // task này chặn ...
+}
+
+model TaskDependency {
+    id          String @id @default(uuid())
+    taskId      String // task phụ thuộc (chỉ DONE được khi dependsOn đã DONE)
+    dependsOnId String // task tiên quyết
+
+    task      Task @relation("DependentTask", fields: [taskId], references: [id], onDelete: Cascade)
+    dependsOn Task @relation("BlockingTask", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+    @@unique([taskId, dependsOnId])
 }
 
 model Subtask {
@@ -308,6 +339,7 @@ model File {
     id           String           @id @default(uuid())
     projectId    String?
     taskId       String?
+    phaseId      String? // file nộp cho giai đoạn
     uploadedBy   String
     fileName     String
     fileUrl      String
@@ -319,5 +351,6 @@ model File {
 
     project  Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
     task     Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    phase    Phase?   @relation(fields: [phaseId], references: [id], onDelete: SetNull)
     uploader User     @relation("FileUploader", fields: [uploadedBy], references: [id], onDelete: Cascade)
 }

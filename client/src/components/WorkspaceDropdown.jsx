@@ -35,58 +35,58 @@ function WorkspaceDropdown() {
 
     return (
         <div className="relative m-4" ref={dropdownRef}>
-            <button onClick={() => setIsOpen(prev => !prev)} className="w-full flex items-center justify-between p-3 h-auto text-left rounded hover:bg-gray-100 dark:hover:bg-zinc-800" >
+            <button onClick={() => setIsOpen(prev => !prev)} className="w-full flex items-center justify-between p-3 h-auto text-left rounded-lg border border-transparent hover:bg-gray-100 dark:hover:bg-surface-elevated transition-colors" >
                 <div className="flex items-center gap-3">
-                    <img src={currentWorkspace?.image_url || assets.workspace_img_default} alt={currentWorkspace?.name} className="w-8 h-8 rounded shadow" />
+                    <img src={currentWorkspace?.image_url || assets.workspace_img_default} alt={currentWorkspace?.name} className="w-8 h-8 rounded-full" />
                     <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-gray-800 dark:text-white text-sm truncate">
+                        <p className="font-bold text-gray-800 dark:text-ink text-sm truncate">
                             {currentWorkspace?.name || "Chọn không gian làm việc"}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">
+                        <p className="text-xs text-gray-500 dark:text-muted truncate">
                             {workspaces.length} không gian làm việc
                         </p>
                     </div>
                 </div>
-                <ChevronDown className="w-4 h-4 text-gray-500 dark:text-zinc-400 flex-shrink-0" />
+                <ChevronDown className="w-4 h-4 text-gray-500 dark:text-muted flex-shrink-0" />
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 w-64 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded shadow-lg top-full left-0">
+                <div className="absolute z-50 w-64 rounded-lg bg-white dark:bg-surface-elevated border border-gray-200 dark:border-transparent dark:shadow-spotify-lg top-full left-0 overflow-hidden">
                     <div className="p-2">
-                        <p className="text-xs text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2 px-2">
+                        <p className="text-xs font-bold text-gray-500 dark:text-muted mb-2 px-2">
                             Không gian làm việc
                         </p>
                         {workspaces.map((ws) => (
-                            <div key={ws.id} onClick={() => onSelectWorkspace(ws.id)} className="flex items-center gap-3 p-2 cursor-pointer rounded hover:bg-gray-100 dark:hover:bg-zinc-800" >
-                                <img src={ws.image_url || assets.workspace_img_default} alt={ws.name} className="w-6 h-6 rounded" />
+                            <div key={ws.id} onClick={() => onSelectWorkspace(ws.id)} className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-surface-soft" >
+                                <img src={ws.image_url || assets.workspace_img_default} alt={ws.name} className="w-6 h-6 rounded-full" />
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
+                                    <p className="text-sm font-medium text-gray-800 dark:text-ink truncate">
                                         {ws.name}
                                     </p>
-                                    <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">
+                                    <p className="text-xs text-gray-500 dark:text-muted truncate">
                                         {ws.members?.length || 0} thành viên
                                     </p>
                                 </div>
                                 {currentWorkspace?.id === ws.id && (
-                                    <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                                    <Check className="w-4 h-4 text-bmw-blue flex-shrink-0" />
                                 )}
                             </div>
                         ))}
 
                         {workspaces.length === 0 && (
-                            <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center py-2">
+                            <p className="text-xs text-muted text-center py-2">
                                 Chưa có không gian làm việc
                             </p>
                         )}
                     </div>
 
-                    <hr className="border-gray-200 dark:border-zinc-700" />
+                    <hr className="border-gray-200 dark:border-hairline" />
 
                     <div
-                        className="p-2 cursor-pointer rounded group hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        className="p-2 cursor-pointer group hover:bg-gray-100 dark:hover:bg-surface-soft"
                         onClick={() => { setIsOpen(false); setShowCreateDialog(true); }}
                     >
-                        <p className="flex items-center text-xs gap-2 my-1 w-full text-blue-600 dark:text-blue-400 group-hover:text-blue-500 dark:group-hover:text-blue-300">
+                        <p className="flex items-center text-xs gap-2 my-1 w-full rounded-full font-bold text-bmw-blue">
                             <Plus className="w-4 h-4" /> Tạo không gian làm việc
                         </p>
                     </div>

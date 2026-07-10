@@ -25,12 +25,12 @@ const Navbar = ({ setIsSidebarOpen }) => {
     const initial = (user?.name || user?.email || "?")[0].toUpperCase();
 
     return (
-        <div className="w-full bg-white/70 dark:bg-white/5 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/10 px-6 xl:px-16 py-3 flex-shrink-0">
+        <div className="w-full bg-white dark:bg-canvas px-6 xl:px-16 py-3 flex-shrink-0">
             <div className="flex items-center justify-between max-w-6xl mx-auto">
                 {/* Left section */}
                 <div className="flex items-center gap-4 min-w-0 flex-1">
                     {/* Sidebar Trigger */}
-                    <button onClick={() => setIsSidebarOpen((prev) => !prev)} className="sm:hidden p-2 rounded-lg transition-colors text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-zinc-800" >
+                    <button onClick={() => setIsSidebarOpen((prev) => !prev)} className="sm:hidden size-9 rounded-full flex items-center justify-center transition-colors text-gray-700 dark:text-ink hover:bg-gray-100 dark:hover:bg-surface-elevated" >
                         <PanelLeft size={20} />
                     </button>
 
@@ -42,11 +42,11 @@ const Navbar = ({ setIsSidebarOpen }) => {
                 <div className="flex items-center gap-3">
 
                     {/* Theme Toggle */}
-                    <button onClick={() => dispatch(toggleTheme())} className="size-8 flex items-center justify-center bg-white dark:bg-zinc-800 shadow rounded-lg transition hover:scale-105 active:scale-95">
+                    <button onClick={() => dispatch(toggleTheme())} className="size-9 rounded-full flex items-center justify-center bg-white dark:bg-surface-elevated transition hover:scale-105 active:scale-95">
                         {
                             theme === "light"
                                 ? (<MoonIcon className="size-4 text-gray-800 dark:text-gray-200" />)
-                                : (<SunIcon className="size-4 text-yellow-400" />)
+                                : (<SunIcon className="size-4 text-m-warning" />)
                         }
                     </button>
 
@@ -55,16 +55,16 @@ const Navbar = ({ setIsSidebarOpen }) => {
 
                     {/* User menu */}
                     <div className="relative" ref={menuRef}>
-                        <button onClick={() => setMenuOpen((v) => !v)} className="size-8 rounded-full bg-blue-600 text-white text-sm font-semibold flex items-center justify-center overflow-hidden">
+                        <button onClick={() => setMenuOpen((v) => !v)} className="size-9 rounded-full bg-surface-elevated text-ink text-sm font-bold flex items-center justify-center overflow-hidden hover:scale-105 transition">
                             {user?.image ? <img src={user.image} alt="" className="size-full object-cover" /> : initial}
                         </button>
                         {menuOpen && (
-                            <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg z-50 py-1">
-                                <div className="px-3 py-2 border-b border-gray-100 dark:border-zinc-800">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user?.name}</p>
-                                    <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">{user?.email}</p>
+                            <div className="absolute right-0 mt-2 w-52 bg-surface-elevated rounded z-50 py-1 shadow-spotify-lg">
+                                <div className="px-3 py-2 border-b border-hairline/30">
+                                    <p className="text-sm font-bold text-ink truncate">{user?.name}</p>
+                                    <p className="text-xs text-muted truncate">{user?.email}</p>
                                 </div>
-                                <button onClick={signOut} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-zinc-800">
+                                <button onClick={signOut} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-ink hover:bg-white/10">
                                     <LogOut className="size-4" /> Đăng xuất
                                 </button>
                             </div>

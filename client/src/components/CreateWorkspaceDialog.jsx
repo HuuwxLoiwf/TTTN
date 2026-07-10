@@ -36,21 +36,21 @@ const CreateWorkspaceDialog = ({ isOpen, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-xl w-full max-w-md mx-4 border border-zinc-200 dark:border-zinc-700">
-                <div className="flex items-center justify-between p-5 border-b border-zinc-200 dark:border-zinc-800">
-                    <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <div className="bg-white dark:bg-surface-card w-full max-w-md rounded-lg shadow-spotify-lg">
+                <div className="flex items-center justify-between p-5">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-ink">
                         Tạo không gian làm việc mới
                     </h2>
-                    <button onClick={onClose} className="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500">
+                    <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-muted">
                         <X className="size-4" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-5 space-y-4">
+                <form onSubmit={handleSubmit} className="p-5 pt-0 space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                            Tên không gian làm việc <span className="text-red-500">*</span>
+                        <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-700 dark:text-body mb-1">
+                            Tên không gian làm việc <span className="text-m-red">*</span>
                         </label>
                         <input
                             type="text"
@@ -58,12 +58,12 @@ const CreateWorkspaceDialog = ({ isOpen, onClose }) => {
                             placeholder="Ví dụ: Công ty ABC"
                             value={formData.name}
                             onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
-                            className="w-full px-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full h-12 px-3 text-sm rounded bg-white dark:bg-surface-elevated text-gray-900 dark:text-ink placeholder-gray-400 dark:placeholder-muted dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                        <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-700 dark:text-body mb-1">
                             Mô tả
                         </label>
                         <textarea
@@ -71,7 +71,7 @@ const CreateWorkspaceDialog = ({ isOpen, onClose }) => {
                             placeholder="Mô tả ngắn về không gian làm việc..."
                             value={formData.description}
                             onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
-                            className="w-full px-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                            className="w-full px-3 py-2 text-sm rounded bg-white dark:bg-surface-elevated text-gray-900 dark:text-ink placeholder-gray-400 dark:placeholder-muted dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white resize-none"
                         />
                     </div>
 
@@ -79,14 +79,14 @@ const CreateWorkspaceDialog = ({ isOpen, onClose }) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                            className="h-11 px-4 text-sm font-bold uppercase tracking-[1.4px] rounded-full border border-hairline-strong text-ink hover:bg-white/10 transition"
                         >
                             Hủy
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting || !formData.name.trim()}
-                            className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                            className="h-11 px-4 text-sm font-bold uppercase tracking-[1.4px] rounded-full bg-m-blue-light text-black hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed transition"
                         >
                             {isSubmitting ? 'Đang tạo...' : 'Tạo'}
                         </button>

@@ -68,46 +68,46 @@ const RecentActivity = () => {
     };
 
     return (
-        <div className="glass-card overflow-hidden">
-            <div className="border-b border-zinc-200 dark:border-zinc-800 p-4">
-                <h2 className="text-lg text-zinc-800 dark:text-zinc-200">Hoạt động gần đây</h2>
+        <div className="bg-white dark:bg-surface-card rounded-lg border border-gray-200 dark:border-transparent overflow-hidden">
+            <div className="border-b border-gray-200 dark:border-hairline p-4">
+                <h2 className="text-sm font-bold text-gray-900 dark:text-ink">Hoạt động gần đây</h2>
             </div>
 
             <div className="p-0">
                 {loading ? (
-                    <div className="p-12 text-center text-zinc-500 dark:text-zinc-400 text-sm">Đang tải...</div>
+                    <div className="p-12 text-center text-gray-500 dark:text-muted text-sm font-light">Đang tải...</div>
                 ) : activities.length === 0 ? (
                     <div className="p-12 text-center">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-zinc-200 dark:bg-zinc-800 rounded-full flex items-center justify-center">
-                            <Clock className="w-8 h-8 text-zinc-600 dark:text-zinc-500" />
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-full border border-gray-200 dark:border-hairline flex items-center justify-center">
+                            <Clock className="w-8 h-8 text-gray-400 dark:text-muted" />
                         </div>
-                        <p className="text-zinc-600 dark:text-zinc-400">Chưa có hoạt động gần đây</p>
+                        <p className="text-gray-500 dark:text-body font-light">Chưa có hoạt động gần đây</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <div className="divide-y divide-gray-200 dark:divide-hairline">
                         {activities.map((act) => (
-                            <div key={act.id} className="group p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                            <div key={act.id} className="group mx-2 my-1 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-surface-elevated transition-colors">
                                 <div className="flex items-start gap-3">
-                                    <div className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg flex-shrink-0">
+                                    <div className="p-2 rounded-full bg-gray-100 dark:bg-surface-elevated flex-shrink-0">
                                         {act.user?.image ? (
                                             <img src={act.user.image} alt="" className="w-4 h-4 rounded-full" />
                                         ) : (
-                                            <ActivityIcon className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                                            <ActivityIcon className="w-4 h-4 text-bmw-blue" />
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-zinc-800 dark:text-zinc-200">
-                                            <span className="font-medium">{act.user?.name || act.user?.email || "Người dùng"}</span>{" "}
-                                            <span className="text-zinc-600 dark:text-zinc-400">{act.action}</span>
+                                        <p className="text-sm text-gray-800 dark:text-body">
+                                            <span className="font-bold text-gray-900 dark:text-ink">{act.user?.name || act.user?.email || "Người dùng"}</span>{" "}
+                                            <span className="text-gray-600 dark:text-body font-light">{act.action}</span>
                                         </p>
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
+                                        <p className="text-xs text-gray-400 dark:text-muted font-light mt-0.5">
                                             {formatDistanceToNow(new Date(act.createdAt), { addSuffix: true, locale: vi })}
                                         </p>
                                     </div>
                                     {isAdmin && (
                                         <button
                                             onClick={() => handleDelete(act.id)}
-                                            className="p-1.5 rounded opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/30 text-zinc-400 hover:text-red-500 transition-all flex-shrink-0"
+                                            className="p-1.5 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-m-red/10 text-gray-400 dark:text-muted hover:text-m-red transition-all flex-shrink-0"
                                             title="Xóa hoạt động (quản trị viên)"
                                         >
                                             <Trash2 className="size-4" />

@@ -7,8 +7,9 @@ import InviteMemberDialog from "../components/InviteMemberDialog";
 import { apiFetch } from "../lib/api";
 import { setWorkspaceMember, removeWorkspaceMember } from "../features/workspaceSlice";
 
+// Mỗi workspace chỉ có MỘT Quản trị viên (chủ sở hữu) — admin chỉ được
+// gán tối đa tới Quản lý, không thăng cấp thêm ADMIN thứ hai.
 const ROLE_OPTIONS = [
-    { value: "ADMIN", label: "Quản trị viên" },
     { value: "MANAGER", label: "Quản lý" },
     { value: "MEMBER", label: "Thành viên" },
     { value: "VIEWER", label: "Người xem" },
@@ -43,6 +44,22 @@ const Team = () => {
         }
     };
 
+    // Đặt đơn giá giờ công (VNĐ/giờ) — dùng tính chi phí nhân công trong Báo cáo
+    const handleRateChange = async (member, rateStr) => {
+        try {
+            const token = await getToken();
+            const updated = await apiFetch(token, `/workspaces/${currentWorkspace.id}/members/${member.id}`, {
+                method: "PUT",
+                body: { hourlyRate: rateStr === "" ? null : Number(rateStr) },
+            });
+            dispatch(setWorkspaceMember(updated));
+            setUsers((prev) => prev.map((m) => (m.id === member.id ? { ...m, hourlyRate: updated.hourlyRate } : m)));
+            toast.success("Đã cập nhật đơn giá giờ công");
+        } catch (err) {
+            toast.error("Cập nhật thất bại: " + err.message);
+        }
+    };
+
     const handleRemove = async (member) => {
         if (!window.confirm(`Gỡ ${member.user?.name || member.user?.email} khỏi không gian làm việc?`)) return;
         try {
@@ -72,12 +89,12 @@ const Team = () => {
             {/* Header */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">Nhóm</h1>
-                    <p className="text-gray-500 dark:text-zinc-400 text-sm">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-ink mb-1">Nhóm</h1>
+                    <p className="text-gray-500 dark:text-body text-sm font-light">
                         Quản lý thành viên nhóm và đóng góp của họ
                     </p>
                 </div>
-                <button onClick={() => setIsDialogOpen(true)} className="flex items-center px-5 py-2 rounded text-sm bg-gradient-to-br from-blue-500 to-blue-600 hover:opacity-90 text-white transition" >
+                <button onClick={() => setIsDialogOpen(true)} className="flex items-center px-6 py-3 text-sm uppercase font-bold tracking-[1.4px] rounded-full bg-m-blue-light text-black hover:scale-105 transition" >
                     <UserPlus className="w-4 h-4 mr-2" /> Mời thành viên
                 </button>
                 <InviteMemberDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
@@ -86,42 +103,42 @@ const Team = () => {
             {/* Stats Cards */}
             <div className="flex flex-wrap gap-4">
                 {/* Total Members */}
-                <div className="max-sm:w-full glass-card rounded-lg p-6">
+                <div className="max-sm:w-full bg-white dark:bg-surface-card rounded-lg p-6 hover:shadow-spotify-md transition">
                     <div className="flex items-center justify-between gap-8 md:gap-22">
                         <div>
-                            <p className="text-sm text-gray-500 dark:text-zinc-400">Tổng thành viên</p>
-                            <p className="text-xl font-bold text-gray-900 dark:text-white">{users.length}</p>
+                            <p className="text-xs uppercase font-bold tracking-[1.4px] text-gray-500 dark:text-muted">Tổng thành viên</p>
+                            <p className="text-xl font-bold text-gray-900 dark:text-ink">{users.length}</p>
                         </div>
-                        <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-500/10">
-                            <UsersIcon className="size-4 text-blue-500 dark:text-blue-200" />
+                        <div className="p-3 rounded-full bg-surface-elevated">
+                            <UsersIcon className="size-4 text-m-blue-light" />
                         </div>
                     </div>
                 </div>
 
                 {/* Active Projects */}
-                <div className="max-sm:w-full glass-card rounded-lg p-6">
+                <div className="max-sm:w-full bg-white dark:bg-surface-card rounded-lg p-6 hover:shadow-spotify-md transition">
                     <div className="flex items-center justify-between gap-8 md:gap-22">
                         <div>
-                            <p className="text-sm text-gray-500 dark:text-zinc-400">Dự án đang hoạt động</p>
-                            <p className="text-xl font-bold text-gray-900 dark:text-white">
+                            <p className="text-xs uppercase font-bold tracking-[1.4px] text-gray-500 dark:text-muted">Dự án đang hoạt động</p>
+                            <p className="text-xl font-bold text-gray-900 dark:text-ink">
                                 {projects.filter((p) => p.status !== "CANCELLED" && p.status !== "COMPLETED").length}
                             </p>
                         </div>
-                        <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-500/10">
-                            <Activity className="size-4 text-emerald-500 dark:text-emerald-200" />
+                        <div className="p-3 rounded-full bg-surface-elevated">
+                            <Activity className="size-4 text-m-success" />
                         </div>
                     </div>
                 </div>
 
                 {/* Total Tasks */}
-                <div className="max-sm:w-full glass-card rounded-lg p-6">
+                <div className="max-sm:w-full bg-white dark:bg-surface-card rounded-lg p-6 hover:shadow-spotify-md transition">
                     <div className="flex items-center justify-between gap-8 md:gap-22">
                         <div>
-                            <p className="text-sm text-gray-500 dark:text-zinc-400">Tổng công việc</p>
-                            <p className="text-xl font-bold text-gray-900 dark:text-white">{tasks.length}</p>
+                            <p className="text-xs uppercase font-bold tracking-[1.4px] text-gray-500 dark:text-muted">Tổng công việc</p>
+                            <p className="text-xl font-bold text-gray-900 dark:text-ink">{tasks.length}</p>
                         </div>
-                        <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-500/10">
-                            <Shield className="size-4 text-purple-500 dark:text-purple-200" />
+                        <div className="p-3 rounded-full bg-surface-elevated">
+                            <Shield className="size-4 text-m-blue-dark" />
                         </div>
                     </div>
                 </div>
@@ -129,23 +146,23 @@ const Team = () => {
 
             {/* Search */}
             <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-zinc-400 size-3" />
-                <input placeholder="Tìm kiếm thành viên..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-8 w-full text-sm rounded-md border border-gray-300 dark:border-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-400 py-2 focus:outline-none focus:border-blue-500" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-muted size-3" />
+                <input placeholder="Tìm kiếm thành viên..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 w-full text-sm rounded-full bg-white dark:bg-surface-elevated text-gray-900 dark:text-ink placeholder-gray-400 dark:placeholder-muted py-2.5 shadow-spotify-inset focus:outline-none" />
             </div>
 
             {/* Team Members */}
             <div className="w-full">
                 {filteredUsers.length === 0 ? (
                     <div className="col-span-full text-center py-16">
-                        <div className="w-24 h-24 mx-auto mb-6 bg-gray-200 dark:bg-zinc-800 rounded-full flex items-center justify-center">
-                            <UsersIcon className="w-12 h-12 text-gray-400 dark:text-zinc-500" />
+                        <div className="w-24 h-24 mx-auto mb-6 bg-surface-elevated rounded-full flex items-center justify-center">
+                            <UsersIcon className="w-12 h-12 text-gray-400 dark:text-muted" />
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-ink mb-2">
                             {users.length === 0
                                 ? "Chưa có thành viên nào"
                                 : "Không tìm thấy thành viên"}
                         </h3>
-                        <p className="text-gray-500 dark:text-zinc-400 mb-6">
+                        <p className="text-gray-500 dark:text-body font-light mb-6">
                             {users.length === 0
                                 ? "Mời thành viên để bắt đầu cộng tác"
                                 : "Hãy thử thay đổi từ khóa tìm kiếm"}
@@ -154,48 +171,48 @@ const Team = () => {
                 ) : (
                     <div className="max-w-4xl w-full">
                         {/* Desktop Table */}
-                        <div className="hidden sm:block overflow-x-auto rounded-md border border-gray-200 dark:border-zinc-800">
-                            <table className="min-w-full divide-y divide-gray-200 dark:divide-zinc-800">
-                                <thead className="bg-gray-50 dark:bg-zinc-900/50">
+                        <div className="hidden sm:block overflow-x-auto rounded-lg bg-white dark:bg-surface-card shadow-spotify-md">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-hairline">
+                                <thead className="bg-gray-50 dark:bg-surface-soft">
                                     <tr>
-                                        <th className="px-6 py-2.5 text-left font-medium text-sm">
+                                        <th className="px-6 py-2.5 text-left font-bold text-xs uppercase tracking-[1.4px] text-gray-500 dark:text-muted">
                                             Tên
                                         </th>
-                                        <th className="px-6 py-2.5 text-left font-medium text-sm">
+                                        <th className="px-6 py-2.5 text-left font-bold text-xs uppercase tracking-[1.4px] text-gray-500 dark:text-muted">
                                             Email
                                         </th>
-                                        <th className="px-6 py-2.5 text-left font-medium text-sm">
+                                        <th className="px-6 py-2.5 text-left font-bold text-xs uppercase tracking-[1.4px] text-gray-500 dark:text-muted">
                                             Vai trò
                                         </th>
                                         {isAdmin && (
-                                            <th className="px-6 py-2.5 text-left font-medium text-sm">Thao tác</th>
+                                            <th className="px-6 py-2.5 text-left font-bold text-xs uppercase tracking-[1.4px] text-gray-500 dark:text-muted">Thao tác</th>
                                         )}
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
+                                <tbody className="divide-y divide-gray-200 dark:divide-hairline">
                                     {filteredUsers.map((user) => (
                                         <tr
                                             key={user.id}
-                                            className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors"
+                                            className="hover:bg-gray-50 dark:hover:bg-surface-soft transition-colors"
                                         >
                                             <td className="px-6 py-2.5 whitespace-nowrap flex items-center gap-3">
                                                 <img
                                                     src={user.user.image}
                                                     alt={user.user.name}
-                                                    className="size-7 rounded-full bg-gray-200 dark:bg-zinc-800"
+                                                    className="size-7 rounded-full bg-gray-200 dark:bg-surface-elevated"
                                                 />
-                                                <span className="text-sm text-zinc-800 dark:text-white truncate">
+                                                <span className="text-sm text-gray-800 dark:text-ink truncate">
                                                     {user.user?.name || "Unknown User"}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
+                                            <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-500 dark:text-muted font-light">
                                                 {user.user.email}
                                             </td>
                                             <td className="px-6 py-2.5 whitespace-nowrap">
                                                 <span
-                                                    className={`px-2 py-1 text-xs rounded-md ${user.role === "ADMIN"
-                                                            ? "bg-purple-100 dark:bg-purple-500/20 text-purple-500 dark:text-purple-400"
-                                                            : "bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300"
+                                                    className={`px-2.5 py-1 rounded-full text-xs font-bold ${user.role === "ADMIN"
+                                                            ? "bg-m-blue-dark/15 text-m-blue-dark"
+                                                            : "bg-surface-elevated text-gray-700 dark:text-body"
                                                         }`}
                                                 >
                                                     {user.role || "User"}
@@ -203,24 +220,38 @@ const Team = () => {
                                             </td>
                                             {isAdmin && (
                                                 <td className="px-6 py-2.5 whitespace-nowrap">
-                                                    {user.userId === currentUser?.id ? (
-                                                        <span className="text-xs text-zinc-400">Bạn</span>
-                                                    ) : (
-                                                        <div className="flex items-center gap-2">
-                                                            <select
-                                                                value={user.role}
-                                                                onChange={(e) => handleRoleChange(user, e.target.value)}
-                                                                className="text-xs rounded border border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 px-2 py-1"
-                                                            >
-                                                                {ROLE_OPTIONS.map((o) => (
-                                                                    <option key={o.value} value={o.value}>{o.label}</option>
-                                                                ))}
-                                                            </select>
-                                                            <button onClick={() => handleRemove(user)} className="p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30">
-                                                                <Trash2 className="size-4" />
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        {user.userId === currentUser?.id ? (
+                                                            <span className="text-xs text-gray-400 dark:text-muted">Bạn</span>
+                                                        ) : user.role === "ADMIN" ? (
+                                                            <span className="text-xs text-gray-400 dark:text-muted">Chủ sở hữu</span>
+                                                        ) : (
+                                                            <>
+                                                                <select
+                                                                    value={user.role}
+                                                                    onChange={(e) => handleRoleChange(user, e.target.value)}
+                                                                    className="text-xs rounded-full dark:bg-surface-elevated text-gray-900 dark:text-ink px-3 py-1.5 shadow-spotify-inset outline-none"
+                                                                >
+                                                                    {ROLE_OPTIONS.map((o) => (
+                                                                        <option key={o.value} value={o.value}>{o.label}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <button onClick={() => handleRemove(user)} className="size-8 flex items-center justify-center rounded-full text-gray-400 dark:text-muted hover:text-m-red hover:bg-m-red/10 transition">
+                                                                    <Trash2 className="size-4" />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {/* Đơn giá giờ công — Enter để lưu */}
+                                                        <input
+                                                            type="number" min="0" step="1000"
+                                                            defaultValue={user.hourlyRate ?? ""}
+                                                            placeholder="đ/giờ"
+                                                            title="Đơn giá giờ công (VNĐ/giờ) — nhấn Enter để lưu"
+                                                            onKeyDown={(e) => { if (e.key === "Enter") handleRateChange(user, e.target.value); }}
+                                                            onBlur={(e) => { if (String(user.hourlyRate ?? "") !== e.target.value) handleRateChange(user, e.target.value); }}
+                                                            className="w-24 text-xs rounded-full dark:bg-surface-elevated text-gray-900 dark:text-ink px-3 py-1.5 shadow-spotify-inset outline-none"
+                                                        />
+                                                    </div>
                                                 </td>
                                             )}
                                         </tr>
@@ -234,28 +265,28 @@ const Team = () => {
                             {filteredUsers.map((user) => (
                                 <div
                                     key={user.id}
-                                    className="p-4 border border-gray-200 dark:border-zinc-800 rounded-md bg-white dark:bg-zinc-900"
+                                    className="p-4 rounded-lg bg-white dark:bg-surface-card shadow-spotify-md"
                                 >
                                     <div className="flex items-center gap-3 mb-2">
                                         <img
                                             src={user.user.image}
                                             alt={user.user.name}
-                                            className="size-9 rounded-full bg-gray-200 dark:bg-zinc-800"
+                                            className="size-9 rounded-full bg-gray-200 dark:bg-surface-elevated"
                                         />
                                         <div>
-                                            <p className="font-medium text-gray-900 dark:text-white">
+                                            <p className="font-medium text-gray-900 dark:text-ink">
                                                 {user.user?.name || "Unknown User"}
                                             </p>
-                                            <p className="text-sm text-gray-500 dark:text-zinc-400">
+                                            <p className="text-sm text-gray-500 dark:text-muted font-light">
                                                 {user.user.email}
                                             </p>
                                         </div>
                                     </div>
                                     <div>
                                         <span
-                                            className={`px-2 py-1 text-xs rounded-md ${user.role === "ADMIN"
-                                                    ? "bg-purple-100 dark:bg-purple-500/20 text-purple-500 dark:text-purple-400"
-                                                    : "bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300"
+                                            className={`px-2.5 py-1 rounded-full text-xs font-bold ${user.role === "ADMIN"
+                                                    ? "bg-m-blue-dark/15 text-m-blue-dark"
+                                                    : "bg-surface-elevated text-gray-700 dark:text-body"
                                                 }`}
                                         >
                                             {user.role || "User"}

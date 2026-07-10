@@ -9,6 +9,7 @@ import { apiFetch } from '../lib/api'
 import { Loader2Icon } from 'lucide-react'
 import { useUser, useAuth } from '../context/AuthContext'
 import AuthPage from './AuthPage'
+import ErrorBoundary from '../components/ErrorBoundary'
 
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -47,8 +48,8 @@ const Layout = () => {
     }, [isLoaded, user])
 
     if (!isLoaded) return (
-        <div className='flex items-center justify-center h-screen bg-white dark:bg-zinc-950'>
-            <Loader2Icon className="size-7 text-blue-500 animate-spin" />
+        <div className='flex items-center justify-center h-screen bg-white dark:bg-canvas'>
+            <Loader2Icon className="size-7 text-ink animate-spin" />
         </div>
     )
 
@@ -57,27 +58,21 @@ const Layout = () => {
     }
 
     if (loading) return (
-        <div className='flex items-center justify-center h-screen bg-white dark:bg-zinc-950'>
-            <Loader2Icon className="size-7 text-blue-500 animate-spin" />
+        <div className='flex items-center justify-center h-screen bg-white dark:bg-canvas'>
+            <Loader2Icon className="size-7 text-ink animate-spin" />
         </div>
     )
 
     return (
-        <div className="relative flex text-gray-900 dark:text-slate-100 bg-gray-50 dark:bg-[#060a18] min-h-screen">
-            {/* Nền trang trí gradient động + blob cho TOÀN màn hình */}
-            <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-indigo-500/5 dark:to-indigo-900/20" />
-                <div className="absolute -top-40 -left-32 w-[30rem] h-[30rem] rounded-full bg-blue-400/20 dark:bg-blue-600/20 blur-3xl animate-blob" />
-                <div className="absolute top-1/2 -right-32 w-[30rem] h-[30rem] rounded-full bg-indigo-400/20 dark:bg-indigo-600/20 blur-3xl animate-blob animation-delay-2000" />
-                <div className="absolute -bottom-40 left-1/3 w-[26rem] h-[26rem] rounded-full bg-purple-400/15 dark:bg-purple-600/20 blur-3xl animate-blob animation-delay-4000" />
-            </div>
-
+        <div className="relative flex text-gray-900 dark:text-ink bg-gray-50 dark:bg-canvas min-h-screen">
             <div className="relative z-10 flex w-full">
                 <Sidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
                 <div className="flex-1 flex flex-col h-screen">
                     <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
                     <div className="flex-1 h-full overflow-y-scroll p-6 xl:p-10 xl:px-16">
-                        <Outlet />
+                        <ErrorBoundary>
+                            <Outlet />
+                        </ErrorBoundary>
                     </div>
                 </div>
             </div>

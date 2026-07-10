@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 
@@ -17,17 +17,70 @@ const post = async (path, body) => {
 
 export default function AuthPage() {
     const { loginWithToken } = useAuth();
-    const [mode, setMode] = useState("login"); // login | register | verify
-    const [form, setForm] = useState({ name: "", email: "", password: "", otp: "" });
+    const [mode, setMode] = useState("login"); // login | register | verify | forgot | reset | 2fa
+    const [form, setForm] = useState({ name: "", email: "", password: "", otp: "", resetToken: "" });
     const [busy, setBusy] = useState(false);
 
+    // Mở link đặt lại mật khẩu từ email (?reset=token)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const t = params.get("reset");
+        if (t) {
+            setForm((f) => ({ ...f, resetToken: t }));
+            setMode("reset");
+        }
+    }, []);
+
     const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+    const handleForgot = async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        try {
+            const data = await post("/auth/forgot-password", { email: form.email });
+            toast.success("Nếu email tồn tại, liên kết đặt lại đã được gửi.", { duration: 6000 });
+            if (data.devResetToken) {
+                setForm((f) => ({ ...f, resetToken: data.devResetToken }));
+                toast(`Token (dev): ${data.devResetToken}`, { duration: 12000 });
+                setMode("reset");
+            } else {
+                setMode("login");
+            }
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const handleReset = async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        try {
+            await post("/auth/reset-password", { token: form.resetToken, newPassword: form.password });
+            toast.success("Đặt lại mật khẩu thành công! Vui lòng đăng nhập.");
+            window.history.replaceState({}, "", window.location.pathname); // xóa ?reset khỏi URL
+            setForm((f) => ({ ...f, password: "", resetToken: "" }));
+            setMode("login");
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setBusy(false);
+        }
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setBusy(true);
         try {
             const data = await post("/auth/login", { email: form.email, password: form.password });
+            // Tài khoản bật 2FA: cần bước 2 — nhập OTP gửi qua email
+            if (data.twoFactorRequired) {
+                toast.success("Nhập mã OTP đã gửi tới email để hoàn tất đăng nhập", { duration: 6000 });
+                if (data.devOtp) toast(`Mã OTP (dev): ${data.devOtp}`, { duration: 12000 });
+                setMode("2fa");
+                return;
+            }
             loginWithToken(data.token, data.user);
             toast.success("Đăng nhập thành công");
         } catch (err) {
@@ -75,6 +128,21 @@ export default function AuthPage() {
         }
     };
 
+    // Bước 2 của đăng nhập khi bật 2FA
+    const handle2fa = async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        try {
+            const data = await post("/auth/verify-2fa", { email: form.email, otp: form.otp });
+            loginWithToken(data.token, data.user);
+            toast.success("Đăng nhập thành công");
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setBusy(false);
+        }
+    };
+
     const resend = async () => {
         try {
             const data = await post("/auth/resend-otp", { email: form.email });
@@ -85,35 +153,24 @@ export default function AuthPage() {
         }
     };
 
-    const inputCls = "w-full px-4 py-2.5 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/60 focus:border-transparent transition";
-    const btnCls = "w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold shadow-lg shadow-blue-900/50 transition disabled:opacity-50 active:scale-[0.98]";
-    const headCls = "text-lg font-semibold text-center text-white mb-2";
-    const linkCls = "text-blue-300 hover:text-blue-200 font-medium";
+    const inputCls = "w-full px-4 py-3 rounded bg-surface-elevated text-ink placeholder-muted text-sm border-none shadow-spotify-inset focus:outline-none transition";
+    const btnCls = "w-full h-12 rounded-full bg-m-blue-light text-black text-sm font-bold uppercase tracking-[1.4px] hover:scale-[1.03] hover:bg-[#1fdf64] transition disabled:opacity-40 disabled:hover:scale-100";
+    const headCls = "text-lg font-bold text-center text-ink mb-2";
+    const linkCls = "text-ink hover:text-m-blue-light hover:underline font-bold";
 
     return (
-        <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-slate-950 p-4 perspective-1000">
-            {/* Nền gradient động */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-950 to-blue-950 bg-animated-gradient" />
+        <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-canvas p-4">
+            {/* Nền — album-art style ambient glow, achromatic ngoại trừ điểm nhấn xanh Spotify */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] to-canvas" />
+            <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at 30% 20%, rgba(30,215,96,0.15), transparent 50%)" }} />
 
-            {/* Các khối blob phát sáng trôi nổi */}
-            <div className="absolute top-[-10%] left-[-5%] w-96 h-96 rounded-full bg-blue-600/30 blur-3xl animate-blob" />
-            <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 rounded-full bg-indigo-600/30 blur-3xl animate-blob animation-delay-2000" />
-            <div className="absolute top-1/3 right-1/4 w-72 h-72 rounded-full bg-purple-600/20 blur-3xl animate-blob animation-delay-4000" />
-
-            {/* Khung lưới xoay 3D trang trí */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-[36rem] h-[36rem] rounded-full border border-white/5 animate-spinslow" />
-                <div className="absolute w-[28rem] h-[28rem] rounded-full border border-white/5 animate-spinslow" style={{ animationDirection: "reverse" }} />
-                <div className="absolute w-[20rem] h-[20rem] rounded-full border border-white/10" />
-            </div>
-
-            {/* Thẻ đăng nhập glassmorphism (đứng yên, chỉ có viền sáng nhịp) */}
+            {/* Thẻ đăng nhập */}
             <div className="relative">
                 <div>
-                    <div className="w-[22rem] max-w-full bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-8" style={{ animation: "glowpulse 5s ease-in-out infinite" }}>
+                    <div className="w-[22rem] max-w-full bg-surface-card rounded-lg p-8 shadow-spotify-lg">
                         <div className="text-center mb-6">
-                            <p className="font-extrabold text-3xl bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 bg-clip-text text-transparent tracking-wide">UMC</p>
-                            <p className="text-white/60 text-sm mt-1">Hệ thống Quản Lý Dự Án</p>
+                            <p className="font-bold text-3xl text-ink tracking-tight">UMC</p>
+                            <p className="text-body text-sm mt-1">Hệ thống Quản Lý Dự Án</p>
                         </div>
 
                 {mode === "login" && (
@@ -124,9 +181,43 @@ export default function AuthPage() {
                         <button type="submit" disabled={busy} className={btnCls}>
                             {busy ? "Đang đăng nhập..." : "Đăng nhập"}
                         </button>
-                        <p className="text-center text-sm text-white/60">
+                        <div className="text-center">
+                            <button type="button" onClick={() => setMode("forgot")} className={"text-xs " + linkCls}>Quên mật khẩu?</button>
+                        </div>
+                        <p className="text-center text-sm text-body">
                             Chưa có tài khoản?{" "}
                             <button type="button" onClick={() => setMode("register")} className={linkCls}>Đăng ký</button>
+                        </p>
+                    </form>
+                )}
+
+                {mode === "forgot" && (
+                    <form onSubmit={handleForgot} className="space-y-3">
+                        <h2 className={headCls}>Quên mật khẩu</h2>
+                        <p className="text-xs text-center text-body">Nhập email để nhận liên kết đặt lại mật khẩu.</p>
+                        <input type="email" placeholder="Email" value={form.email} onChange={set("email")} className={inputCls} required />
+                        <button type="submit" disabled={busy} className={btnCls}>
+                            {busy ? "Đang gửi..." : "Gửi liên kết đặt lại"}
+                        </button>
+                        <p className="text-center text-sm text-body">
+                            <button type="button" onClick={() => setMode("login")} className={linkCls}>← Quay lại đăng nhập</button>
+                        </p>
+                    </form>
+                )}
+
+                {mode === "reset" && (
+                    <form onSubmit={handleReset} className="space-y-3">
+                        <h2 className={headCls}>Đặt lại mật khẩu</h2>
+                        <p className="text-xs text-center text-body">Nhập mật khẩu mới cho tài khoản của bạn.</p>
+                        {!form.resetToken && (
+                            <input placeholder="Token đặt lại" value={form.resetToken} onChange={set("resetToken")} className={inputCls} required />
+                        )}
+                        <input type="password" placeholder="Mật khẩu mới" value={form.password} onChange={set("password")} className={inputCls} required />
+                        <button type="submit" disabled={busy} className={btnCls}>
+                            {busy ? "Đang đặt lại..." : "Đặt lại mật khẩu"}
+                        </button>
+                        <p className="text-center text-sm text-body">
+                            <button type="button" onClick={() => setMode("login")} className={linkCls}>← Quay lại đăng nhập</button>
                         </p>
                     </form>
                 )}
@@ -140,9 +231,23 @@ export default function AuthPage() {
                         <button type="submit" disabled={busy} className={btnCls}>
                             {busy ? "Đang đăng ký..." : "Đăng ký"}
                         </button>
-                        <p className="text-center text-sm text-white/60">
+                        <p className="text-center text-sm text-body">
                             Đã có tài khoản?{" "}
                             <button type="button" onClick={() => setMode("login")} className={linkCls}>Đăng nhập</button>
+                        </p>
+                    </form>
+                )}
+
+                {mode === "2fa" && (
+                    <form onSubmit={handle2fa} className="space-y-3">
+                        <h2 className={headCls}>Bảo mật 2 lớp</h2>
+                        <p className="text-xs text-center text-body">Nhập mã OTP đã gửi tới {form.email}</p>
+                        <input placeholder="Mã OTP (6 số)" value={form.otp} onChange={set("otp")} className={inputCls + " text-center tracking-widest"} required autoFocus />
+                        <button type="submit" disabled={busy} className={btnCls}>
+                            {busy ? "Đang xác minh..." : "Hoàn tất đăng nhập"}
+                        </button>
+                        <p className="text-center text-sm text-body">
+                            <button type="button" onClick={() => setMode("login")} className={linkCls}>← Quay lại đăng nhập</button>
                         </p>
                     </form>
                 )}
@@ -150,13 +255,13 @@ export default function AuthPage() {
                 {mode === "verify" && (
                     <form onSubmit={handleVerify} className="space-y-3">
                         <h2 className={headCls}>Xác minh email</h2>
-                        <p className="text-xs text-center text-white/60">Nhập mã OTP gửi tới {form.email}</p>
+                        <p className="text-xs text-center text-body">Nhập mã OTP gửi tới {form.email}</p>
                         <input placeholder="Mã OTP (6 số)" value={form.otp} onChange={set("otp")} className={inputCls + " text-center tracking-widest"} required />
                         <button type="submit" disabled={busy} className={btnCls}>
                             {busy ? "Đang xác minh..." : "Xác minh"}
                         </button>
-                        <div className="flex justify-between text-sm text-white/60">
-                            <button type="button" onClick={() => setMode("login")} className="hover:underline text-white/70">← Quay lại</button>
+                        <div className="flex justify-between text-sm text-body">
+                            <button type="button" onClick={() => setMode("login")} className="hover:underline text-body-strong">← Quay lại</button>
                             <button type="button" onClick={resend} className={linkCls}>Gửi lại mã</button>
                         </div>
                     </form>

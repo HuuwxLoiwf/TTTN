@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getFiles, uploadFile, deleteFile, reviewFile, upload } from '../controllers/fileController.js';
-import { requireAuth } from '../middleware/authz.js';
+import { requireAuth, requireMember } from '../middleware/authz.js';
 
 const router = Router();
 
@@ -12,9 +12,10 @@ const uploadSingle = (req, res, next) => {
     });
 };
 
+// getFiles dùng query ?projectId / ?taskId → controller tự kiểm tra quyền thành viên workspace
 router.get('/', requireAuth, getFiles);
 router.post('/upload', requireAuth, uploadSingle, uploadFile);
-router.put('/:id/review', requireAuth, reviewFile);
-router.delete('/:id', requireAuth, deleteFile);
+router.put('/:id/review', requireMember({ from: 'file', param: 'id' }), reviewFile);
+router.delete('/:id', requireMember({ from: 'file', param: 'id' }), deleteFile);
 
 export default router;

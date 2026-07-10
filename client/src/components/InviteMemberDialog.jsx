@@ -45,16 +45,16 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }) => {
     if (!isDialogOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/20 dark:bg-black/50 backdrop-blur flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl p-6 w-full max-w-md text-zinc-900 dark:text-zinc-200">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-surface-card rounded-lg p-6 w-full max-w-md text-gray-900 dark:text-ink shadow-spotify-lg">
                 {/* Header */}
                 <div className="mb-4">
                     <h2 className="text-xl font-bold flex items-center gap-2">
-                        <UserPlus className="size-5 text-zinc-900 dark:text-zinc-200" /> Mời thành viên
+                        <UserPlus className="size-5 text-gray-900 dark:text-ink" /> Mời thành viên
                     </h2>
                     {currentWorkspace && (
-                        <p className="text-sm text-zinc-700 dark:text-zinc-400">
-                            Mời vào không gian làm việc: <span className="text-blue-600 dark:text-blue-400">{currentWorkspace.name}</span>
+                        <p className="text-sm text-gray-700 dark:text-body mt-1">
+                            Mời vào không gian làm việc: <span className="text-bmw-blue">{currentWorkspace.name}</span>
                         </p>
                     )}
                 </div>
@@ -63,20 +63,20 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Email */}
                     <div className="space-y-2">
-                        <label htmlFor="email" className="text-sm font-medium text-zinc-900 dark:text-zinc-200">
+                        <label htmlFor="email" className="text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body">
                             Địa chỉ email
                         </label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 w-4 h-4" />
-                            <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="Nhập địa chỉ email" className="pl-10 mt-1 w-full rounded border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 text-sm placeholder-zinc-400 dark:placeholder-zinc-500 py-2 focus:outline-none focus:border-blue-500" required />
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-muted w-4 h-4" />
+                            <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="Nhập địa chỉ email" className="pl-10 mt-1 w-full h-12 rounded bg-white dark:bg-surface-elevated text-gray-900 dark:text-ink text-sm placeholder-gray-400 dark:placeholder-muted dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" required />
                         </div>
                     </div>
 
                     {/* Role */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-900 dark:text-zinc-200">Vai trò</label>
-                        <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className="w-full rounded border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 py-2 px-3 mt-1 focus:outline-none focus:border-blue-500 text-sm" >
-                            <option value="ADMIN">Quản trị viên — toàn quyền</option>
+                        <label className="text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body">Vai trò</label>
+                        <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className="w-full h-12 rounded bg-white dark:bg-surface-elevated text-gray-900 dark:text-ink px-3 mt-1 dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white text-sm" >
+                            {/* Không có ADMIN: mỗi workspace chỉ có 1 Quản trị viên (chủ sở hữu) */}
                             <option value="MANAGER">Quản lý — quản lý dự án & phòng ban</option>
                             <option value="MEMBER">Thành viên — làm việc bình thường</option>
                             <option value="VIEWER">Người xem — chỉ xem</option>
@@ -85,10 +85,10 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }) => {
 
                     {/* Footer */}
                     <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={() => setIsDialogOpen(false)} className="px-5 py-2 rounded text-sm border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition" >
+                        <button type="button" onClick={() => setIsDialogOpen(false)} className="h-11 px-5 text-sm font-bold uppercase tracking-[1.4px] rounded-full border border-hairline-strong text-ink hover:bg-white/10 transition" >
                             Hủy
                         </button>
-                        <button type="submit" disabled={isSubmitting || !currentWorkspace} className="px-5 py-2 rounded text-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white disabled:opacity-50 hover:opacity-90 transition" >
+                        <button type="submit" disabled={isSubmitting || !currentWorkspace} className="h-11 px-5 text-sm font-bold uppercase tracking-[1.4px] rounded-full bg-m-blue-light text-black hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 transition" >
                             {isSubmitting ? "Đang gửi..." : "Gửi lời mời"}
                         </button>
                     </div>

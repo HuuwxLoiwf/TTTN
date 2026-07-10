@@ -58,36 +58,36 @@ export default function PendingAccounts() {
     };
 
     if (!isAdmin) {
-        return <div className="max-w-3xl mx-auto py-16 text-center text-zinc-500">Chỉ quản trị viên mới truy cập được trang này.</div>;
+        return <div className="max-w-3xl mx-auto py-16 text-center text-gray-500 dark:text-muted">Chỉ quản trị viên mới truy cập được trang này.</div>;
     }
 
     return (
         <div className="max-w-4xl mx-auto space-y-5">
             <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent mb-1 flex items-center gap-2">
-                    <UserCheck className="size-6 text-blue-500" /> Duyệt tài khoản
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-ink mb-1 flex items-center gap-2">
+                    <UserCheck className="size-6 text-bmw-blue" /> Duyệt tài khoản
                 </h1>
-                <p className="text-gray-500 dark:text-zinc-400 text-sm">Tài khoản mới chờ bạn duyệt để được đăng nhập ({list.length})</p>
+                <p className="text-gray-500 dark:text-body text-sm">Tài khoản mới chờ bạn duyệt để được đăng nhập ({list.length})</p>
             </div>
 
             {loading ? (
-                <p className="text-center text-sm text-zinc-400 py-10">Đang tải...</p>
+                <p className="text-center text-sm text-gray-400 dark:text-muted py-10">Đang tải...</p>
             ) : list.length === 0 ? (
-                <p className="text-center text-sm text-zinc-400 py-10">Không có tài khoản nào chờ duyệt</p>
+                <p className="text-center text-sm text-gray-400 dark:text-muted py-10">Không có tài khoản nào chờ duyệt</p>
             ) : (
                 <div className="space-y-2">
                     {list.map((u) => (
-                        <div key={u.id} className="glass-card flex items-center justify-between gap-3 p-4">
+                        <div key={u.id} className="flex items-center justify-between gap-3 p-4 rounded-lg bg-white dark:bg-surface-card hover:bg-gray-50 dark:hover:bg-surface-elevated transition-colors">
                             <div className="min-w-0">
-                                <p className="font-medium text-zinc-900 dark:text-white truncate">{u.name}</p>
-                                <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{u.email}</p>
-                                <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-0.5">Đăng ký: {format(new Date(u.createdAt), "dd/MM/yyyy HH:mm")}</p>
+                                <p className="font-medium text-gray-900 dark:text-ink truncate">{u.name}</p>
+                                <p className="text-sm text-gray-500 dark:text-body truncate">{u.email}</p>
+                                <p className="text-xs text-gray-400 dark:text-muted mt-0.5">Đăng ký: {format(new Date(u.createdAt), "dd/MM/yyyy HH:mm")}</p>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                                <button onClick={() => approve(u.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm">
+                                <button onClick={() => approve(u.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-m-blue-light text-black hover:brightness-110 text-xs font-bold transition">
                                     <Check className="size-4" /> Duyệt
                                 </button>
-                                <button onClick={() => reject(u.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 text-sm">
+                                <button onClick={() => reject(u.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-m-red text-m-red hover:bg-m-red hover:text-white text-xs font-bold transition">
                                     <X className="size-4" /> Từ chối
                                 </button>
                             </div>

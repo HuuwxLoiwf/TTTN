@@ -8,9 +8,14 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 import { initSocket } from './socket.js';
 import { JWT_SECRET } from './controllers/authController.js';
+import { startTrashCleanup } from './utils/trashCleanup.js';
+import { startAutoStatusTick } from './utils/autoStatus.js';
+import { startOverdueDigest } from './utils/overdueDigest.js';
+
+// Chạy trong Vitest/test: không listen port, không rate-limit, không cron dọn rác
+const IS_TEST = !!process.env.VITEST || process.env.NODE_ENV === 'test';
 
 import authRoutes from './routes/auth.js';
-import userRoutes from './routes/users.js';
 import workspaceRoutes from './routes/workspaces.js';
 import projectRoutes from './routes/projects.js';
 import taskRoutes from './routes/tasks.js';
@@ -25,6 +30,9 @@ import timeLogRoutes from './routes/timeLogs.js';
 import subtaskRoutes from './routes/subtasks.js';
 import aiRoutes from './routes/ai.js';
 import phaseRoutes from './routes/phases.js';
+import dependencyRoutes from './routes/dependencies.js';
+import trashRoutes from './routes/trash.js';
+import reportRoutes from './routes/reports.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -45,13 +53,24 @@ if (!process.env.VERCEL) {
 app.use(express.json());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 
-// Rate limiting: chống spam/lạm dụng API (300 request / 15 phút / IP)
+// Rate limiting: chống spam/lạm dụng API (600 request / 15 phút / IP — app realtime polling nhiều)
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 300,
+    max: 600,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => IS_TEST,
     message: { error: 'Quá nhiều yêu cầu, vui lòng thử lại sau' },
+});
+
+// Limiter chặt riêng cho auth (chống brute-force đăng nhập/OTP): 20 request / 15 phút / IP
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: () => IS_TEST,
+    message: { error: 'Quá nhiều lần thử, vui lòng thử lại sau' },
 });
 
 // Xác thực JWT tự ký (thay cho Clerk)
@@ -76,19 +95,7 @@ if (!process.env.VERCEL) {
 
 app.get('/', (req, res) => res.send('Server is live'));
 
-// Debug route — kiểm tra env vars có được load không
-app.get('/api/debug', (req, res) => {
-    res.json({
-        hasSecretKey: !!process.env.CLERK_SECRET_KEY,
-        hasPublishableKey: !!process.env.CLERK_PUBLISHABLE_KEY,
-        hasDatabase: !!process.env.DATABASE_URL,
-        userId: req.auth?.userId || null,
-        env: process.env.NODE_ENV,
-    });
-});
-
-app.use('/api/auth', apiLimiter, authRoutes);
-app.use('/api/users', apiLimiter, userRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/workspaces', apiLimiter, workspaceRoutes);
 app.use('/api/projects', apiLimiter, projectRoutes);
 app.use('/api/tasks', apiLimiter, taskRoutes);
@@ -103,12 +110,18 @@ app.use('/api/time-logs', apiLimiter, timeLogRoutes);
 app.use('/api/subtasks', apiLimiter, subtaskRoutes);
 app.use('/api/ai', apiLimiter, aiRoutes);
 app.use('/api/phases', apiLimiter, phaseRoutes);
+app.use('/api/dependencies', apiLimiter, dependencyRoutes);
+app.use('/api/trash', apiLimiter, trashRoutes);
+app.use('/api/reports', apiLimiter, reportRoutes);
 
 const PORT = process.env.PORT || 5000;
 
 // On Vercel, the platform handles listening — do not call listen()
-if (!process.env.VERCEL) {
+if (!process.env.VERCEL && !IS_TEST) {
     httpServer.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+    startTrashCleanup(); // tự dọn thùng rác quá 30 ngày (chạy ngay + mỗi 24h)
+    startAutoStatusTick(); // tự chuyển trạng thái task theo kế hoạch thời gian (mỗi 60 phút)
+    startOverdueDigest(); // automation: nhắc việc quá hạn hằng ngày (workspace bật mới chạy)
 }
 
 export default app;

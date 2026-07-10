@@ -85,3 +85,49 @@ export const sendCommentNotificationEmail = async ({ to, commenterName, taskTitl
         `,
     });
 };
+
+// Thông báo qua email khi được @mention. Bỏ qua âm thầm nếu chưa cấu hình email.
+export const sendMentionEmail = async ({ to, mentionedName, actorName, context, content }) => {
+    const transporter = createTransporter();
+    if (!transporter) return;
+    await transporter.sendMail({
+        from: `"${APP_NAME}" <${process.env.EMAIL_USER}>`,
+        to,
+        subject: `[${APP_NAME}] ${actorName || "Ai đó"} đã nhắc đến bạn`,
+        html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <h2 style="color: #2563eb;">📣 Bạn được nhắc đến</h2>
+                <p>Xin chào <strong>${mentionedName || to}</strong>,</p>
+                <p><strong>${actorName || "Một thành viên"}</strong> đã nhắc đến bạn trong ${context || "một thảo luận"}:</p>
+                ${content ? `<blockquote style="border-left: 4px solid #2563eb; padding: 8px 16px; margin: 16px 0; background: #f1f5f9; border-radius: 4px;">${content}</blockquote>` : ""}
+                <a href="${APP_URL}" style="display:inline-block; padding:10px 24px; background:#2563eb; color:white; border-radius:6px; text-decoration:none;">Mở ứng dụng</a>
+                <p style="color:#9ca3af; margin-top:24px; font-size:12px;">${APP_NAME}</p>
+            </div>
+        `,
+    });
+};
+
+// Gửi liên kết đặt lại mật khẩu. Trả true nếu gửi được, false nếu chưa cấu hình email.
+export const sendResetPasswordEmail = async ({ to, name, token }) => {
+    const transporter = createTransporter();
+    if (!transporter) return false;
+
+    const resetUrl = `${APP_URL}/?reset=${token}`;
+    await transporter.sendMail({
+        from: `"${APP_NAME}" <${process.env.EMAIL_USER}>`,
+        to,
+        subject: `[${APP_NAME}] Đặt lại mật khẩu`,
+        html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <h2 style="color: #2563eb;">🔑 Đặt lại mật khẩu</h2>
+                <p>Xin chào <strong>${name || to}</strong>,</p>
+                <p>Bạn (hoặc ai đó) đã yêu cầu đặt lại mật khẩu. Nhấn nút bên dưới để tạo mật khẩu mới:</p>
+                <a href="${resetUrl}" style="display:inline-block; padding:10px 24px; background:#2563eb; color:white; border-radius:6px; text-decoration:none; margin:16px 0;">Đặt lại mật khẩu</a>
+                <p style="color:#6b7280;">Liên kết có hiệu lực trong 30 phút. Nếu không phải bạn yêu cầu, hãy bỏ qua email này.</p>
+                <p style="color:#9ca3af; word-break:break-all; font-size:12px;">Hoặc dán liên kết: ${resetUrl}</p>
+                <p style="color:#9ca3af; margin-top:24px; font-size:12px;">${APP_NAME}</p>
+            </div>
+        `,
+    });
+    return true;
+};

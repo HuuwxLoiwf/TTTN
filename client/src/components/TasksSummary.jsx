@@ -24,21 +24,21 @@ export default function TasksSummary() {
             title: "Công việc của tôi",
             count: myTasks.length,
             icon: User,
-            color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400",
+            color: "bg-m-success/15 text-m-success",
             items: myTasks.slice(0, 3)
         },
         {
             title: "Quá hạn",
             count: overdueTasks.length,
             icon: AlertTriangle,
-            color: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-400",
+            color: "bg-m-red/15 text-m-red",
             items: overdueTasks.slice(0, 3)
         },
         {
             title: "Đang thực hiện",
             count: inProgressIssues.length,
             icon: Clock,
-            color: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-400",
+            color: "bg-m-blue-light/15 text-m-blue-light",
             items: inProgressIssues.slice(0, 3)
         }
     ];
@@ -46,15 +46,15 @@ export default function TasksSummary() {
     return (
         <div className="space-y-6">
             {summaryCards.map((card) => (
-                <div key={card.title} className="glass-card overflow-hidden">
-                    <div className="border-b border-zinc-200 dark:border-zinc-800 p-4 pb-3">
+                <div key={card.title} className="bg-white dark:bg-surface-card rounded-lg overflow-hidden dark:shadow-spotify-md">
+                    <div className="p-4 pb-3">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-                                <card.icon className="w-4 h-4 text-gray-500 dark:text-zinc-400" />
+                            <div className="p-2 rounded-full bg-gray-100 dark:bg-surface-elevated">
+                                <card.icon className="w-4 h-4 text-gray-500 dark:text-muted" />
                             </div>
                             <div className="flex items-center justify-between flex-1">
-                                <h3 className="text-sm font-medium text-gray-800 dark:text-white">{card.title}</h3>
-                                <span className={`inline-block mt-1 px-2 py-1 rounded text-xs font-semibold ${card.color}`}>
+                                <h3 className="text-sm font-medium text-gray-800 dark:text-body-strong">{card.title}</h3>
+                                <span className={`inline-block mt-1 px-2.5 py-1 rounded-full text-xs font-bold ${card.color}`}>
                                     {card.count}
                                 </span>
                             </div>
@@ -62,23 +62,23 @@ export default function TasksSummary() {
                     </div>
                     <div className="p-4">
                         {card.items.length === 0 ? (
-                            <p className="text-sm text-gray-500 dark:text-zinc-400 text-center py-4">
+                            <p className="text-sm text-gray-500 dark:text-muted text-center py-4">
                                 Không có mục nào
                             </p>
                         ) : (
                             <div className="space-y-3">
                                 {card.items.map((issue) => (
-                                    <div key={issue.id} className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer">
-                                        <h4 className="text-sm font-medium text-gray-800 dark:text-white truncate">
+                                    <div key={issue.id} className="p-3 rounded-lg bg-gray-50 dark:bg-surface-soft hover:bg-gray-100 dark:hover:bg-surface-elevated transition-colors cursor-pointer">
+                                        <h4 className="text-sm font-medium text-gray-800 dark:text-body-strong truncate">
                                             {issue.title}
                                         </h4>
-                                        <p className="text-xs text-gray-600 dark:text-zinc-400 capitalize mt-1">
+                                        <p className="text-xs text-gray-600 dark:text-muted capitalize mt-1">
                                             {issue.type} • {issue.priority}
                                         </p>
                                     </div>
                                 ))}
                                 {card.count > 3 && (
-                                    <button className="flex items-center justify-center w-full text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-white mt-2">
+                                    <button className="flex items-center justify-center w-full text-sm text-gray-500 dark:text-muted hover:text-gray-800 dark:hover:text-ink mt-2 rounded-full py-1 hover:bg-gray-50 dark:hover:bg-surface-elevated">
                                         Xem thêm {card.count - 3} <ArrowRight className="w-3 h-3 ml-2" />
                                     </button>
                                 )}

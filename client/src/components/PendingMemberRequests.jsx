@@ -64,32 +64,32 @@ const PendingMemberRequests = ({ projectId, onApproved }) => {
     if (loading || requests.length === 0) return null; // ẩn khi không có yêu cầu
 
     return (
-        <div className="rounded-lg border border-amber-300 dark:border-amber-900/50 p-6 bg-amber-50/50 dark:bg-amber-900/10">
-            <h2 className="text-lg font-medium text-amber-700 dark:text-amber-400 mb-3 flex items-center gap-2">
+        <div className="rounded-lg p-6 bg-white dark:bg-m-warning/5">
+            <h2 className="text-sm font-bold text-amber-700 dark:text-m-warning mb-3 flex items-center gap-2">
                 <Clock className="size-5" /> Yêu cầu chờ duyệt ({requests.length})
             </h2>
             <div className="space-y-2">
                 {requests.map((req) => (
-                    <div key={req.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded bg-white dark:bg-zinc-800 text-sm">
+                    <div key={req.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-white dark:bg-surface-card hover:bg-gray-50 dark:hover:bg-surface-elevated transition-colors text-sm">
                         <div className="flex items-center gap-2 min-w-0">
                             {req.user?.image && <img src={req.user.image} alt="" className="size-6 rounded-full" />}
                             <div className="min-w-0">
-                                <p className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{req.user?.name || req.user?.email}</p>
-                                <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{req.user?.email}</p>
+                                <p className="font-medium text-gray-900 dark:text-ink truncate">{req.user?.name || req.user?.email}</p>
+                                <p className="text-xs text-gray-500 dark:text-muted truncate">{req.user?.email}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                             <button
                                 onClick={() => handleApprove(req.id)}
                                 disabled={busyId === req.id}
-                                className="flex items-center gap-1 px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-xs disabled:opacity-50"
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-m-blue-light text-black hover:brightness-110 text-xs font-bold disabled:opacity-50 transition"
                             >
                                 <Check className="size-3.5" /> Duyệt
                             </button>
                             <button
                                 onClick={() => handleReject(req.id)}
                                 disabled={busyId === req.id}
-                                className="flex items-center gap-1 px-3 py-1.5 rounded border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 text-xs disabled:opacity-50"
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-m-red text-m-red hover:bg-m-red hover:text-white text-xs font-bold disabled:opacity-50 transition"
                             >
                                 <X className="size-3.5" /> Từ chối
                             </button>

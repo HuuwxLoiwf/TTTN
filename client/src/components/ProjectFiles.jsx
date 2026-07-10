@@ -8,9 +8,9 @@ import { format } from "date-fns";
 import FilePreview, { canPreview } from "./FilePreview";
 
 const reviewBadge = {
-    PENDING: { label: "Chờ duyệt", cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", Icon: Clock },
-    APPROVED: { label: "Đạt yêu cầu", cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400", Icon: CheckCircle2 },
-    REJECTED: { label: "Chưa đạt", cls: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", Icon: XCircle },
+    PENDING: { label: "Chờ duyệt", cls: "bg-m-warning/15 text-m-warning", Icon: Clock },
+    APPROVED: { label: "Đạt yêu cầu", cls: "bg-m-success/15 text-m-success", Icon: CheckCircle2 },
+    REJECTED: { label: "Chưa đạt", cls: "bg-m-red/15 text-m-red", Icon: XCircle },
 };
 
 const getFileIcon = (fileName) => {
@@ -133,36 +133,43 @@ const ProjectFiles = ({ projectId }) => {
 
     return (
         <div className="space-y-6">
-            {/* Upload Zone */}
-            <div
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                    dragOver
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                        : "border-zinc-300 dark:border-zinc-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-                }`}
-            >
-                <UploadCloud className={`size-10 mx-auto mb-3 ${dragOver ? "text-blue-500" : "text-zinc-400 dark:text-zinc-500"}`} />
-                <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    {uploading ? "Đang tải lên..." : "Kéo file vào đây hoặc click để chọn"}
-                </p>
-                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Hỗ trợ mọi loại file, tối đa 10MB mỗi file</p>
-                <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileSelect} />
-            </div>
+            {/* Upload Zone — chỉ admin/trưởng dự án (tài liệu chung của dự án).
+                User thường upload tài liệu công việc của mình ở chi tiết task. */}
+            {canReview ? (
+                <div
+                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all ${
+                        dragOver
+                            ? "border-bmw-blue bg-bmw-blue/10"
+                            : "border-hairline hover:border-bmw-blue hover:bg-surface-card"
+                    }`}
+                >
+                    <UploadCloud className={`size-10 mx-auto mb-3 ${dragOver ? "text-bmw-blue" : "text-zinc-400 dark:text-muted"}`} />
+                    <p className="text-sm font-medium text-zinc-700 dark:text-body">
+                        {uploading ? "Đang tải lên..." : "Kéo file vào đây hoặc click để chọn"}
+                    </p>
+                    <p className="text-xs text-zinc-400 dark:text-muted mt-1">Tài liệu chung cho cả dự án · tối đa 10MB mỗi file</p>
+                    <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileSelect} />
+                </div>
+            ) : (
+                <div className="bg-surface-card rounded-lg p-4 text-center text-sm text-zinc-500 dark:text-muted">
+                    Tài liệu chung của dự án (chỉ quản trị viên/trưởng dự án đăng tải). Bạn có thể đính kèm tài liệu công việc trong từng công việc của mình.
+                </div>
+            )}
 
             {/* File List */}
             <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                <h3 className="text-xs font-bold text-zinc-700 dark:text-body-strong">
                     Tài liệu dự án ({files.length})
                 </h3>
 
                 {loading ? (
-                    <p className="text-sm text-zinc-400 dark:text-zinc-500 text-center py-4">Đang tải...</p>
+                    <p className="text-sm text-zinc-400 dark:text-muted text-center py-4">Đang tải...</p>
                 ) : files.length === 0 ? (
-                    <div className="text-center py-8 text-zinc-400 dark:text-zinc-500">
+                    <div className="text-center py-8 text-zinc-400 dark:text-muted">
                         <File className="size-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">Chưa có tài liệu nào</p>
                     </div>
@@ -175,28 +182,28 @@ const ProjectFiles = ({ projectId }) => {
                             return (
                                 <div
                                     key={file.id}
-                                    className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/60 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                                    className="p-3 rounded-lg bg-surface-card hover:bg-surface-elevated transition-colors"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex-shrink-0">
-                                            <Icon className="size-5 text-blue-600 dark:text-blue-400" />
+                                        <div className="size-9 rounded-full bg-surface-elevated flex items-center justify-center flex-shrink-0">
+                                            <Icon className="size-5 text-bmw-blue dark:text-bmw-blue" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{file.fileName}</p>
-                                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium flex-shrink-0 ${badge.cls}`}>
+                                                <p className="text-sm font-medium text-zinc-900 dark:text-ink truncate">{file.fileName}</p>
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium flex-shrink-0 ${badge.cls}`}>
                                                     <BadgeIcon className="size-3" /> {badge.label}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                                            <p className="text-xs text-zinc-400 dark:text-muted">
                                                 {file.uploader?.name || file.uploader?.email} &bull; {format(new Date(file.createdAt), "dd/MM/yyyy HH:mm")}
                                             </p>
                                         </div>
-                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                        <div className="flex items-center gap-1 flex-shrink-0">
                                             {canPreview(file.fileName) && (
                                                 <button
                                                     onClick={() => setPreviewFile(file)}
-                                                    className="p-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 text-zinc-500 dark:text-zinc-400 hover:text-blue-500 transition-colors"
+                                                    className="p-2 rounded-full hover:bg-white/10 text-zinc-500 dark:text-muted hover:text-bmw-blue transition-colors"
                                                     title="Xem trực tiếp"
                                                 >
                                                     <Eye className="size-4" />
@@ -208,13 +215,13 @@ const ProjectFiles = ({ projectId }) => {
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="p-1.5 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-500 dark:text-zinc-400 transition-colors"
+                                                className="p-2 rounded-full hover:bg-white/10 text-zinc-500 dark:text-muted transition-colors"
                                             >
                                                 <Download className="size-4" />
                                             </a>
                                             <button
                                                 onClick={() => handleDelete(file.id)}
-                                                className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                                className="p-2 rounded-full hover:bg-white/10 text-zinc-400 hover:text-m-red dark:hover:text-m-red transition-colors"
                                             >
                                                 <Trash2 className="size-4" />
                                             </button>
@@ -223,23 +230,24 @@ const ProjectFiles = ({ projectId }) => {
 
                                     {/* Ghi chú đánh giá (nếu chưa đạt) */}
                                     {file.reviewStatus === "REJECTED" && file.reviewNote && (
-                                        <p className="mt-2 ml-12 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded px-2 py-1">
+                                        <p className="mt-2 ml-12 text-xs text-m-red bg-m-red/10 rounded-lg px-2 py-1">
                                             <strong>Cần làm lại:</strong> {file.reviewNote}
                                         </p>
                                     )}
 
-                                    {/* Nút đánh giá — chỉ admin/trưởng dự án */}
-                                    {canReview && (
+                                    {/* Nút đánh giá — chỉ admin/trưởng dự án, và CHỈ với file chưa duyệt.
+                                        File do admin up tự "Đạt" nên không hiện nút. */}
+                                    {canReview && file.reviewStatus !== "APPROVED" && (
                                         <div className="mt-2 ml-12 flex gap-2">
                                             <button
                                                 onClick={() => handleReview(file.id, "APPROVED")}
-                                                className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                                className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-m-success/15 text-m-success hover:bg-m-success hover:text-black transition-colors"
                                             >
                                                 <CheckCircle2 className="size-3.5" /> Đạt
                                             </button>
                                             <button
                                                 onClick={() => handleReview(file.id, "REJECTED")}
-                                                className="flex items-center gap-1 px-2 py-1 rounded text-xs border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                                className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-m-red/15 text-m-red hover:bg-m-red hover:text-white transition-colors"
                                             >
                                                 <XCircle className="size-3.5" /> Chưa đạt
                                             </button>

@@ -34,25 +34,25 @@ const DepartmentStats = () => {
     if (groups.length === 0) return null;
 
     return (
-        <div className="glass-card overflow-hidden">
-            <div className="border-b border-zinc-200 dark:border-zinc-800 p-4 flex items-center gap-2">
-                <Building2 className="size-5 text-blue-500" />
-                <h2 className="text-lg text-zinc-800 dark:text-zinc-200">Dự án theo phòng ban</h2>
+        <div className="bg-white dark:bg-surface-card rounded-lg overflow-hidden dark:shadow-spotify-md">
+            <div className="p-4 flex items-center gap-2">
+                <Building2 className="size-5 text-m-blue-light" />
+                <h2 className="text-sm font-bold text-gray-900 dark:text-ink">Dự án theo phòng ban</h2>
             </div>
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            <div className="divide-y divide-gray-100 dark:divide-white/5">
                 {groups.map((g) => (
                     <div key={g.name} className="p-4">
                         <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{g.name}</span>
-                            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                            <span className="text-sm font-medium text-gray-900 dark:text-body-strong">{g.name}</span>
+                            <span className="text-xs text-gray-500 dark:text-muted">
                                 {g.count} dự án · {g.done}/{g.tasks} công việc xong
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="flex-1 h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600" style={{ width: `${g.avgProgress}%` }} />
+                            <div className="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-surface-elevated overflow-hidden">
+                                <div className="h-full rounded-full bg-m-blue-light" style={{ width: `${g.avgProgress}%` }} />
                             </div>
-                            <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 w-10 text-right">{g.avgProgress}%</span>
+                            <span className="text-xs font-semibold text-gray-600 dark:text-body w-10 text-right">{g.avgProgress}%</span>
                         </div>
                     </div>
                 ))}

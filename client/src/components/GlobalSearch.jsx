@@ -55,28 +55,28 @@ const GlobalSearch = () => {
 
     return (
         <div className="relative flex-1 max-w-sm" ref={ref}>
-            <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400 size-3.5" />
+            <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-muted size-3.5" />
             <input
                 type="text"
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
                 onFocus={() => setOpen(true)}
                 placeholder="Tìm kiếm dự án, công việc..."
-                className="pl-8 pr-4 py-2 w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
+                className="pl-9 pr-4 py-2 w-full rounded-full bg-white dark:bg-surface-elevated border border-gray-300 dark:border-transparent dark:shadow-spotify-inset text-sm text-gray-900 dark:text-ink placeholder-gray-400 dark:placeholder-muted focus:outline-none focus:border-gray-900 dark:focus:border-ink transition"
             />
 
             {open && query.trim() && (
-                <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto">
+                <div className="absolute left-0 right-0 mt-2 rounded-lg bg-white dark:bg-surface-elevated border border-gray-200 dark:border-transparent dark:shadow-spotify-lg z-50 max-h-80 overflow-y-auto overflow-hidden">
                     {!hasResults ? (
-                        <p className="px-3 py-4 text-sm text-gray-400 dark:text-zinc-500 text-center">Không tìm thấy kết quả</p>
+                        <p className="px-3 py-4 text-sm text-gray-400 dark:text-muted text-center">Không tìm thấy kết quả</p>
                     ) : (
                         <>
                             {results.projects.length > 0 && (
                                 <div>
-                                    <p className="px-3 pt-2 pb-1 text-[11px] uppercase font-semibold text-gray-400 dark:text-zinc-500">Dự án</p>
+                                    <p className="px-3 pt-2 pb-1 text-xs font-bold text-gray-400 dark:text-muted">Dự án</p>
                                     {results.projects.map((p) => (
-                                        <button key={p.id} onClick={() => goProject(p.id)} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-zinc-800 text-gray-800 dark:text-zinc-200">
-                                            <FolderOpen className="size-4 text-blue-500 flex-shrink-0" />
+                                        <button key={p.id} onClick={() => goProject(p.id)} className="w-full flex items-center gap-2 px-3 py-2 mx-1 my-0.5 rounded-lg text-sm text-left hover:bg-gray-50 dark:hover:bg-surface-soft text-gray-800 dark:text-body">
+                                            <FolderOpen className="size-4 text-bmw-blue flex-shrink-0" />
                                             <span className="truncate">{p.name}</span>
                                         </button>
                                     ))}
@@ -84,12 +84,12 @@ const GlobalSearch = () => {
                             )}
                             {results.tasks.length > 0 && (
                                 <div>
-                                    <p className="px-3 pt-2 pb-1 text-[11px] uppercase font-semibold text-gray-400 dark:text-zinc-500">Công việc</p>
+                                    <p className="px-3 pt-2 pb-1 text-xs font-bold text-gray-400 dark:text-muted">Công việc</p>
                                     {results.tasks.map((t) => (
-                                        <button key={t.id} onClick={() => goTask(t)} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-zinc-800 text-gray-800 dark:text-zinc-200">
-                                            <ListTodo className="size-4 text-green-500 flex-shrink-0" />
+                                        <button key={t.id} onClick={() => goTask(t)} className="w-full flex items-center gap-2 px-3 py-2 mx-1 my-0.5 rounded-lg text-sm text-left hover:bg-gray-50 dark:hover:bg-surface-soft text-gray-800 dark:text-body">
+                                            <ListTodo className="size-4 text-m-success flex-shrink-0" />
                                             <span className="truncate flex-1">{t.title}</span>
-                                            <span className="text-xs text-gray-400 dark:text-zinc-500 truncate max-w-24">{t.projectName}</span>
+                                            <span className="text-xs text-gray-400 dark:text-muted truncate max-w-24">{t.projectName}</span>
                                         </button>
                                     ))}
                                 </div>

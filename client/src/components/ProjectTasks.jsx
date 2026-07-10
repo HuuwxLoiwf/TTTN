@@ -9,17 +9,17 @@ import { apiFetch } from "../lib/api";
 import { Bug, CalendarIcon, GitCommit, MessageSquare, Square, Trash, XIcon, Zap } from "lucide-react";
 
 const typeIcons = {
-    BUG: { icon: Bug, color: "text-red-600 dark:text-red-400" },
-    FEATURE: { icon: Zap, color: "text-blue-600 dark:text-blue-400" },
-    TASK: { icon: Square, color: "text-green-600 dark:text-green-400" },
-    IMPROVEMENT: { icon: GitCommit, color: "text-purple-600 dark:text-purple-400" },
-    OTHER: { icon: MessageSquare, color: "text-amber-600 dark:text-amber-400" },
+    BUG: { icon: Bug, color: "text-m-red" },
+    FEATURE: { icon: Zap, color: "text-bmw-blue" },
+    TASK: { icon: Square, color: "text-m-success" },
+    IMPROVEMENT: { icon: GitCommit, color: "text-m-blue-light" },
+    OTHER: { icon: MessageSquare, color: "text-m-warning" },
 };
 
 const priorityTexts = {
-    LOW: { background: "bg-red-100 dark:bg-red-950", prioritycolor: "text-red-600 dark:text-red-400" },
-    MEDIUM: { background: "bg-blue-100 dark:bg-blue-950", prioritycolor: "text-blue-600 dark:text-blue-400" },
-    HIGH: { background: "bg-emerald-100 dark:bg-emerald-950", prioritycolor: "text-emerald-600 dark:text-emerald-400" },
+    LOW: { background: "bg-bmw-blue/15", prioritycolor: "text-bmw-blue dark:text-bmw-blue" },
+    MEDIUM: { background: "bg-m-warning/15", prioritycolor: "text-m-warning dark:text-m-warning" },
+    HIGH: { background: "bg-m-red/15", prioritycolor: "text-m-red dark:text-m-red" },
 };
 
 const ProjectTasks = ({ tasks }) => {
@@ -158,7 +158,7 @@ const ProjectTasks = ({ tasks }) => {
                         ],
                     };
                     return (
-                        <select key={name} name={name} onChange={handleFilterChange} className=" border not-dark:bg-white border-zinc-300 dark:border-zinc-800 outline-none px-3 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200" >
+                        <select key={name} name={name} onChange={handleFilterChange} className="rounded-full not-dark:bg-white dark:bg-surface-elevated outline-none px-4 py-1.5 text-sm text-ink dark:text-body" >
                             {options[name].map((opt, idx) => (
                                 <option key={idx} value={opt.value}>{opt.label}</option>
                             ))}
@@ -167,7 +167,7 @@ const ProjectTasks = ({ tasks }) => {
                 })}
 
                 {/* Sắp xếp */}
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border not-dark:bg-white border-zinc-300 dark:border-zinc-800 outline-none px-3 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="rounded-full not-dark:bg-white dark:bg-surface-elevated outline-none px-4 py-1.5 text-sm text-ink dark:text-body">
                     <option value="created_desc">Mới nhất</option>
                     <option value="created_asc">Cũ nhất</option>
                     <option value="due_asc">Hạn chót gần nhất</option>
@@ -176,28 +176,30 @@ const ProjectTasks = ({ tasks }) => {
 
                 {/* Reset filters */}
                 {(filters.status || filters.type || filters.priority || filters.assignee) && (
-                    <button type="button" onClick={() => setFilters({ status: "", type: "", priority: "", assignee: "" })} className="px-3 py-1 flex items-center gap-2 rounded bg-gradient-to-br from-purple-400 to-purple-500 text-zinc-100 dark:text-zinc-200 text-sm transition-colors" >
+                    <button type="button" onClick={() => setFilters({ status: "", type: "", priority: "", assignee: "" })} className="rounded-full px-4 py-1.5 flex items-center gap-2 bg-surface-elevated text-body dark:text-body text-xs font-bold hover:bg-white/10 transition-colors" >
                         <XIcon className="size-3" /> Đặt lại
                     </button>
                 )}
 
-                {selectedTasks.length > 0 && (
-                    <button type="button" onClick={handleDelete} className="px-3 py-1 flex items-center gap-2 rounded bg-gradient-to-br from-indigo-400 to-indigo-500 text-zinc-100 dark:text-zinc-200 text-sm transition-colors" >
+                {isAdmin && selectedTasks.length > 0 && (
+                    <button type="button" onClick={handleDelete} className="rounded-full px-4 py-1.5 flex items-center gap-2 bg-m-red/15 text-m-red text-xs font-bold hover:bg-m-red hover:text-white transition-colors" >
                         <Trash className="size-3" /> Xóa
                     </button>
                 )}
             </div>
 
             {/* Tasks Table */}
-            <div className="overflow-auto rounded-lg lg:border border-zinc-300 dark:border-zinc-800">
+            <div className="rounded-lg overflow-auto">
                 <div className="w-full">
                     {/* Desktop/Table View */}
                     <div className="hidden lg:block overflow-x-auto">
-                        <table className="min-w-full text-sm text-left not-dark:bg-white text-zinc-900 dark:text-zinc-300">
-                            <thead className="text-xs uppercase dark:bg-zinc-800/70 text-zinc-500 dark:text-zinc-400 ">
+                        <table className="min-w-full text-sm text-left not-dark:bg-white dark:bg-canvas text-ink dark:text-body">
+                            <thead className="text-xs dark:bg-surface-soft bg-surface-soft text-muted dark:text-muted ">
                                 <tr>
                                     <th className="pl-2 pr-1">
-                                        <input onChange={() => selectedTasks.length > 1 ? setSelectedTasks([]) : setSelectedTasks(tasks.map((t) => t.id))} checked={selectedTasks.length === tasks.length} type="checkbox" className="size-3 accent-zinc-600 dark:accent-zinc-500" />
+                                        {isAdmin && (
+                                            <input onChange={() => selectedTasks.length > 1 ? setSelectedTasks([]) : setSelectedTasks(tasks.map((t) => t.id))} checked={selectedTasks.length === tasks.length} type="checkbox" className="size-3 accent-bmw-blue" />
+                                        )}
                                     </th>
                                     <th className="px-4 pl-0 py-3">Tiêu đề</th>
                                     <th className="px-4 py-3">Loại</th>
@@ -214,29 +216,45 @@ const ProjectTasks = ({ tasks }) => {
                                         const { background, prioritycolor } = priorityTexts[task.priority] || {};
 
                                         return (
-                                            <tr key={task.id} onClick={() => navigate(`/taskDetails?projectId=${task.projectId}&taskId=${task.id}`)} className=" border-t border-zinc-300 dark:border-zinc-800 group hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all cursor-pointer" >
+                                            <tr key={task.id} onClick={() => navigate(`/taskDetails?projectId=${task.projectId}&taskId=${task.id}`)} className="border-t border-hairline/40 dark:border-hairline/40 group hover:bg-surface-soft dark:hover:bg-surface-card transition-all cursor-pointer" >
                                                 <td onClick={e => e.stopPropagation()} className="pl-2 pr-1">
-                                                    <input type="checkbox" className="size-3 accent-zinc-600 dark:accent-zinc-500" onChange={() => selectedTasks.includes(task.id) ? setSelectedTasks(selectedTasks.filter((i) => i !== task.id)) : setSelectedTasks((prev) => [...prev, task.id])} checked={selectedTasks.includes(task.id)} />
+                                                    {isAdmin && (
+                                                        <input type="checkbox" className="size-3 accent-bmw-blue" onChange={() => selectedTasks.includes(task.id) ? setSelectedTasks(selectedTasks.filter((i) => i !== task.id)) : setSelectedTasks((prev) => [...prev, task.id])} checked={selectedTasks.includes(task.id)} />
+                                                    )}
                                                 </td>
-                                                <td className="px-4 pl-0 py-2">{task.title}</td>
+                                                <td className="px-4 pl-0 py-2">
+                                                    {task.title}
+                                                    {task.labels?.length > 0 && (
+                                                        <span className="flex flex-wrap gap-1 mt-0.5">
+                                                            {task.labels.map((l) => (
+                                                                <span key={l} className="text-[10px] px-2 py-0.5 rounded-full bg-bmw-blue/15 text-bmw-blue dark:text-bmw-blue">{l}</span>
+                                                            ))}
+                                                        </span>
+                                                    )}
+                                                </td>
                                                 <td className="px-4 py-2">
                                                     <div className="flex items-center gap-2">
                                                         {Icon && <Icon className={`size-4 ${color}`} />}
-                                                        <span className={`uppercase text-xs ${color}`}>{task.type}</span>
+                                                        <span className={`text-xs ${color}`}>{task.type}</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-4 py-2">
-                                                    <span className={`text-xs px-2 py-1 rounded ${background} ${prioritycolor}`}>
+                                                    <span className={`rounded-full text-xs px-2.5 py-1 font-bold ${background} ${prioritycolor}`}>
                                                         {task.priority}
                                                     </span>
                                                 </td>
                                                 <td onClick={e => e.stopPropagation()} className="px-4 py-2">
-                                                    <select name="status" disabled={!canChangeStatus(task)} onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 outline-none px-2 pr-4 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" >
-                                                        <option value="TODO">Chờ làm</option>
-                                                        <option value="IN_PROGRESS">Đang làm</option>
-                                                        <option value="REVIEW">Đang review</option>
-                                                        <option value="DONE">Hoàn thành</option>
-                                                    </select>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <select name="status" disabled={!canChangeStatus(task)} onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="rounded-full bg-white dark:bg-surface-elevated outline-none px-3 pr-4 py-1 text-sm text-ink dark:text-body cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" >
+                                                            <option value="TODO">Chờ làm</option>
+                                                            <option value="IN_PROGRESS">Đang làm</option>
+                                                            <option value="REVIEW">Đang review</option>
+                                                            <option value="DONE">Hoàn thành</option>
+                                                        </select>
+                                                        {task.autoStatus && (
+                                                            <span title="Tự động chuyển trạng thái theo thời gian" className="text-[10px] px-2 py-0.5 rounded-full bg-bmw-blue/15 text-bmw-blue dark:text-bmw-blue">Auto</span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <div className="flex items-center gap-2">
@@ -245,7 +263,7 @@ const ProjectTasks = ({ tasks }) => {
                                                     </div>
                                                 </td>
                                                 <td className="px-4 py-2">
-                                                    <div className="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                                                    <div className="flex items-center gap-1 text-muted dark:text-muted">
                                                         <CalendarIcon className="size-4" />
                                                         {task.due_date ? format(new Date(task.due_date), "dd MMMM") : "-"}
                                                     </div>
@@ -255,7 +273,7 @@ const ProjectTasks = ({ tasks }) => {
                                     })
                                 ) : (
                                     <tr>
-                                        <td colSpan="7" className="text-center text-zinc-500 dark:text-zinc-400 py-6">
+                                        <td colSpan="7" className="text-center text-muted dark:text-muted py-6">
                                             Không tìm thấy công việc với bộ lọc đã chọn.
                                         </td>
                                     </tr>
@@ -272,26 +290,28 @@ const ProjectTasks = ({ tasks }) => {
                                 const { background, prioritycolor } = priorityTexts[task.priority] || {};
 
                                 return (
-                                    <div key={task.id} className="glass-card p-4 flex flex-col gap-2">
+                                    <div key={task.id} className="rounded-lg bg-white dark:bg-surface-card p-4 flex flex-col gap-2 hover:shadow-spotify-md transition-shadow">
                                         <div className="flex items-center justify-between">
-                                            <h3 className="text-zinc-900 dark:text-zinc-200 text-sm font-semibold">{task.title}</h3>
-                                            <input type="checkbox" className="size-4 accent-zinc-600 dark:accent-zinc-500" onChange={() => selectedTasks.includes(task.id) ? setSelectedTasks(selectedTasks.filter((i) => i !== task.id)) : setSelectedTasks((prev) => [...prev, task.id])} checked={selectedTasks.includes(task.id)} />
+                                            <h3 className="text-ink dark:text-ink text-sm font-semibold">{task.title}</h3>
+                                            {isAdmin && (
+                                                <input type="checkbox" className="size-4 accent-bmw-blue" onChange={() => selectedTasks.includes(task.id) ? setSelectedTasks(selectedTasks.filter((i) => i !== task.id)) : setSelectedTasks((prev) => [...prev, task.id])} checked={selectedTasks.includes(task.id)} />
+                                            )}
                                         </div>
 
-                                        <div className="text-xs text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
+                                        <div className="text-xs text-muted dark:text-muted flex items-center gap-2">
                                             {Icon && <Icon className={`size-4 ${color}`} />}
-                                            <span className={`${color} uppercase`}>{task.type}</span>
+                                            <span className={color}>{task.type}</span>
                                         </div>
 
                                         <div>
-                                            <span className={`text-xs px-2 py-1 rounded ${background} ${prioritycolor}`}>
+                                            <span className={`rounded-full text-xs px-2.5 py-1 font-bold ${background} ${prioritycolor}`}>
                                                 {task.priority}
                                             </span>
                                         </div>
 
                                         <div>
-                                            <label className="text-zinc-600 dark:text-zinc-400 text-xs">Trạng thái</label>
-                                            <select name="status" disabled={!canChangeStatus(task)} onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="w-full mt-1 bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-300 dark:ring-zinc-700 outline-none px-2 py-1 rounded text-sm text-zinc-900 dark:text-zinc-200 disabled:opacity-50" >
+                                            <label className="text-muted dark:text-muted text-xs">Trạng thái</label>
+                                            <select name="status" disabled={!canChangeStatus(task)} onChange={(e) => handleStatusChange(task.id, e.target.value)} value={task.status} className="rounded-full w-full mt-1 bg-surface-soft dark:bg-surface-elevated outline-none px-3 py-1 text-sm text-ink dark:text-body disabled:opacity-50" >
                                                 <option value="TODO">Chờ làm</option>
                                                 <option value="IN_PROGRESS">Đang làm</option>
                                                 <option value="REVIEW">Đang review</option>
@@ -299,12 +319,12 @@ const ProjectTasks = ({ tasks }) => {
                                             </select>
                                         </div>
 
-                                        <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+                                        <div className="flex items-center gap-2 text-sm text-body dark:text-body">
                                             <img src={task.assignee?.image} className="size-5 rounded-full" alt="avatar" />
                                             {task.assignee?.name || "-"}
                                         </div>
 
-                                        <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                                        <div className="flex items-center gap-2 text-sm text-muted dark:text-muted">
                                             <CalendarIcon className="size-4" />
                                             {task.due_date ? format(new Date(task.due_date), "dd MMMM") : "-"}
                                         </div>
@@ -312,7 +332,7 @@ const ProjectTasks = ({ tasks }) => {
                                 );
                             })
                         ) : (
-                            <p className="text-center text-zinc-500 dark:text-zinc-400 py-4">
+                            <p className="text-center text-muted dark:text-muted py-4">
                                 Không tìm thấy công việc với bộ lọc đã chọn.
                             </p>
                         )}

@@ -65,10 +65,40 @@ const uploadBufferToCloudinary = (buffer, originalname) =>
 
 export const getFiles = async (req, res) => {
     try {
-        const { projectId, taskId } = req.query;
+        const userId = req.auth?.userId;
+        const { projectId, taskId, phaseId } = req.query;
+        if (!projectId && !taskId && !phaseId) {
+            return res.status(400).json({ error: 'Thiếu projectId, taskId hoặc phaseId' });
+        }
+
+        // Suy ra dự án để kiểm tra quyền: chỉ thành viên workspace mới xem được tài liệu
+        let resolvedProjectId = projectId || null;
+        if (!resolvedProjectId && taskId) {
+            const t = await prisma.task.findUnique({ where: { id: taskId }, select: { projectId: true } });
+            resolvedProjectId = t?.projectId || null;
+        }
+        if (!resolvedProjectId && phaseId) {
+            const p = await prisma.phase.findUnique({ where: { id: phaseId }, select: { projectId: true } });
+            resolvedProjectId = p?.projectId || null;
+        }
+        if (!resolvedProjectId) return res.status(404).json({ error: 'Không tìm thấy dự án' });
+
+        const project = await prisma.project.findUnique({
+            where: { id: resolvedProjectId },
+            select: { workspaceId: true },
+        });
+        if (!project) return res.status(404).json({ error: 'Dự án không tồn tại' });
+
+        const membership = await prisma.workspaceMember.findUnique({
+            where: { userId_workspaceId: { userId, workspaceId: project.workspaceId } },
+            select: { id: true },
+        });
+        if (!membership) return res.status(403).json({ error: 'Bạn không phải thành viên của không gian làm việc này' });
+
         const where = {};
         if (projectId) where.projectId = projectId;
         if (taskId) where.taskId = taskId;
+        if (phaseId) where.phaseId = phaseId;
 
         const files = await prisma.file.findMany({
             where,
@@ -81,58 +111,109 @@ export const getFiles = async (req, res) => {
     }
 };
 
+// Multer decode originalname bằng latin1 → tên tiếng Việt bị lỗi font ("BÃ¡o cÃ¡o").
+// Chuyển lại về UTF-8 để lưu đúng tên hiển thị.
+const fixFileName = (name) => {
+    try {
+        return Buffer.from(name, 'latin1').toString('utf8');
+    } catch {
+        return name;
+    }
+};
+
 export const uploadFile = async (req, res) => {
     try {
         const userId = req.auth?.userId;
         if (!userId) return res.status(401).json({ error: 'Unauthorized' });
         if (!req.file) return res.status(400).json({ error: 'Không có file được tải lên' });
 
-        const { projectId, taskId } = req.body;
+        const { projectId, taskId, phaseId } = req.body;
+        const originalName = fixFileName(req.file.originalname);
 
         let fileUrl;
         if (useCloudinary) {
-            const result = await uploadBufferToCloudinary(req.file.buffer, req.file.originalname);
+            const result = await uploadBufferToCloudinary(req.file.buffer, originalName);
             fileUrl = result.secure_url;
         } else {
             const baseUrl = `${req.protocol}://${req.get('host')}`;
             fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
         }
 
-        // Xác định dự án (kể cả khi đính kèm vào task) để kiểm tra quyền người upload
+        // Xác định dự án (kể cả khi đính kèm vào task/giai đoạn) để kiểm tra quyền người upload
         let resolvedProjectId = projectId || null;
         if (!resolvedProjectId && taskId) {
             const t = await prisma.task.findUnique({ where: { id: taskId }, select: { projectId: true } });
             resolvedProjectId = t?.projectId || null;
         }
+        if (!resolvedProjectId && phaseId) {
+            const p = await prisma.phase.findUnique({ where: { id: phaseId }, select: { projectId: true } });
+            resolvedProjectId = p?.projectId || null;
+        }
 
         // Nếu người upload là ADMIN workspace hoặc trưởng dự án → file tự ĐẠT, không cần duyệt
         let autoApproved = false;
+        let isManager = false;
+        let projectInfo = null;
         if (resolvedProjectId) {
-            const project = await prisma.project.findUnique({
+            projectInfo = await prisma.project.findUnique({
                 where: { id: resolvedProjectId },
-                select: { workspaceId: true, team_lead: true },
+                select: { workspaceId: true, team_lead: true, name: true },
             });
-            if (project) {
+            if (projectInfo) {
                 const membership = await prisma.workspaceMember.findUnique({
-                    where: { userId_workspaceId: { userId, workspaceId: project.workspaceId } },
+                    where: { userId_workspaceId: { userId, workspaceId: projectInfo.workspaceId } },
                     select: { role: true },
                 });
-                autoApproved = membership?.role === "ADMIN" || project.team_lead === userId;
+                isManager = membership?.role === "ADMIN" || projectInfo.team_lead === userId;
+                autoApproved = isManager;
             }
+        }
+
+        // Tài liệu CHUNG của dự án (có projectId, không gắn task): chỉ admin/trưởng dự án được up.
+        // User thường chỉ up tài liệu công việc (gắn taskId).
+        if (projectId && !taskId && !isManager) {
+            return res.status(403).json({ error: "Chỉ quản trị viên/trưởng dự án mới đăng tài liệu chung của dự án. Hãy đính kèm vào công việc của bạn." });
         }
 
         const file = await prisma.file.create({
             data: {
-                fileName: req.file.originalname,
+                fileName: originalName,
                 fileUrl,
                 uploadedBy: userId,
                 reviewStatus: autoApproved ? "APPROVED" : "PENDING",
                 ...(autoApproved ? { reviewedBy: userId, reviewedAt: new Date() } : {}),
                 ...(projectId ? { projectId } : {}),
                 ...(taskId ? { taskId } : {}),
+                ...(phaseId ? { phaseId } : {}),
             },
             include: { uploader: { select: { id: true, name: true, email: true } } },
         });
+
+        // File CẦN DUYỆT (không phải admin/trưởng dự án up) → báo trưởng dự án + các ADMIN để xem xét.
+        if (!autoApproved && projectInfo) {
+            const admins = await prisma.workspaceMember.findMany({
+                where: { workspaceId: projectInfo.workspaceId, role: "ADMIN" },
+                select: { userId: true },
+            });
+            const recipients = new Set([projectInfo.team_lead, ...admins.map((a) => a.userId)]);
+            recipients.delete(userId); // không tự báo mình
+            for (const rid of recipients) {
+                notifyUser({
+                    userId: rid,
+                    actorId: userId,
+                    title: "Tài liệu mới chờ duyệt",
+                    message: `${file.uploader?.name || file.uploader?.email || "Thành viên"} vừa nộp tài liệu "${originalName}" trong dự án ${projectInfo.name} — cần bạn xem xét/duyệt.`,
+                });
+            }
+            logActivity({
+                projectId: resolvedProjectId,
+                userId,
+                action: `đã nộp tài liệu "${originalName}" (chờ duyệt)`,
+                entityType: "FILE",
+                entityId: file.id,
+            });
+        }
+
         res.status(201).json(file);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -207,9 +288,18 @@ export const reviewFile = async (req, res) => {
 
 export const deleteFile = async (req, res) => {
     try {
+        const userId = req.auth?.userId;
         const { id } = req.params;
         const file = await prisma.file.findUnique({ where: { id } });
         if (!file) return res.status(404).json({ error: 'File không tồn tại' });
+
+        // Quyền xóa: người upload, ADMIN workspace, hoặc trưởng dự án.
+        // (requireMember đã gắn req.fileOwnerId / req.fileTeamLead / req.memberRole)
+        const isOwner = req.fileOwnerId === userId;
+        const isManager = req.memberRole === "ADMIN" || req.fileTeamLead === userId;
+        if (!isOwner && !isManager) {
+            return res.status(403).json({ error: 'Chỉ người tải lên, quản trị viên hoặc trưởng dự án mới được xóa file' });
+        }
 
         // Xóa file vật lý: chỉ khi lưu ở đĩa local (Cloudinary giữ lại, không bắt buộc xóa)
         if (!useCloudinary && file.fileUrl.includes('/uploads/')) {

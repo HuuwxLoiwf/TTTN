@@ -62,7 +62,7 @@ const WorkspaceReportButton = () => {
     return (
         <button
             onClick={exportReport}
-            className="flex items-center gap-2 px-5 py-2 text-sm rounded border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition"
+            className="flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold bg-surface-card text-gray-700 dark:text-body hover:bg-gray-50 dark:hover:bg-surface-elevated transition"
         >
             <FileSpreadsheet size={16} /> Xuất báo cáo
         </button>

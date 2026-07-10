@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { apiFetch } from "../lib/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 const fmtDuration = (mins) => {
     const h = Math.floor(mins / 60);
@@ -16,12 +17,17 @@ const fmtDuration = (mins) => {
     return `${m}p`;
 };
 
-// Colors for charts and priorities
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+// Colors for charts and priorities (Spotify palette)
+const COLORS = ["#1ed760", "#539df5", "#ffa42b", "#f3727f", "#b3b3b3"];
 const PRIORITY_COLORS = {
-    LOW: "text-red-600 bg-red-200 dark:text-red-500 dark:bg-red-600",
-    MEDIUM: "text-blue-600 bg-blue-200 dark:text-blue-500 dark:bg-blue-600",
-    HIGH: "text-emerald-600 bg-emerald-200 dark:text-emerald-500 dark:bg-emerald-600",
+    LOW: "bg-m-red",
+    MEDIUM: "bg-bmw-blue",
+    HIGH: "bg-m-success",
+};
+const PRIORITY_TEXT_COLORS = {
+    LOW: "text-m-red",
+    MEDIUM: "text-bmw-blue",
+    HIGH: "text-m-success",
 };
 
 const ProjectAnalytics = ({ project, tasks }) => {
@@ -101,30 +107,30 @@ const ProjectAnalytics = ({ project, tasks }) => {
         {
             label: "Tỷ lệ hoàn thành",
             value: `${completionRate}%`,
-            color: "text-emerald-600 dark:text-emerald-400",
-            icon: <CheckCircle className="size-5 text-emerald-600 dark:text-emerald-400" />,
-            bg: "bg-emerald-200 dark:bg-emerald-500/10",
+            color: "text-m-success",
+            icon: <CheckCircle className="size-5 text-m-success" />,
+            bg: "bg-emerald-100 dark:bg-m-success/10",
         },
         {
             label: "Đang thực hiện",
             value: stats.inProgress,
-            color: "text-blue-600 dark:text-blue-400",
-            icon: <Clock className="size-5 text-blue-600 dark:text-blue-400" />,
-            bg: "bg-blue-200 dark:bg-blue-500/10",
+            color: "text-bmw-blue",
+            icon: <Clock className="size-5 text-bmw-blue" />,
+            bg: "bg-blue-100 dark:bg-bmw-blue/10",
         },
         {
             label: "Công việc quá hạn",
             value: stats.overdue,
-            color: "text-red-600 dark:text-red-400",
-            icon: <AlertTriangle className="size-5 text-red-600 dark:text-red-400" />,
-            bg: "bg-red-200 dark:bg-red-500/10",
+            color: "text-m-red",
+            icon: <AlertTriangle className="size-5 text-m-red" />,
+            bg: "bg-red-100 dark:bg-m-red/10",
         },
         {
             label: "Quy mô nhóm",
             value: project?.members?.length || 0,
-            color: "text-purple-600 dark:text-purple-400",
-            icon: <Users className="size-5 text-purple-600 dark:text-purple-400" />,
-            bg: "bg-purple-200 dark:bg-purple-500/10",
+            color: "text-m-warning",
+            icon: <Users className="size-5 text-m-warning" />,
+            bg: "bg-amber-100 dark:bg-m-warning/10",
         },
     ];
 
@@ -147,6 +153,49 @@ const ProjectAnalytics = ({ project, tasks }) => {
         a.download = `${project?.name || "bao-cao"}-${format(new Date(), "yyyy-MM-dd")}.csv`;
         a.click();
         URL.revokeObjectURL(url);
+    };
+
+    const exportExcel = () => {
+        const wb = XLSX.utils.book_new();
+
+        // Sheet 1: Tổng quan
+        const overview = [
+            ["Dự án", project?.name || ""],
+            ["Ngày xuất", format(new Date(), "dd/MM/yyyy HH:mm")],
+            ["Tổng công việc", stats.total],
+            ["Hoàn thành", stats.completed],
+            ["Tỷ lệ hoàn thành", `${completionRate}%`],
+            ["Đang thực hiện", stats.inProgress],
+            ["Chờ làm", stats.todo],
+            ["Quá hạn", stats.overdue],
+            ["Tiến độ dự án", `${project?.progress || 0}%`],
+        ];
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(overview), "Tổng quan");
+
+        // Sheet 2: Danh sách công việc
+        const taskRows = tasks.map((t) => ({
+            "Tiêu đề": t.title,
+            "Loại": t.type,
+            "Trạng thái": t.status,
+            "Ưu tiên": t.priority,
+            "Người thực hiện": t.assignee?.name || t.assignee?.email || "",
+            "Hạn chót": t.due_date ? format(new Date(t.due_date), "dd/MM/yyyy") : "",
+            "Ngày tạo": t.createdAt ? format(new Date(t.createdAt), "dd/MM/yyyy") : "",
+        }));
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(taskRows), "Công việc");
+
+        // Sheet 3: Giờ làm theo thành viên (nếu có)
+        if (timeReport?.byUser?.length) {
+            const timeRows = timeReport.byUser.map((u) => ({
+                "Thành viên": u.user?.name || u.user?.email || "",
+                "Tổng phút": u.minutes,
+                "Quy đổi giờ": (u.minutes / 60).toFixed(1),
+                "Số lần ghi": u.entries,
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(timeRows), "Giờ làm");
+        }
+
+        XLSX.writeFile(wb, `${project?.name || "bao-cao"}-${format(new Date(), "yyyy-MM-dd")}.xlsx`);
     };
 
     const exportPDF = () => {
@@ -208,23 +257,29 @@ const ProjectAnalytics = ({ project, tasks }) => {
     return (
         <div className="space-y-6">
             {/* Export Buttons */}
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-wrap justify-end gap-2">
                 <button
                     onClick={handleAnalyze}
                     disabled={analyzing}
-                    className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-surface-elevated text-gray-700 dark:text-body hover:bg-white/10 transition-colors disabled:opacity-50"
                 >
                     <Sparkles className="size-4" /> {analyzing ? "Đang phân tích..." : "Phân tích AI"}
                 </button>
                 <button
                     onClick={exportPDF}
-                    className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-surface-elevated text-gray-700 dark:text-body hover:bg-white/10 transition-colors"
                 >
                     <FileDown className="size-4" /> Xuất PDF
                 </button>
                 <button
+                    onClick={exportExcel}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-surface-elevated text-gray-700 dark:text-body hover:bg-white/10 transition-colors"
+                >
+                    <FileDown className="size-4" /> Xuất Excel
+                </button>
+                <button
                     onClick={exportCSV}
-                    className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-m-blue-light text-black hover:scale-105 transition-transform"
                 >
                     <Download className="size-4" />
                     Xuất báo cáo CSV
@@ -232,55 +287,55 @@ const ProjectAnalytics = ({ project, tasks }) => {
             </div>
 
             {aiAnalysis && (
-                <div className="rounded-lg border border-purple-200 dark:border-purple-900/30 bg-purple-50 dark:bg-purple-900/10 p-5">
+                <div className="bg-surface-soft rounded-lg p-5">
                     <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-2"><Sparkles className="size-4" /> Phân tích từ AI</h3>
-                        <button onClick={() => setAiAnalysis("")} className="text-xs text-zinc-400 hover:text-zinc-600">Đóng</button>
+                        <h3 className="font-bold text-gray-700 dark:text-body-strong flex items-center gap-2"><Sparkles className="size-4" /> Phân tích từ AI</h3>
+                        <button onClick={() => setAiAnalysis("")} className="text-xs text-gray-400 dark:text-muted hover:text-gray-600 dark:hover:text-body">Đóng</button>
                     </div>
-                    <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">{aiAnalysis}</p>
+                    <p className="text-sm text-gray-700 dark:text-body whitespace-pre-wrap">{aiAnalysis}</p>
                 </div>
             )}
 
             {/* Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {metrics.map((m, i) => (
                     <div
                         key={i}
-                        className="glass-card rounded-lg p-6"
+                        className="bg-surface-card rounded-lg p-6"
                     >
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-zinc-600 dark:text-zinc-400 text-sm">{m.label}</p>
+                                <p className="text-gray-600 dark:text-muted text-xs font-bold">{m.label}</p>
                                 <p className={`text-xl font-bold ${m.color}`}>{m.value}</p>
                             </div>
-                            <div className={`p-2 rounded-md ${m.bg}`}>{m.icon}</div>
+                            <div className={`p-2 rounded-full ${m.bg}`}>{m.icon}</div>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* Charts */}
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid lg:grid-cols-2 gap-4">
                 {/* Tasks by Status */}
-                <div className="glass-card rounded-lg p-6">
-                    <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Công việc theo trạng thái</h2>
+                <div className="bg-surface-card rounded-lg p-6">
+                    <h2 className="text-gray-900 dark:text-ink mb-4 text-sm font-bold">Công việc theo trạng thái</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={statusData}>
                             <XAxis
                                 dataKey="name"
-                                tick={{ fill: "#52525b", fontSize: 12 }}
-                                axisLine={{ stroke: "#d4d4d8" }}
-                                dark={{ stroke: "#27272a" }}
+                                tick={{ fill: "#7e7e7e", fontSize: 12 }}
+                                axisLine={{ stroke: "#3c3c3c" }}
+                                dark={{ stroke: "#3c3c3c" }}
                             />
-                            <YAxis tick={{ fill: "#52525b", fontSize: 12 }} axisLine={{ stroke: "#d4d4d8" }} />
-                            <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                            <YAxis tick={{ fill: "#7e7e7e", fontSize: 12 }} axisLine={{ stroke: "#3c3c3c" }} />
+                            <Bar dataKey="value" fill="#1ed760" radius={[6, 6, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
                 {/* Tasks by Type */}
-                <div className="glass-card rounded-lg p-6">
-                    <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Công việc theo loại</h2>
+                <div className="bg-surface-card rounded-lg p-6">
+                    <h2 className="text-gray-900 dark:text-ink mb-4 text-sm font-bold">Công việc theo loại</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
                             <Pie
@@ -303,12 +358,12 @@ const ProjectAnalytics = ({ project, tasks }) => {
 
             {/* Báo cáo giờ làm theo thành viên */}
             {timeReport && timeReport.byUser.length > 0 && (
-                <div className="glass-card rounded-lg p-6">
+                <div className="bg-surface-card rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-zinc-900 dark:text-white font-medium flex items-center gap-2">
-                            <Timer className="size-5 text-blue-500" /> Giờ làm theo thành viên
+                        <h2 className="text-gray-900 dark:text-ink text-sm font-bold flex items-center gap-2">
+                            <Timer className="size-5 text-bmw-blue" /> Giờ làm theo thành viên
                         </h2>
-                        <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                        <span className="text-sm font-bold text-bmw-blue">
                             Tổng: {fmtDuration(timeReport.totalMinutes)}
                         </span>
                     </div>
@@ -318,11 +373,11 @@ const ProjectAnalytics = ({ project, tasks }) => {
                             return (
                                 <div key={u.user?.id} className="space-y-1">
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-zinc-900 dark:text-zinc-200">{u.user?.name || u.user?.email}</span>
-                                        <span className="text-zinc-600 dark:text-zinc-400">{fmtDuration(u.minutes)} · {pct}%</span>
+                                        <span className="text-gray-900 dark:text-body-strong">{u.user?.name || u.user?.email}</span>
+                                        <span className="text-gray-600 dark:text-muted">{fmtDuration(u.minutes)} · {pct}%</span>
                                     </div>
-                                    <div className="w-full bg-zinc-300 dark:bg-zinc-800 rounded-full h-1.5">
-                                        <div className="h-1.5 rounded-full bg-blue-500" style={{ width: `${pct}%` }} />
+                                    <div className="w-full rounded-full bg-surface-elevated h-1.5">
+                                        <div className="h-1.5 rounded-full bg-m-blue-light" style={{ width: `${pct}%` }} />
                                     </div>
                                 </div>
                             );
@@ -333,38 +388,38 @@ const ProjectAnalytics = ({ project, tasks }) => {
 
             {/* Burndown chart */}
             {burndownData.length > 1 && (
-                <div className="glass-card rounded-lg p-6">
-                    <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Biểu đồ Burndown (công việc còn lại)</h2>
+                <div className="bg-surface-card rounded-lg p-6">
+                    <h2 className="text-gray-900 dark:text-ink mb-4 text-sm font-bold">Biểu đồ Burndown (công việc còn lại)</h2>
                     <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={burndownData}>
-                            <XAxis dataKey="name" tick={{ fill: "#52525b", fontSize: 11 }} />
-                            <YAxis tick={{ fill: "#52525b", fontSize: 11 }} allowDecimals={false} />
+                            <XAxis dataKey="name" tick={{ fill: "#7e7e7e", fontSize: 11 }} />
+                            <YAxis tick={{ fill: "#7e7e7e", fontSize: 11 }} allowDecimals={false} />
                             <Tooltip />
-                            <Line type="monotone" dataKey="remaining" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} name="Còn lại" />
+                            <Line type="monotone" dataKey="remaining" stroke="#1ed760" strokeWidth={2} dot={{ r: 3 }} name="Còn lại" />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
             )}
 
             {/* Priority Breakdown */}
-            <div className="glass-card rounded-lg p-6">
-                <h2 className="text-zinc-900 dark:text-white mb-4 font-medium">Công việc theo độ ưu tiên</h2>
+            <div className="bg-surface-card rounded-lg p-6">
+                <h2 className="text-gray-900 dark:text-ink mb-4 text-sm font-bold">Công việc theo độ ưu tiên</h2>
                 <div className="space-y-4">
                     {priorityData.map((p) => (
                         <div key={p.name} className="space-y-2">
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    <ArrowRightIcon className={`size-3.5 ${PRIORITY_COLORS[p.name]} bg-transparent dark:bg-transparent`} />
-                                    <span className="text-zinc-900 dark:text-zinc-200 capitalize">{p.name.toLowerCase()}</span>
+                                    <ArrowRightIcon className={`size-3.5 ${PRIORITY_TEXT_COLORS[p.name]}`} />
+                                    <span className="text-gray-900 dark:text-body-strong capitalize">{p.name.toLowerCase()}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-zinc-600 dark:text-zinc-400 text-sm">{p.value} công việc</span>
-                                    <span className="px-2 py-0.5 border border-zinc-400 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 text-xs rounded">
+                                    <span className="text-gray-600 dark:text-muted text-sm">{p.value} công việc</span>
+                                    <span className="px-2.5 py-0.5 rounded-full bg-surface-elevated text-gray-600 dark:text-muted text-xs">
                                         {p.percentage}%
                                     </span>
                                 </div>
                             </div>
-                            <div className="w-full bg-zinc-300 dark:bg-zinc-800 rounded-full h-1.5">
+                            <div className="w-full rounded-full bg-surface-elevated h-1.5">
                                 <div
                                     className={`h-1.5 rounded-full ${PRIORITY_COLORS[p.name]}`}
                                     style={{ width: `${p.percentage}%` }}

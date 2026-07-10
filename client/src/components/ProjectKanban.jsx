@@ -8,24 +8,24 @@ import { apiFetch, API_BASE_URL } from "../lib/api";
 import { updateTask } from "../features/workspaceSlice";
 
 const COLUMNS = [
-    { key: "TODO", label: "Chờ làm", color: "border-zinc-400 dark:border-zinc-600", headerBg: "bg-zinc-100 dark:bg-zinc-800" },
-    { key: "IN_PROGRESS", label: "Đang làm", color: "border-amber-400 dark:border-amber-500", headerBg: "bg-amber-50 dark:bg-amber-900/20" },
-    { key: "REVIEW", label: "Đang review", color: "border-purple-400 dark:border-purple-500", headerBg: "bg-purple-50 dark:bg-purple-900/20" },
-    { key: "DONE", label: "Hoàn thành", color: "border-emerald-400 dark:border-emerald-500", headerBg: "bg-emerald-50 dark:bg-emerald-900/20" },
+    { key: "TODO", label: "Chờ làm", color: "border-hairline", headerBg: "bg-zinc-100 dark:bg-surface-soft" },
+    { key: "IN_PROGRESS", label: "Đang làm", color: "border-m-warning/60", headerBg: "bg-amber-50 dark:bg-m-warning/10" },
+    { key: "REVIEW", label: "Đang review", color: "border-bmw-blue/60", headerBg: "bg-blue-50 dark:bg-bmw-blue/10" },
+    { key: "DONE", label: "Hoàn thành", color: "border-m-success/60", headerBg: "bg-emerald-50 dark:bg-m-success/10" },
 ];
 
 const TYPE_ICONS = {
-    BUG: { icon: Bug, color: "text-red-500" },
-    FEATURE: { icon: Zap, color: "text-blue-500" },
-    TASK: { icon: Square, color: "text-green-500" },
-    IMPROVEMENT: { icon: GitCommit, color: "text-purple-500" },
-    OTHER: { icon: MessageSquare, color: "text-amber-500" },
+    BUG: { icon: Bug, color: "text-m-red" },
+    FEATURE: { icon: Zap, color: "text-bmw-blue" },
+    TASK: { icon: Square, color: "text-m-success" },
+    IMPROVEMENT: { icon: GitCommit, color: "text-bmw-blue" },
+    OTHER: { icon: MessageSquare, color: "text-m-warning" },
 };
 
 const PRIORITY_BADGE = {
-    LOW: "bg-zinc-100 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300",
-    MEDIUM: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-    HIGH: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+    LOW: "bg-zinc-100 text-zinc-600 dark:bg-white/10 dark:text-body",
+    MEDIUM: "bg-blue-50 text-bmw-blue dark:bg-bmw-blue/15 dark:text-bmw-blue",
+    HIGH: "bg-red-50 text-m-red dark:bg-m-red/15 dark:text-m-red",
 };
 
 const PRIORITY_LABEL = { LOW: "Thấp", MEDIUM: "TB", HIGH: "Cao" };
@@ -64,17 +64,17 @@ const TaskCard = ({ task, onDragStart }) => {
         <div
             draggable
             onDragStart={(e) => onDragStart(e, task)}
-            className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-3 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-all select-none"
+            className="bg-white dark:bg-surface-card rounded-lg p-3 cursor-grab active:cursor-grabbing hover:shadow-spotify-md transition-all select-none"
         >
             <div className="flex items-start justify-between gap-2 mb-2">
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 leading-snug">{task.title}</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-ink leading-snug">{task.title}</p>
                 <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
                         title="Đính kèm tài liệu"
-                        className="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-400 hover:text-blue-500 disabled:opacity-50"
+                        className="p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-surface-elevated text-zinc-400 hover:text-bmw-blue disabled:opacity-50"
                     >
                         <Paperclip className="size-3.5" />
                     </button>
@@ -84,15 +84,15 @@ const TaskCard = ({ task, onDragStart }) => {
             </div>
 
             {task.description && (
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2 line-clamp-2">{task.description}</p>
+                <p className="text-xs text-zinc-500 dark:text-muted mb-2 line-clamp-2">{task.description}</p>
             )}
 
             <div className="flex items-center justify-between mt-2">
-                <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${PRIORITY_BADGE[task.priority]}`}>
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${PRIORITY_BADGE[task.priority]}`}>
                     {PRIORITY_LABEL[task.priority]}
                 </span>
                 {task.due_date && (
-                    <span className="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-500">
+                    <span className="flex items-center gap-1 text-xs text-zinc-400 dark:text-muted">
                         <CalendarIcon className="size-3" />
                         {format(new Date(task.due_date), "dd/MM")}
                     </span>
@@ -100,11 +100,11 @@ const TaskCard = ({ task, onDragStart }) => {
             </div>
 
             {task.assignee && (
-                <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-700">
-                    <div className="size-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-hairline/30 dark:border-hairline/30">
+                    <div className="size-5 rounded-full bg-bmw-blue flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                         {(task.assignee.name || task.assignee.email || "?")[0].toUpperCase()}
                     </div>
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                    <span className="text-xs text-zinc-500 dark:text-muted truncate">
                         {task.assignee.name || task.assignee.email}
                     </span>
                 </div>
@@ -175,23 +175,23 @@ const ProjectKanban = ({ tasks: initialTasks }) => {
                         onDragOver={(e) => handleDragOver(e, col.key)}
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, col.key)}
-                        className={`flex flex-col rounded-xl border-2 transition-colors ${col.color} ${isOver ? "bg-blue-50 dark:bg-blue-900/10" : ""}`}
+                        className={`flex flex-col rounded-lg transition-colors ${isOver ? "bg-blue-50 dark:bg-bmw-blue/10" : "bg-surface-soft dark:bg-surface-soft"}`}
                     >
                         {/* Column header */}
-                        <div className={`px-3 py-2 rounded-t-lg ${col.headerBg} flex items-center justify-between`}>
-                            <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">{col.label}</span>
-                            <span className="size-5 rounded-full bg-white dark:bg-zinc-700 text-xs font-bold text-zinc-600 dark:text-zinc-300 flex items-center justify-center shadow-sm">
+                        <div className="px-3 py-2.5 flex items-center justify-between">
+                            <span className="text-xs font-bold text-zinc-700 dark:text-body-strong">{col.label}</span>
+                            <span className="size-5 rounded-full bg-white dark:bg-surface-elevated text-xs font-bold text-zinc-600 dark:text-body flex items-center justify-center">
                                 {colTasks.length}
                             </span>
                         </div>
 
                         {/* Task cards */}
-                        <div className={`flex-1 p-2 space-y-2 min-h-32 rounded-b-lg ${isOver ? "ring-2 ring-blue-400 ring-inset rounded-b-xl" : ""}`}>
+                        <div className={`flex-1 p-2 space-y-2 min-h-32 rounded-lg ${isOver ? "ring-2 ring-bmw-blue ring-inset" : ""}`}>
                             {colTasks.map((task) => (
                                 <TaskCard key={task.id} task={task} onDragStart={handleDragStart} />
                             ))}
                             {colTasks.length === 0 && (
-                                <div className="flex items-center justify-center h-20 text-xs text-zinc-400 dark:text-zinc-600 border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-lg">
+                                <div className="flex items-center justify-center h-20 text-xs text-zinc-400 dark:text-muted rounded-lg border-2 border-dashed border-hairline/40 dark:border-hairline/40">
                                     Kéo thả công việc vào đây
                                 </div>
                             )}

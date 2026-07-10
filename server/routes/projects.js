@@ -7,6 +7,7 @@ import {
   deleteProject,
   addProjectMember,
   removeProjectMember,
+  duplicateProject,
 } from "../controllers/projectController.js";
 import { requireMember } from "../middleware/authz.js";
 
@@ -17,6 +18,8 @@ router.get("/:id", requireMember({ from: "project", param: "id" }), getProject);
 router.post("/workspace/:workspaceId", requireMember({ from: "workspace", param: "workspaceId" }), createProject);
 router.put("/:id", requireMember({ from: "project", param: "id" }), updateProject);
 router.delete("/:id", requireMember({ from: "project", param: "id", role: ["ADMIN", "MANAGER"] }), deleteProject);
+// Nhân bản dự án làm mẫu (controller tự kiểm tra ADMIN/MANAGER/trưởng dự án)
+router.post("/:id/duplicate", requireMember({ from: "project", param: "id" }), duplicateProject);
 router.post("/:id/members", requireMember({ from: "project", param: "id" }), addProjectMember);
 router.delete("/:id/members/:memberId", requireMember({ from: "project", param: "id" }), removeProjectMember);
 

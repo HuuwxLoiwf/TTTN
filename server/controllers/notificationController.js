@@ -18,6 +18,8 @@ export const checkDueTasks = async (req, res) => {
         assigneeId: userId,
         status: { not: "DONE" },
         due_date: { not: null, lte: in24h },
+        deletedAt: null, // không nhắc task đã nằm trong thùng rác
+        project: { deletedAt: null },
       },
       select: { id: true, title: true, due_date: true },
     });
@@ -79,6 +81,25 @@ export const markAsRead = async (req, res) => {
   }
 };
 
+// Đánh dấu đã đọc theo nhóm (mảng ids) — chỉ thông báo của chính mình
+export const markManyAsRead = async (req, res) => {
+  try {
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "Danh sách thông báo trống" });
+    }
+    const result = await prisma.notification.updateMany({
+      where: { id: { in: ids }, userId },
+      data: { isRead: true },
+    });
+    res.json({ updated: result.count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const markAllAsRead = async (req, res) => {
   try {
     const userId = req.auth?.userId;
@@ -94,14 +115,3 @@ export const markAllAsRead = async (req, res) => {
   }
 };
 
-export const createNotification = async (req, res) => {
-  try {
-    const { userId, title, message } = req.body;
-    const notification = await prisma.notification.create({
-      data: { userId, title, message },
-    });
-    res.status(201).json(notification);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};

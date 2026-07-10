@@ -1,18 +1,20 @@
 import prisma from "../configs/prisma.js";
 import { notifyUser, logActivity, logAudit } from "../utils/notify.js";
+import { userRelation } from "../utils/safeSelect.js";
 
 export const getProjects = async (req, res) => {
   try {
     const { workspaceId } = req.params;
     const projects = await prisma.project.findMany({
-      where: { workspaceId },
+      where: { workspaceId, deletedAt: null },
       include: {
-        members: { include: { user: true } },
+        members: { include: { user: userRelation } },
         tasks: {
-          include: { assignee: true },
+          where: { deletedAt: null },
+          include: { assignee: userRelation },
           orderBy: { createdAt: "desc" },
         },
-        owner: true,
+        owner: userRelation,
         department: true,
       },
       orderBy: { createdAt: "desc" },
@@ -29,17 +31,18 @@ export const getProject = async (req, res) => {
     const project = await prisma.project.findUnique({
       where: { id },
       include: {
-        members: { include: { user: true } },
+        members: { include: { user: userRelation } },
         tasks: {
-          include: { assignee: true },
+          where: { deletedAt: null },
+          include: { assignee: userRelation },
           orderBy: { createdAt: "desc" },
         },
-        owner: true,
+        owner: userRelation,
         department: true,
         workspace: true,
       },
     });
-    if (!project) return res.status(404).json({ error: "Project not found" });
+    if (!project || project.deletedAt) return res.status(404).json({ error: "Project not found" });
     res.json(project);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -88,9 +91,9 @@ export const createProject = async (req, res) => {
         },
       },
       include: {
-        members: { include: { user: true } },
-        tasks: { include: { assignee: true } },
-        owner: true,
+        members: { include: { user: userRelation } },
+        tasks: { include: { assignee: userRelation } },
+        owner: userRelation,
       },
     });
 
@@ -108,9 +111,9 @@ export const createProject = async (req, res) => {
     const fullProject = await prisma.project.findUnique({
       where: { id: project.id },
       include: {
-        members: { include: { user: true } },
-        tasks: { include: { assignee: true } },
-        owner: true,
+        members: { include: { user: userRelation } },
+        tasks: { include: { assignee: userRelation } },
+        owner: userRelation,
       },
     });
 
@@ -140,12 +143,37 @@ export const updateProject = async (req, res) => {
   try {
     const userId = req.auth?.userId;
     const { id } = req.params;
-    const { name, description, priority, status, start_date, end_date, progress, departmentId } = req.body;
+    // progress KHÔNG nhận từ client — luôn auto-tính theo % task DONE (recalcProjectProgress).
+    const { name, description, priority, status, start_date, end_date, departmentId, budget } = req.body;
+
+    // Ngân sách: số không âm hoặc null (bỏ ngân sách)
+    let budgetData;
+    if (budget !== undefined) {
+      if (budget === null || budget === "") budgetData = null;
+      else {
+        const b = Number(budget);
+        if (!Number.isFinite(b) || b < 0) return res.status(400).json({ error: "Ngân sách phải là số không âm" });
+        budgetData = b;
+      }
+    }
 
     const before = await prisma.project.findUnique({
       where: { id },
-      select: { name: true, status: true, priority: true },
+      select: { name: true, status: true, priority: true, progress: true, team_lead: true },
     });
+
+    // Chỉ ADMIN hoặc trưởng dự án được sửa thông tin dự án (Cài đặt)
+    if (req.memberRole !== "ADMIN" && before?.team_lead !== userId) {
+      return res.status(403).json({ error: "Chỉ quản trị viên hoặc trưởng dự án mới được sửa dự án" });
+    }
+
+    // Chặn đánh dấu dự án HOÀN THÀNH khi còn công việc chưa xong
+    // (VD: dự án 10 ngày, mới ngày thứ 2 đã "hoàn thành" trong khi tiến độ 20% là phi lý).
+    if (status === "COMPLETED" && (before?.progress ?? 0) < 100) {
+      return res.status(400).json({
+        error: `Không thể đánh dấu dự án hoàn thành: tiến độ mới đạt ${before?.progress ?? 0}% — vẫn còn công việc chưa xong. Hãy hoàn thành hết công việc trước.`,
+      });
+    }
 
     const project = await prisma.project.update({
       where: { id },
@@ -156,13 +184,13 @@ export const updateProject = async (req, res) => {
         status,
         start_date: start_date ? new Date(start_date) : undefined,
         end_date: end_date ? new Date(end_date) : undefined,
-        progress,
         ...(departmentId !== undefined && { departmentId: departmentId || null }),
+        ...(budget !== undefined && { budget: budgetData }),
       },
       include: {
-        members: { include: { user: true } },
-        tasks: { include: { assignee: true } },
-        owner: true,
+        members: { include: { user: userRelation } },
+        tasks: { include: { assignee: userRelation } },
+        owner: userRelation,
       },
     });
 
@@ -194,7 +222,8 @@ export const deleteProject = async (req, res) => {
     const userId = req.auth?.userId;
     const { id } = req.params;
     const proj = await prisma.project.findUnique({ where: { id }, select: { name: true, workspaceId: true } });
-    await prisma.project.delete({ where: { id } });
+    // Soft-delete: vào thùng rác (khôi phục/xóa hẳn ở /api/trash)
+    await prisma.project.update({ where: { id }, data: { deletedAt: new Date() } });
     if (proj) {
       logAudit({
         workspaceId: proj.workspaceId,
@@ -213,6 +242,7 @@ export const deleteProject = async (req, res) => {
 
 export const addProjectMember = async (req, res) => {
   try {
+    const userId = req.auth?.userId;
     const { id } = req.params;
     const { email } = req.body;
 
@@ -225,9 +255,16 @@ export const addProjectMember = async (req, res) => {
 
     const project = await prisma.project.findUnique({
       where: { id },
-      select: { name: true, workspaceId: true },
+      select: { name: true, workspaceId: true, team_lead: true },
     });
     if (!project) return res.status(404).json({ error: "Dự án không tồn tại" });
+
+    // Chỉ ADMIN/MANAGER workspace hoặc trưởng dự án được thêm trực tiếp.
+    // Thành viên thường phải dùng luồng yêu cầu duyệt (member-requests).
+    const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER" || project.team_lead === userId;
+    if (!isManager) {
+      return res.status(403).json({ error: "Chỉ quản trị viên hoặc trưởng dự án mới thêm trực tiếp. Hãy gửi yêu cầu duyệt." });
+    }
 
     // BẮT BUỘC: người được thêm phải là thành viên của workspace chứa dự án
     const inWorkspace = await prisma.workspaceMember.findUnique({
@@ -244,7 +281,7 @@ export const addProjectMember = async (req, res) => {
 
     const member = await prisma.projectMember.create({
       data: { userId: user.id, projectId: id },
-      include: { user: true },
+      include: { user: userRelation },
     });
 
     notifyUser({
@@ -269,11 +306,132 @@ export const addProjectMember = async (req, res) => {
 
 export const removeProjectMember = async (req, res) => {
   try {
+    const userId = req.auth?.userId;
     const { id, memberId } = req.params;
-    await prisma.projectMember.delete({
-      where: { id: memberId, projectId: id },
+
+    const project = await prisma.project.findUnique({
+      where: { id },
+      select: { team_lead: true },
     });
+    if (!project) return res.status(404).json({ error: "Dự án không tồn tại" });
+
+    const target = await prisma.projectMember.findUnique({
+      where: { id: memberId },
+      select: { userId: true, projectId: true },
+    });
+    if (!target || target.projectId !== id) {
+      return res.status(404).json({ error: "Thành viên không thuộc dự án này" });
+    }
+
+    // Quyền xóa: ADMIN/MANAGER, trưởng dự án, hoặc tự rời dự án.
+    const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER" || project.team_lead === userId;
+    const isSelf = target.userId === userId;
+    if (!isManager && !isSelf) {
+      return res.status(403).json({ error: "Bạn không có quyền xóa thành viên này" });
+    }
+    // Không cho xóa trưởng dự án khỏi chính dự án của họ
+    if (target.userId === project.team_lead) {
+      return res.status(400).json({ error: "Không thể xóa trưởng dự án khỏi dự án" });
+    }
+
+    await prisma.projectMember.delete({ where: { id: memberId } });
     res.json({ message: "Member removed" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * NHÂN BẢN DỰ ÁN (dùng dự án cũ làm MẪU) — POST /api/projects/:id/duplicate
+ * Sao chép: thông tin dự án + toàn bộ giai đoạn + công việc (đưa về TODO, bỏ người
+ * được giao & hạn chót). KHÔNG sao chép: bình luận, file, giờ công, tin nhắn.
+ * Quyền: ADMIN / MANAGER / trưởng dự án.
+ */
+export const duplicateProject = async (req, res) => {
+  try {
+    const userId = req.auth?.userId;
+    const { id } = req.params;
+
+    const source = await prisma.project.findUnique({
+      where: { id },
+      include: {
+        phases: { orderBy: { order: "asc" } },
+        tasks: { where: { deletedAt: null } },
+      },
+    });
+    if (!source) return res.status(404).json({ error: "Dự án không tồn tại" });
+
+    const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER" || source.team_lead === userId;
+    if (!isManager) {
+      return res.status(403).json({ error: "Chỉ quản trị viên/quản lý/trưởng dự án mới được nhân bản dự án" });
+    }
+
+    // Tạo dự án mới (người nhân bản làm trưởng dự án)
+    const copy = await prisma.project.create({
+      data: {
+        name: `${source.name} (bản sao)`,
+        description: source.description,
+        priority: source.priority,
+        status: "PLANNING",
+        workspaceId: source.workspaceId,
+        departmentId: source.departmentId,
+        budget: source.budget,
+        team_lead: userId,
+        members: { create: [{ userId }] },
+      },
+    });
+
+    // Sao chép giai đoạn (giữ thứ tự, bỏ ngày & người phụ trách — dự án mới tự đặt)
+    const phaseIdMap = new Map();
+    for (const ph of source.phases) {
+      const newPh = await prisma.phase.create({
+        data: {
+          projectId: copy.id,
+          name: ph.name,
+          description: ph.description,
+          order: ph.order,
+        },
+      });
+      phaseIdMap.set(ph.id, newPh.id);
+    }
+
+    // Sao chép công việc: reset về TODO, bỏ assignee/hạn chót, giữ nhãn + giai đoạn tương ứng
+    if (source.tasks.length > 0) {
+      await prisma.task.createMany({
+        data: source.tasks.map((t) => ({
+          projectId: copy.id,
+          title: t.title,
+          description: t.description,
+          type: t.type,
+          priority: t.priority,
+          labels: t.labels || [],
+          status: "TODO",
+          phaseId: t.phaseId ? phaseIdMap.get(t.phaseId) || null : null,
+        })),
+      });
+    }
+
+    const full = await prisma.project.findUnique({
+      where: { id: copy.id },
+      include: {
+        members: { include: { user: userRelation } },
+        tasks: { include: { assignee: userRelation } },
+        owner: userRelation,
+        department: true,
+      },
+    });
+
+    logAudit({
+      workspaceId: source.workspaceId,
+      userId,
+      action: "CREATE",
+      entityType: "PROJECT",
+      entityId: copy.id,
+      entityName: full.name,
+      changes: { duplicatedFrom: { old: null, new: source.name } },
+    });
+
+    res.status(201).json(full);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

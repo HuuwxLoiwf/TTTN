@@ -1,6 +1,7 @@
 node_modules
 .env
 .env.*
+!.env.example
 
 # Build output (Vercel/Railway tự build lại)
 client/dist

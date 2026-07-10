@@ -79,28 +79,47 @@ const NotificationBell = () => {
         }
     };
 
+    // Khi mở dropdown: đánh dấu đã đọc theo nhóm các thông báo đang hiển thị (UX "đã xem")
+    const handleToggle = () => {
+        const willOpen = !open;
+        setOpen(willOpen);
+        if (willOpen) {
+            const unreadIds = items.filter((n) => !n.isRead).map((n) => n.id);
+            if (unreadIds.length === 0) return;
+            setItems((prev) => prev.map((n) => ({ ...n, isRead: true })));
+            (async () => {
+                try {
+                    const token = await getToken();
+                    await apiFetch(token, "/notifications/read-many", { method: "PUT", body: { ids: unreadIds } });
+                } catch {
+                    fetchNotifications();
+                }
+            })();
+        }
+    };
+
     return (
         <div className="relative" ref={ref}>
             <button
-                onClick={() => setOpen((v) => !v)}
-                className="relative size-8 flex items-center justify-center bg-white dark:bg-zinc-800 shadow rounded-lg transition hover:scale-105 active:scale-95"
+                onClick={handleToggle}
+                className="relative size-8 flex items-center justify-center bg-white dark:bg-surface-card rounded-full transition hover:scale-105 active:scale-95"
             >
-                <Bell className="size-4 text-gray-800 dark:text-gray-200" />
+                <Bell className="size-4 text-gray-800 dark:text-ink" />
                 {unread > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 flex items-center justify-center text-[10px] font-semibold text-white bg-red-500 rounded-full">
+                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-m-red rounded-full">
                         {unread > 9 ? "9+" : unread}
                     </span>
                 )}
             </button>
 
             {open && (
-                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg z-50">
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-zinc-800 sticky top-0 bg-white dark:bg-zinc-900">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Thông báo</h3>
+                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg shadow-spotify-lg bg-white dark:bg-surface-elevated z-50">
+                    <div className="flex items-center justify-between px-4 py-3 sticky top-0 bg-white dark:bg-surface-elevated rounded-t-lg">
+                        <h3 className="text-xs font-bold text-gray-900 dark:text-ink">Thông báo</h3>
                         {unread > 0 && (
                             <button
                                 onClick={markAllRead}
-                                className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                                className="flex items-center gap-1 text-xs text-bmw-blue hover:underline"
                             >
                                 <CheckCheck className="size-3.5" /> Đọc tất cả
                             </button>
@@ -108,25 +127,25 @@ const NotificationBell = () => {
                     </div>
 
                     {items.length === 0 ? (
-                        <div className="px-4 py-8 text-center text-sm text-gray-400 dark:text-zinc-500">
+                        <div className="px-4 py-8 text-center text-sm text-gray-400 dark:text-muted">
                             Chưa có thông báo
                         </div>
                     ) : (
-                        <div className="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <div className="p-1.5 space-y-1">
                             {items.map((n) => (
                                 <button
                                     key={n.id}
                                     onClick={() => markOneRead(n.id)}
-                                    className={`w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-colors ${
-                                        n.isRead ? "" : "bg-blue-50/60 dark:bg-blue-900/10"
+                                    className={`w-full text-left px-3 py-2.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${
+                                        n.isRead ? "" : "bg-blue-50/40 dark:bg-surface-soft"
                                     }`}
                                 >
                                     <div className="flex items-start gap-2">
-                                        {!n.isRead && <span className="mt-1.5 size-2 rounded-full bg-blue-500 flex-shrink-0" />}
-                                        <div className={`flex-1 min-w-0 ${n.isRead ? "pl-4" : ""}`}>
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">{n.title}</p>
-                                            <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">{n.message}</p>
-                                            <p className="text-[11px] text-gray-400 dark:text-zinc-500 mt-1">
+                                        {!n.isRead && <span className="mt-1.5 size-1.5 rounded-full bg-m-blue-light flex-shrink-0" />}
+                                        <div className={`flex-1 min-w-0 ${n.isRead ? "pl-3.5" : ""}`}>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-ink">{n.title}</p>
+                                            <p className="text-xs text-gray-500 dark:text-body mt-0.5">{n.message}</p>
+                                            <p className="text-[11px] text-gray-400 dark:text-muted mt-1">
                                                 {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: vi })}
                                             </p>
                                         </div>

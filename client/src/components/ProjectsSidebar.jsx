@@ -30,11 +30,11 @@ const ProjectSidebar = () => {
     return (
         <div className="mt-6 px-3">
             <div className="flex items-center justify-between px-3 py-2">
-                <h3 className="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                <h3 className="text-xs font-bold text-gray-500 dark:text-muted">
                     Dự án
                 </h3>
                 <Link to="/projects">
-                    <button className="size-5 text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 rounded flex items-center justify-center transition-colors duration-200">
+                    <button className="size-5 rounded-full text-gray-500 dark:text-muted hover:text-gray-900 dark:hover:text-ink hover:bg-gray-100 dark:hover:bg-surface-elevated flex items-center justify-center transition-colors duration-200">
                         <ArrowRightIcon className="size-3" />
                     </button>
                 </Link>
@@ -43,14 +43,14 @@ const ProjectSidebar = () => {
             <div className="space-y-1 px-3">
                 {projects.map((project) => (
                     <div key={project.id}>
-                        <button onClick={() => toggleProject(project.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white" >
-                            <ChevronRightIcon className={`size-3 text-gray-500 dark:text-zinc-400 transition-transform duration-200 ${expandedProjects.has(project.id) && 'rotate-90'}`} />
-                            <div className="size-2 rounded-full bg-blue-500" />
+                        <button onClick={() => toggleProject(project.id)} className="w-full flex items-center gap-2 px-3 py-2 rounded-full transition-colors duration-200 text-gray-700 dark:text-body hover:bg-gray-100 dark:hover:bg-surface-soft hover:text-gray-900 dark:hover:text-ink" >
+                            <ChevronRightIcon className={`size-3 text-gray-500 dark:text-muted transition-transform duration-200 ${expandedProjects.has(project.id) && 'rotate-90'}`} />
+                            <div className="size-2 rounded-full bg-bmw-blue" />
                             <span className="truncate max-w-40 text-sm">{project.name}</span>
                         </button>
 
                         {expandedProjects.has(project.id) && (
-                            <div className="ml-5 mt-1 space-y-1">
+                            <div className="ml-5 mt-1 space-y-1 border-l border-gray-200 dark:border-hairline">
                                 {getProjectSubItems(project.id).map((subItem) => {
                                     // checking if the current path matches the sub-item's URL
                                     const isActive =
@@ -59,7 +59,7 @@ const ProjectSidebar = () => {
                                         searchParams.get('tab') === subItem.title.toLowerCase();
 
                                     return (
-                                        <Link key={subItem.title} to={subItem.url} className={`flex items-center gap-3 px-3 py-1.5 rounded-lg transition-colors duration-200 text-xs ${isActive ? 'bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20' : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800'}`} >
+                                        <Link key={subItem.title} to={subItem.url} className={`flex items-center gap-3 px-3 py-1.5 rounded-full transition-colors duration-200 text-xs ${isActive ? 'bg-gray-100 text-bmw-blue dark:bg-surface-elevated dark:text-bmw-blue' : 'text-gray-600 dark:text-muted hover:text-gray-900 dark:hover:text-ink hover:bg-gray-100 dark:hover:bg-surface-soft'}`} >
                                             <subItem.icon className="size-3" />
                                             {subItem.title}
                                         </Link>

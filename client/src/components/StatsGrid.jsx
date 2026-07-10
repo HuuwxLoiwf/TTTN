@@ -23,32 +23,28 @@ export default function StatsGrid() {
             title: "Tổng dự án",
             value: stats.totalProjects,
             subtitle: currentWorkspace?.name ? `dự án trong ${currentWorkspace.name}` : "chưa có không gian làm việc",
-            bgColor: "bg-blue-500/10",
-            textColor: "text-blue-500",
+            textColor: "text-m-blue-dark",
         },
         {
             icon: CheckCircle,
             title: "Dự án hoàn thành",
             value: stats.completedProjects,
             subtitle: `trên ${stats.totalProjects} tổng`,
-            bgColor: "bg-emerald-500/10",
-            textColor: "text-emerald-500",
+            textColor: "text-m-success",
         },
         {
             icon: Users,
             title: "Công việc của tôi",
             value: stats.myTasks,
             subtitle: "được giao cho tôi",
-            bgColor: "bg-purple-500/10",
-            textColor: "text-purple-500",
+            textColor: "text-bmw-blue",
         },
         {
             icon: AlertTriangle,
             title: "Quá hạn",
             value: stats.overdueIssues,
             subtitle: "cần chú ý",
-            bgColor: "bg-amber-500/10",
-            textColor: "text-amber-500",
+            textColor: "text-m-warning",
         },
     ];
 
@@ -81,28 +77,26 @@ export default function StatsGrid() {
     }, [currentWorkspace, user?.id]);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-9">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 my-9">
             {statCards.map(
-                ({ icon: Icon, title, value, subtitle, bgColor, textColor }, i) => (
-                    <div key={i} className="glass-card hover:-translate-y-1" >
-                        <div className="p-6 py-4">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">
-                                        {title}
+                ({ icon: Icon, title, value, subtitle, textColor }, i) => (
+                    <div key={i} className="rounded-lg shadow-spotify-md bg-white dark:bg-surface-card p-6 py-4">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <p className="text-xs font-bold text-gray-500 dark:text-muted mb-1">
+                                    {title}
+                                </p>
+                                <p className="text-3xl font-bold text-gray-900 dark:text-ink">
+                                    {value}
+                                </p>
+                                {subtitle && (
+                                    <p className="text-xs text-gray-400 dark:text-muted font-light mt-1">
+                                        {subtitle}
                                     </p>
-                                    <p className="text-3xl font-bold text-zinc-800 dark:text-white">
-                                        {value}
-                                    </p>
-                                    {subtitle && (
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
-                                            {subtitle}
-                                        </p>
-                                    )}
-                                </div>
-                                <div className={`p-3 rounded-xl ${bgColor} bg-opacity-20`}>
-                                    <Icon size={20} className={textColor} />
-                                </div>
+                                )}
+                            </div>
+                            <div className="p-3 rounded-full bg-black/5 dark:bg-white/10">
+                                <Icon size={20} className={textColor} />
                             </div>
                         </div>
                     </div>

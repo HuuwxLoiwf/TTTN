@@ -1,11 +1,12 @@
 import prisma from "../configs/prisma.js";
+import { userRelation } from "../utils/safeSelect.js";
 
 export const getActivities = async (req, res) => {
   try {
     const { workspaceId } = req.params;
     const activities = await prisma.activity.findMany({
       where: { workspaceId },
-      include: { user: true },
+      include: { user: userRelation },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
@@ -69,7 +70,7 @@ export const createActivity = async (req, res) => {
 
     const activity = await prisma.activity.create({
       data: { workspaceId, userId, action, entityType, entityId },
-      include: { user: true },
+      include: { user: userRelation },
     });
     res.status(201).json(activity);
   } catch (error) {

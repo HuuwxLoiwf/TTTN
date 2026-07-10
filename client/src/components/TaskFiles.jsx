@@ -67,15 +67,15 @@ const TaskFiles = ({ taskId }) => {
     };
 
     return (
-        <div className="p-4 rounded-md bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-800">
+        <div className="p-4 rounded-lg bg-white dark:bg-surface-card">
             <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
+                <h3 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-ink">
                     <Paperclip className="size-4" /> Tệp đính kèm ({files.length})
                 </h3>
                 <button
                     onClick={() => inputRef.current?.click()}
                     disabled={uploading}
-                    className="text-xs px-2.5 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                    className="text-xs font-bold rounded-full px-3 py-1.5 bg-m-blue-light text-black hover:bg-m-blue-dark disabled:opacity-50 transition"
                 >
                     {uploading ? "Đang tải..." : "+ Thêm file"}
                 </button>
@@ -83,22 +83,24 @@ const TaskFiles = ({ taskId }) => {
             </div>
 
             {files.length === 0 ? (
-                <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center py-2">Chưa có tệp đính kèm</p>
+                <p className="text-xs text-gray-400 dark:text-muted text-center py-2">Chưa có tệp đính kèm</p>
             ) : (
                 <div className="space-y-1.5">
                     {files.map((f) => (
-                        <div key={f.id} className="flex items-center gap-2 px-2 py-1.5 rounded bg-zinc-50 dark:bg-zinc-800/60 text-sm">
-                            <FileText className="size-4 text-blue-500 flex-shrink-0" />
-                            <span className="flex-1 truncate text-zinc-800 dark:text-zinc-200">{f.fileName}</span>
+                        <div key={f.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg dark:bg-surface-soft text-sm">
+                            <span className="flex items-center justify-center rounded-full bg-surface-elevated size-7 flex-shrink-0">
+                                <FileText className="size-3.5 text-m-blue-light" />
+                            </span>
+                            <span className="flex-1 truncate text-gray-800 dark:text-body-strong">{f.fileName}</span>
                             {canPreview(f.fileName) && (
-                                <button onClick={() => setPreviewFile(f)} className="p-1 text-zinc-400 hover:text-blue-500" title="Xem trực tiếp">
+                                <button onClick={() => setPreviewFile(f)} className="rounded-full p-1.5 text-gray-400 dark:text-muted hover:text-m-blue-light hover:bg-surface-elevated" title="Xem trực tiếp">
                                     <Eye className="size-4" />
                                 </button>
                             )}
-                            <a href={f.fileUrl} target="_blank" rel="noreferrer" className="p-1 text-zinc-400 hover:text-blue-500">
+                            <a href={f.fileUrl} target="_blank" rel="noreferrer" className="rounded-full p-1.5 text-gray-400 dark:text-muted hover:text-m-blue-light hover:bg-surface-elevated">
                                 <Download className="size-4" />
                             </a>
-                            <button onClick={() => handleDelete(f.id)} className="p-1 text-zinc-400 hover:text-red-500">
+                            <button onClick={() => handleDelete(f.id)} className="rounded-full p-1.5 text-gray-400 dark:text-muted hover:text-m-red hover:bg-surface-elevated">
                                 <Trash2 className="size-4" />
                             </button>
                         </div>

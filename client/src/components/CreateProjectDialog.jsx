@@ -156,37 +156,37 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
     if (!isDialogOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur flex items-center justify-center text-left z-50 p-4">
-            <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 w-full max-w-lg text-zinc-900 dark:text-zinc-200 relative max-h-[90vh] overflow-y-auto">
-                <button className="absolute top-3 right-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200" onClick={() => setIsDialogOpen(false)} >
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center text-left z-50 p-4">
+            <div className="bg-white dark:bg-surface-card rounded-lg p-6 w-full max-w-lg text-gray-900 dark:text-ink relative max-h-[90vh] overflow-y-auto shadow-spotify-lg">
+                <button className="absolute top-3 right-3 text-gray-500 dark:text-muted hover:text-gray-700 dark:hover:text-ink" onClick={() => setIsDialogOpen(false)} >
                     <XIcon className="size-5" />
                 </button>
 
-                <h2 className="text-xl font-medium mb-1">Tạo dự án mới</h2>
+                <h2 className="text-xl font-bold mb-1">Tạo dự án mới</h2>
                 {currentWorkspace && (
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-                        Trong không gian làm việc: <span className="text-blue-600 dark:text-blue-400">{currentWorkspace.name}</span>
+                    <p className="text-sm text-gray-600 dark:text-body mb-4">
+                        Trong không gian làm việc: <span className="text-bmw-blue">{currentWorkspace.name}</span>
                     </p>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Project Name */}
                     <div>
-                        <label className="block text-sm mb-1">Tên dự án</label>
-                        <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Nhập tên dự án" className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm" required />
+                        <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Tên dự án</label>
+                        <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Nhập tên dự án" className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" required />
                     </div>
 
                     {/* Description */}
                     <div>
-                        <label className="block text-sm mb-1">Mô tả</label>
-                        <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Mô tả dự án của bạn" className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm h-20" />
+                        <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Mô tả</label>
+                        <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Mô tả dự án của bạn" className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm h-20 dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" />
                     </div>
 
                     {/* Status & Priority */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm mb-1">Trạng thái</label>
-                            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm" >
+                            <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Trạng thái</label>
+                            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" >
                                 <option value="PLANNING">Lên kế hoạch</option>
                                 <option value="ACTIVE">Đang hoạt động</option>
                                 <option value="COMPLETED">Hoàn thành</option>
@@ -196,8 +196,8 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm mb-1">Độ ưu tiên</label>
-                            <select value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })} className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm" >
+                            <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Độ ưu tiên</label>
+                            <select value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" >
                                 <option value="LOW">Thấp</option>
                                 <option value="MEDIUM">Trung bình</option>
                                 <option value="HIGH">Cao</option>
@@ -208,19 +208,19 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                     {/* Phòng ban */}
                     <div>
                         <div className="flex items-center justify-between mb-1">
-                            <label className="block text-sm">Phòng ban <span className="text-red-500">*</span></label>
-                            <button type="button" onClick={() => setShowDeptManager(true)} className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                            <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body">Phòng ban <span className="text-m-red">*</span></label>
+                            <button type="button" onClick={() => setShowDeptManager(true)} className="text-xs text-bmw-blue hover:underline flex items-center gap-1">
                                 <Building2 className="size-3" /> Quản lý
                             </button>
                         </div>
-                        <select required value={formData.departmentId} onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })} className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm">
+                        <select required value={formData.departmentId} onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white">
                             <option value="">-- Chọn phòng ban --</option>
                             {departments.map((d) => (
                                 <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
                         </select>
                         {departments.length === 0 && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                            <p className="text-xs text-m-warning mt-1">
                                 Chưa có phòng ban. Bấm "Quản lý" để tạo trước khi tạo dự án.
                             </p>
                         )}
@@ -229,19 +229,19 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                     {/* Dates */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm mb-1">Ngày bắt đầu</label>
-                            <input type="date" value={formData.start_date} min={today} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm" />
+                            <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Ngày bắt đầu</label>
+                            <input type="date" value={formData.start_date} min={today} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" />
                         </div>
                         <div>
-                            <label className="block text-sm mb-1">Ngày kết thúc</label>
-                            <input type="date" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })} min={formData.start_date} className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm" />
+                            <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Ngày kết thúc</label>
+                            <input type="date" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })} min={formData.start_date} className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" />
                         </div>
                     </div>
 
                     {/* Lead */}
                     <div>
-                        <label className="block text-sm mb-1">Trưởng dự án</label>
-                        <select value={formData.team_lead} onChange={(e) => setFormData({ ...formData, team_lead: e.target.value, team_members: e.target.value ? [...new Set([...formData.team_members, e.target.value])] : formData.team_members, })} className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm" >
+                        <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Trưởng dự án</label>
+                        <select value={formData.team_lead} onChange={(e) => setFormData({ ...formData, team_lead: e.target.value, team_members: e.target.value ? [...new Set([...formData.team_members, e.target.value])] : formData.team_members, })} className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" >
                             <option value="">Chưa có</option>
                             {currentWorkspace?.members?.map((member) => (
                                 <option key={member.user.email} value={member.user.email}>
@@ -253,7 +253,7 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
 
                     {/* Team Members */}
                     <div>
-                        <label className="block text-sm mb-1">Thành viên nhóm</label>
+                        <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Thành viên nhóm</label>
                         <div className="flex gap-2 mt-1">
                             <input
                                 type="email"
@@ -267,9 +267,9 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                                     }
                                 }}
                                 placeholder="Nhập email thành viên..."
-                                className="flex-1 px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-200 text-sm"
+                                className="flex-1 px-3 py-2 bg-white dark:bg-surface-elevated rounded text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white"
                             />
-                            <button type="button" onClick={addTeamMember} className="px-4 py-2 rounded border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-sm whitespace-nowrap" >
+                            <button type="button" onClick={addTeamMember} className="px-4 py-2 rounded-full border border-hairline-strong text-ink hover:bg-white/10 text-sm font-bold uppercase tracking-[1.4px] whitespace-nowrap transition" >
                                 Thêm
                             </button>
                         </div>
@@ -281,19 +281,19 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                                     <option key={member.user.email} value={member.user.email} />
                                 ))}
                         </datalist>
-                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Gõ email thành viên rồi bấm Thêm.</p>
+                        <p className="text-xs text-gray-400 dark:text-muted mt-1">Gõ email thành viên rồi bấm Thêm.</p>
 
                         {/* Email chưa thuộc workspace → mời ngay tại đây, không cần thoát ra */}
                         {pendingInvite && (
-                            <div className="mt-2 p-3 rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
-                                <p className="text-xs text-amber-700 dark:text-amber-400 mb-2">
+                            <div className="mt-2 p-3 rounded bg-m-warning/10">
+                                <p className="text-xs text-m-warning mb-2">
                                     <strong>{pendingInvite}</strong> chưa thuộc không gian làm việc.
                                 </p>
                                 <div className="flex gap-2">
-                                    <button type="button" onClick={inviteToWorkspace} disabled={inviting} className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs disabled:opacity-50">
+                                    <button type="button" onClick={inviteToWorkspace} disabled={inviting} className="px-3 py-1.5 rounded-full border border-bmw-blue text-bmw-blue hover:bg-bmw-blue hover:text-white text-xs font-bold uppercase tracking-[1.4px] disabled:opacity-50 transition">
                                         {inviting ? "Đang mời..." : "Mời vào workspace + thêm vào dự án"}
                                     </button>
-                                    <button type="button" onClick={() => setPendingInvite("")} className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 text-xs">
+                                    <button type="button" onClick={() => setPendingInvite("")} className="px-3 py-1.5 rounded-full border border-hairline-strong text-ink text-xs font-bold uppercase tracking-[1.4px] hover:bg-white/10 transition">
                                         Bỏ qua
                                     </button>
                                 </div>
@@ -303,9 +303,9 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                         {formData.team_members.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
                                 {formData.team_members.map((email) => (
-                                    <div key={email} className="flex items-center gap-1 bg-blue-200/50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 px-2 py-1 rounded-md text-sm" >
+                                    <div key={email} className="flex items-center gap-1 rounded-full bg-bmw-blue/10 text-bmw-blue px-3 py-1 text-sm" >
                                         {email}
-                                        <button type="button" onClick={() => removeTeamMember(email)} className="ml-1 hover:bg-blue-300/30 dark:hover:bg-blue-500/30 rounded" >
+                                        <button type="button" onClick={() => removeTeamMember(email)} className="ml-1 hover:bg-bmw-blue/20 rounded-full" >
                                             <XIcon className="w-3 h-3" />
                                         </button>
                                     </div>
@@ -316,10 +316,10 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
 
                     {/* Footer */}
                     <div className="flex justify-end gap-3 pt-2 text-sm">
-                        <button type="button" onClick={() => setIsDialogOpen(false)} className="px-4 py-2 rounded border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800" >
+                        <button type="button" onClick={() => setIsDialogOpen(false)} className="px-4 h-11 rounded-full border border-hairline-strong text-ink font-bold uppercase tracking-[1.4px] hover:bg-white/10 transition" >
                             Hủy
                         </button>
-                        <button type="submit" disabled={isSubmitting || !currentWorkspace} className="px-4 py-2 rounded bg-gradient-to-br from-blue-500 to-blue-600 text-white dark:text-zinc-200 disabled:opacity-50" >
+                        <button type="submit" disabled={isSubmitting || !currentWorkspace} className="px-4 h-11 rounded-full bg-m-blue-light text-black font-bold uppercase tracking-[1.4px] hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 transition" >
                             {isSubmitting ? "Đang tạo..." : "Tạo dự án"}
                         </button>
                     </div>

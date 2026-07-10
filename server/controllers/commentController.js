@@ -2,13 +2,14 @@ import prisma from "../configs/prisma.js";
 import { emitToProject } from "../socket.js";
 import { sendCommentNotificationEmail } from "../utils/emailService.js";
 import { notifyUser, logActivity, notifyMentions } from "../utils/notify.js";
+import { userRelation } from "../utils/safeSelect.js";
 
 export const getComments = async (req, res) => {
   try {
     const { taskId } = req.params;
     const comments = await prisma.comment.findMany({
       where: { taskId },
-      include: { user: true },
+      include: { user: userRelation },
       orderBy: { createdAt: "asc" },
     });
     res.json(comments);
@@ -27,7 +28,7 @@ export const createComment = async (req, res) => {
 
     const comment = await prisma.comment.create({
       data: { content, userId, taskId },
-      include: { user: true },
+      include: { user: userRelation },
     });
 
     // Emit to all clients watching this task's project

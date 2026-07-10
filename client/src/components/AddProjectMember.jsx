@@ -59,20 +59,20 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }) => {
     if (!isDialogOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/20 dark:bg-black/50 backdrop-blur flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl p-6 w-full max-w-md text-zinc-900 dark:text-zinc-200">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="rounded-lg bg-white dark:bg-surface-card shadow-spotify-lg p-6 w-full max-w-md text-ink dark:text-body">
                 {/* Header */}
                 <div className="mb-4">
-                    <h2 className="text-xl font-bold flex items-center gap-2">
-                        <UserPlus className="size-5 text-zinc-900 dark:text-zinc-200" /> {canAddDirectly ? "Thêm thành viên dự án" : "Yêu cầu thêm thành viên"}
+                    <h2 className="text-lg font-bold flex items-center gap-2 dark:text-ink">
+                        <UserPlus className="size-5 text-ink dark:text-ink" /> {canAddDirectly ? "Thêm thành viên dự án" : "Yêu cầu thêm thành viên"}
                     </h2>
                     {project && (
-                        <p className="text-sm text-zinc-700 dark:text-zinc-400">
-                            {canAddDirectly ? "Thêm vào dự án" : "Gửi yêu cầu cho dự án"}: <span className="text-blue-600 dark:text-blue-400">{project.name}</span>
+                        <p className="text-sm text-body dark:text-muted mt-1">
+                            {canAddDirectly ? "Thêm vào dự án" : "Gửi yêu cầu cho dự án"}: <span className="text-m-blue-light">{project.name}</span>
                         </p>
                     )}
                     {!canAddDirectly && (
-                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                        <p className="text-xs text-m-warning mt-1">
                             Bạn không phải quản trị viên — yêu cầu sẽ được gửi tới quản trị viên/trưởng dự án để duyệt.
                         </p>
                     )}
@@ -82,12 +82,12 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }) => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Email select */}
                     <div className="space-y-2">
-                        <label htmlFor="email" className="text-sm font-medium text-zinc-900 dark:text-zinc-200">
+                        <label htmlFor="email" className="text-xs font-bold text-ink dark:text-body-strong">
                             Chọn thành viên
                         </label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 w-4 h-4" />
-                            <select value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10 mt-1 w-full rounded border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 text-sm py-2 focus:outline-none focus:border-blue-500" required >
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted dark:text-muted w-4 h-4" />
+                            <select value={email} onChange={(e) => setEmail(e.target.value)} className="rounded pl-10 mt-1 w-full bg-white dark:bg-surface-elevated dark:shadow-spotify-inset text-ink dark:text-ink text-sm py-2 focus:outline-none" required >
                                 <option value="">Chọn thành viên</option>
                                 {currentWorkspace?.members
                                     .filter((member) => !projectMembersEmails.includes(member.user.email))
@@ -100,10 +100,10 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }) => {
 
                     {/* Footer */}
                     <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={() => setIsDialogOpen(false)} className="px-5 py-2 text-sm rounded border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition" >
+                        <button type="button" onClick={() => setIsDialogOpen(false)} className="rounded-full px-5 py-2 text-sm font-bold text-ink dark:text-body hover:bg-surface-soft dark:hover:bg-surface-elevated transition" >
                             Hủy
                         </button>
-                        <button type="submit" disabled={isAdding || !project || !email} className="px-5 py-2 text-sm rounded bg-gradient-to-br from-blue-500 to-blue-600 hover:opacity-90 text-white disabled:opacity-50 transition" >
+                        <button type="submit" disabled={isAdding || !project || !email} className="rounded-full px-5 py-2 text-sm font-bold bg-m-blue-light text-black hover:bg-m-blue-dark disabled:opacity-50 transition" >
                             {isAdding ? "Đang xử lý..." : canAddDirectly ? "Thêm thành viên" : "Gửi yêu cầu"}
                         </button>
                     </div>

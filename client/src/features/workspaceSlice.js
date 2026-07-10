@@ -105,10 +105,13 @@ const workspaceSlice = createSlice({
             );
         },
         addTask: (state, action) => {
+            // Chống trùng: người tạo nhận task 2 lần (API response + socket task:created)
+            const appendUnique = (tasks) =>
+                tasks.some((t) => t.id === action.payload.id) ? tasks : tasks.concat(action.payload);
             if (state.currentWorkspace) {
                 state.currentWorkspace.projects = state.currentWorkspace.projects.map((p) => {
                     if (p.id === action.payload.projectId) {
-                        return { ...p, tasks: p.tasks.concat(action.payload) };
+                        return { ...p, tasks: appendUnique(p.tasks) };
                     }
                     return p;
                 });
@@ -119,7 +122,7 @@ const workspaceSlice = createSlice({
                           ...w,
                           projects: w.projects.map((p) =>
                               p.id === action.payload.projectId
-                                  ? { ...p, tasks: p.tasks.concat(action.payload) }
+                                  ? { ...p, tasks: appendUnique(p.tasks) }
                                   : p
                           ),
                       }

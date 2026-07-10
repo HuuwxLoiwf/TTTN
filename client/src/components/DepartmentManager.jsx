@@ -72,12 +72,12 @@ const DepartmentManager = ({ isOpen, setIsOpen, onChange }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 w-full max-w-md text-zinc-900 dark:text-zinc-200 relative">
-                <button className="absolute top-3 right-3 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200" onClick={() => setIsOpen(false)}>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="rounded-lg bg-white dark:bg-surface-card shadow-spotify-lg p-6 w-full max-w-md text-zinc-900 dark:text-body relative">
+                <button className="absolute top-3 right-3 rounded-full p-1 text-zinc-500 hover:text-zinc-700 dark:text-muted dark:hover:text-ink hover:bg-surface-elevated transition" onClick={() => setIsOpen(false)}>
                     <XIcon className="size-5" />
                 </button>
-                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-bold mb-4 flex items-center gap-2 dark:text-ink">
                     <Building2 className="size-5" /> Quản lý phòng ban
                 </h2>
 
@@ -87,9 +87,9 @@ const DepartmentManager = ({ isOpen, setIsOpen, onChange }) => {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Tên phòng ban (VD: Phòng IT)"
-                            className="flex-1 px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-sm"
+                            className="flex-1 rounded px-3 py-2 dark:bg-surface-elevated dark:shadow-spotify-inset text-sm dark:text-ink focus:outline-none"
                         />
-                        <button type="submit" disabled={busy} className="px-3 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm flex items-center gap-1 disabled:opacity-50">
+                        <button type="submit" disabled={busy} className="rounded-full px-4 py-2 bg-m-blue-light text-black hover:bg-m-blue-dark text-sm font-bold flex items-center gap-1 disabled:opacity-50 transition">
                             <Plus className="size-4" /> Thêm
                         </button>
                     </form>
@@ -97,16 +97,16 @@ const DepartmentManager = ({ isOpen, setIsOpen, onChange }) => {
 
                 <div className="space-y-2 max-h-72 overflow-y-auto">
                     {departments.length === 0 ? (
-                        <p className="text-sm text-zinc-400 text-center py-6">Chưa có phòng ban nào</p>
+                        <p className="text-sm text-zinc-400 dark:text-muted text-center py-6">Chưa có phòng ban nào</p>
                     ) : (
                         departments.map((d) => (
-                            <div key={d.id} className="flex items-center justify-between px-3 py-2 rounded bg-zinc-100 dark:bg-zinc-800 text-sm">
+                            <div key={d.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-zinc-50 dark:bg-surface-soft text-sm">
                                 <div>
-                                    <span className="font-medium">{d.name}</span>
-                                    <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-2">{d._count?.projects ?? 0} dự án</span>
+                                    <span className="font-medium dark:text-ink">{d.name}</span>
+                                    <span className="text-xs text-zinc-500 dark:text-muted ml-2">{d._count?.projects ?? 0} dự án</span>
                                 </div>
                                 {isAdmin && (
-                                    <button onClick={() => handleDelete(d.id)} className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-zinc-400 hover:text-red-500">
+                                    <button onClick={() => handleDelete(d.id)} className="rounded-full p-1 hover:bg-red-50 dark:hover:bg-m-red/10 text-zinc-400 dark:text-muted hover:text-m-red">
                                         <Trash2 className="size-4" />
                                     </button>
                                 )}
