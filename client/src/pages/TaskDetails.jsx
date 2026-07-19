@@ -8,6 +8,7 @@ import { CalendarIcon, MessageCircle, PenIcon, Edit2, ArrowLeftIcon, Trash2 } fr
 import { useDispatch } from "react-redux";
 import { deleteTask } from "../features/workspaceSlice";
 import { apiFetch } from "../lib/api";
+import { canManageProject } from "../lib/permissions";
 import { joinProject, leaveProject, getSocket } from "../lib/socket";
 import TimeTracker from "../components/TimeTracker";
 import SubtaskChecklist from "../components/SubtaskChecklist";
@@ -15,6 +16,7 @@ import TaskDependencies from "../components/TaskDependencies";
 import TaskFiles from "../components/TaskFiles";
 import EditTaskDialog from "../components/EditTaskDialog";
 import MentionPicker from "../components/MentionPicker";
+import Avatar from "../components/Avatar";
 
 const TaskDetails = () => {
 
@@ -42,9 +44,9 @@ const TaskDetails = () => {
 
     const { currentWorkspace } = useSelector((state) => state.workspace);
 
-    // Xóa công việc: chỉ Quản trị viên (ADMIN) của không gian làm việc
-    const myRole = currentWorkspace?.members?.find((m) => m.userId === user?.id)?.role;
-    const isAdmin = myRole === "ADMIN";
+    // Thao tác công việc (sửa, mục con, ghi giờ, phụ thuộc, xóa vào thùng rác):
+    // thành viên dự án — khớp server (requireProjectMember). VIEWER/người ngoài dự án chỉ xem.
+    const canOperate = canManageProject(currentWorkspace, project, user?.id);
 
     const handleDeleteTask = async () => {
         if (!window.confirm(`Xóa công việc "${task.title}"? Công việc sẽ được chuyển vào thùng rác.`)) return;
@@ -160,9 +162,7 @@ const TaskDetails = () => {
                                 {comments.map((comment) => (
                                     <div key={comment.id} className={`sm:max-w-4/5 dark:bg-surface-elevated rounded-lg p-3 ${comment.user?.id === user?.id ? "ml-auto" : "mr-auto"}`} >
                                         <div className="flex items-center gap-2 mb-1 text-sm text-gray-500 dark:text-body">
-                                            {comment.user?.image && (
-                                                <img src={comment.user.image} alt="avatar" className="size-5 rounded-full" />
-                                            )}
+                                            <Avatar src={comment.user?.image} name={comment.user?.name} email={comment.user?.email} size="size-5" textClass="text-[9px]" />
                                             <span className="font-medium text-gray-900 dark:text-ink">{comment.user?.name || comment.user?.email || "Người dùng"}</span>
                                             <span className="text-xs text-gray-400 dark:text-muted">
                                                 • {format(new Date(comment.createdAt), "dd MMM yyyy, HH:mm")}
@@ -204,11 +204,13 @@ const TaskDetails = () => {
                         <div className="flex items-start justify-between gap-2">
                             <h1 className="text-lg font-bold text-gray-900 dark:text-ink">{task.title}</h1>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                                <button onClick={() => setShowEdit(true)} className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-surface-elevated hover:bg-zinc-200 dark:hover:bg-white/10">
-                                    <Edit2 className="size-3.5" /> Sửa
-                                </button>
-                                {isAdmin && (
-                                    <button onClick={handleDeleteTask} title="Xóa công việc (chỉ quản trị viên)" className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full bg-m-red/10 text-m-red hover:bg-m-red hover:text-white transition">
+                                {canOperate && (
+                                    <button onClick={() => setShowEdit(true)} className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-surface-elevated hover:bg-zinc-200 dark:hover:bg-white/10">
+                                        <Edit2 className="size-3.5" /> Sửa
+                                    </button>
+                                )}
+                                {canOperate && (
+                                    <button onClick={handleDeleteTask} title="Xóa công việc (chuyển vào thùng rác)" className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full bg-m-red/10 text-m-red hover:bg-m-red hover:text-white transition">
                                         <Trash2 className="size-3.5" /> Xóa
                                     </button>
                                 )}
@@ -235,8 +237,8 @@ const TaskDetails = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-body">
                         <div className="flex items-center gap-2">
-                            {task.assignee?.image && (
-                                <img src={task.assignee.image} className="size-5 rounded-full" alt="avatar" />
+                            {task.assignee && (
+                                <Avatar src={task.assignee.image} name={task.assignee.name} email={task.assignee.email} size="size-5" textClass="text-[9px]" />
                             )}
                             {task.assignee?.name || task.assignee?.email || "Chưa giao"}
                         </div>
@@ -251,13 +253,13 @@ const TaskDetails = () => {
                 <TaskFiles taskId={taskId} />
 
                 {/* Subtask / checklist — chỉ quản trị viên chỉnh, thành viên chỉ xem */}
-                <SubtaskChecklist taskId={taskId} canEdit={isAdmin} />
+                <SubtaskChecklist taskId={taskId} canEdit={canOperate} />
 
                 {/* Phụ thuộc công việc — chỉ quản trị viên chỉnh */}
-                <TaskDependencies taskId={taskId} projectTasks={project?.tasks || []} canEdit={isAdmin} />
+                <TaskDependencies taskId={taskId} projectTasks={project?.tasks || []} canEdit={canOperate} />
 
                 {/* Thời gian làm việc — chỉ quản trị viên ghi/xóa */}
-                <TimeTracker taskId={taskId} canEdit={isAdmin} />
+                <TimeTracker taskId={taskId} canEdit={canOperate} />
 
                 {/* Project Info */}
                 {project && (

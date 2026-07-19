@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth, useUser } from "../context/AuthContext";
 import { deleteTask, updateTask } from "../features/workspaceSlice";
 import { apiFetch } from "../lib/api";
+import { canManageProject } from "../lib/permissions";
+import Avatar from "./Avatar";
 import { Bug, CalendarIcon, GitCommit, MessageSquare, Square, Trash, XIcon, Zap } from "lucide-react";
 
 const typeIcons = {
@@ -30,10 +32,17 @@ const ProjectTasks = ({ tasks }) => {
     const { currentWorkspace } = useSelector((state) => state.workspace);
     const [selectedTasks, setSelectedTasks] = useState([]);
 
-    // Quyền đổi trạng thái: chỉ quản trị viên (ADMIN)
+    // Xóa hàng loạt = quyền quản trị viên (khớp server bulkDeleteTasks)
     const myRole = currentWorkspace?.members?.find((m) => m.userId === user?.id)?.role;
     const isAdmin = myRole === "ADMIN";
-    const canChangeStatus = () => isAdmin;
+    // Đổi trạng thái: thành viên dự án của task đó (khớp server PUT /tasks/:id)
+    const projectsById = useMemo(() => {
+        const map = {};
+        (currentWorkspace?.projects || []).forEach((p) => { map[p.id] = p; });
+        return map;
+    }, [currentWorkspace]);
+    const canChangeStatus = (task) =>
+        canManageProject(currentWorkspace, projectsById[task?.projectId], user?.id);
 
     const [filters, setFilters] = useState({
         status: "",
@@ -258,7 +267,7 @@ const ProjectTasks = ({ tasks }) => {
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <div className="flex items-center gap-2">
-                                                        <img src={task.assignee?.image} className="size-5 rounded-full" alt="avatar" />
+                                                        {task.assignee ? <Avatar src={task.assignee.image} name={task.assignee.name} email={task.assignee.email} size="size-5" textClass="text-[9px]" /> : null}
                                                         {task.assignee?.name || "-"}
                                                     </div>
                                                 </td>
@@ -320,7 +329,7 @@ const ProjectTasks = ({ tasks }) => {
                                         </div>
 
                                         <div className="flex items-center gap-2 text-sm text-body dark:text-body">
-                                            <img src={task.assignee?.image} className="size-5 rounded-full" alt="avatar" />
+                                            {task.assignee ? <Avatar src={task.assignee.image} name={task.assignee.name} email={task.assignee.email} size="size-5" textClass="text-[9px]" /> : null}
                                             {task.assignee?.name || "-"}
                                         </div>
 

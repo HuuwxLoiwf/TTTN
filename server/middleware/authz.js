@@ -98,6 +98,33 @@ export const requireMember = ({ from = "workspace", param = "id", role } = {}) =
                 workspaceId = log.task?.project?.workspaceId;
                 req.projectId = log.task?.projectId;
                 req.timeLogOwnerId = log.userId;
+            } else if (from === "equipment") {
+                const eq = await prisma.equipment.findUnique({
+                    where: { id: req.params[param] },
+                    select: { workspaceId: true },
+                });
+                if (!eq) return res.status(404).json({ error: "Thiết bị không tồn tại" });
+                workspaceId = eq.workspaceId;
+            } else if (from === "risk") {
+                const risk = await prisma.risk.findUnique({
+                    where: { id: req.params[param] },
+                    select: { createdBy: true, projectId: true, project: { select: { workspaceId: true, team_lead: true } } },
+                });
+                if (!risk) return res.status(404).json({ error: "Rủi ro không tồn tại" });
+                workspaceId = risk.project?.workspaceId;
+                req.projectId = risk.projectId;
+                req.riskCreatorId = risk.createdBy;
+                req.projectTeamLead = risk.project?.team_lead;
+            } else if (from === "expense") {
+                const exp = await prisma.expense.findUnique({
+                    where: { id: req.params[param] },
+                    select: { createdBy: true, projectId: true, project: { select: { workspaceId: true, team_lead: true } } },
+                });
+                if (!exp) return res.status(404).json({ error: "Khoản chi không tồn tại" });
+                workspaceId = exp.project?.workspaceId;
+                req.projectId = exp.projectId;
+                req.expenseCreatorId = exp.createdBy;
+                req.projectTeamLead = exp.project?.team_lead;
             } else if (from === "file") {
                 const file = await prisma.file.findUnique({
                     where: { id: req.params[param] },

@@ -1,0 +1,31 @@
+P[5] cover :: XÂY DỰNG WEBSITE QUẢN LÝ DỰ ÁN VÀ
+CỘNG TÁC NHÓM CHO DOANH NGHIỆP
+P[15] cover :: XÂY DỰNG WEBSITE QUẢN LÝ DỰ ÁN VÀ
+CỘNG TÁC NHÓM CHO DOANH NGHIỆP
+P[18] Normal (Web) :: Chúng em xin cam đoan báo cáo thực tập tốt nghiệp với đề tài "Xây dựng website quản lý dự án và cộng tác nhóm 
+P[46] Normal (Web) :: Trong bối cảnh chuyển đổi số và làm việc nhóm, làm việc từ xa ngày càng phổ biến, nhu cầu về một công cụ quản 
+P[47] Normal (Web) :: Đề tài thực hiện xây dựng hệ thống quản lý dự án và cộng tác nhóm (đặt tên UMC) dưới dạng ứng dụng web một tra
+P[49] noind :: Từ khóa: quản lý dự án, cộng tác nhóm, thời gian thực, ReactJS, Node.js, phân quyền theo vai trò.
+P[72] noind :: Hình 3.2: Sơ đồ use case quản lý dự án
+P[92] noind :: Bảng 2.1: So sánh một số hệ thống quản lý dự án phổ biến
+P[128] Normal (Web) :: Lý do chọn đề tài. Trong thời đại chuyển đổi số diễn ra mạnh mẽ, cách thức tổ chức và vận hành công việc trong
+P[129] Normal (Web) :: Mục tiêu và phạm vi thực tập. Mục tiêu của đợt thực tập là vận dụng kiến thức đã học để xây dựng một hệ thống 
+P[142] Normal (Web) :: Trong thời gian thực tập tại đơn vị, nhóm được bố trí công việc tại bộ phận [phát triển phần mềm / công nghệ t
+P[144] Normal :: Khảo sát và phân tích yêu cầu: tìm hiểu quy trình quản lý dự án thực tế của doanh nghiệp, khảo sát các nền tản
+P[160] Normal (Web) :: Quản lý dự án và cộng tác nhóm là hai lĩnh vực gắn liền trong phát triển phần mềm quản lý công việc. Nhiều ngh
+P[161] Normal (Web) :: Về quản lý dự án, các tài liệu nền tảng như PMBOK Guide của Viện Quản lý Dự án Hoa Kỳ [1] cung cấp khung khái 
+P[164] Heading 3 :: 2.2.1. Khái niệm và phương pháp quản lý dự án
+P[165] Normal (Web) :: Theo Viện Quản lý Dự án Hoa Kỳ (PMI), dự án là một nỗ lực có thời hạn nhằm tạo ra một sản phẩm, dịch vụ hoặc k
+P[175] Normal (Web) :: Node.js là môi trường thực thi JavaScript phía máy chủ, hoạt động theo mô hình bất đồng bộ hướng sự kiện với l
+P[183] Normal (Web) :: Hiện nay trên thị trường có nhiều nền tảng quản lý dự án và cộng tác nhóm phổ biến cả trong và ngoài nước. Việ
+P[188] tbl-name :: Bảng 2.1: So sánh một số hệ thống quản lý dự án phổ biến
+P[197] Normal (Web) :: Việc nghiên cứu cơ sở lý thuyết về quản lý dự án, tìm hiểu các công nghệ web hiện đại và khảo sát các nền tảng
+P[202] Normal (Web) :: Khảo sát và phân tích yêu cầu: tìm hiểu quy trình quản lý dự án thực tế và khảo sát các nền tảng hiện có để rú
+P[207] Normal (Web) :: Hệ thống website quản lý dự án UMC được xây dựng nhằm hỗ trợ doanh nghiệp số hóa hoạt động quản lý công việc v
+P[216] noind :: b) Sơ đồ use case quản lý dự án
+P[218] Normal :: [Hình vẽ: Sơ đồ use case quản lý dự án]
+P[219] fig-name :: Hình 3.2: Sơ đồ use case quản lý dự án
+P[351] Normal (Web) :: Bên cạnh các chức năng quản lý dự án tổng quát, hệ thống bổ sung ba nhóm chức năng phục vụ đặc thù của một côn
+P[360] Normal (Web) :: Sau quá trình thực tập, nhóm đã hoàn thành một hệ thống quản lý dự án và cộng tác nhóm hoàn chỉnh với đầy đủ c
+P[376] Normal (Web) :: Quá trình thực tập là một giai đoạn quan trọng giúp nhóm áp dụng những kiến thức đã học trên giảng đường vào v
+P[377] Normal (Web) :: Hệ thống bao phủ trọn vòng đời quản lý dự án, từ tổ chức không gian làm việc, phòng ban, dự án đến quản lý côn

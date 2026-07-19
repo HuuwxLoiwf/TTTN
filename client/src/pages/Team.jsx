@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useAuth, useUser } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import InviteMemberDialog from "../components/InviteMemberDialog";
+import Avatar from "../components/Avatar";
 import { apiFetch } from "../lib/api";
 import { setWorkspaceMember, removeWorkspaceMember } from "../features/workspaceSlice";
 
@@ -196,11 +197,7 @@ const Team = () => {
                                             className="hover:bg-gray-50 dark:hover:bg-surface-soft transition-colors"
                                         >
                                             <td className="px-6 py-2.5 whitespace-nowrap flex items-center gap-3">
-                                                <img
-                                                    src={user.user.image}
-                                                    alt={user.user.name}
-                                                    className="size-7 rounded-full bg-gray-200 dark:bg-surface-elevated"
-                                                />
+                                                <Avatar src={user.user.image} name={user.user.name} email={user.user.email} size="size-7" />
                                                 <span className="text-sm text-gray-800 dark:text-ink truncate">
                                                     {user.user?.name || "Unknown User"}
                                                 </span>
@@ -268,11 +265,7 @@ const Team = () => {
                                     className="p-4 rounded-lg bg-white dark:bg-surface-card shadow-spotify-md"
                                 >
                                     <div className="flex items-center gap-3 mb-2">
-                                        <img
-                                            src={user.user.image}
-                                            alt={user.user.name}
-                                            className="size-9 rounded-full bg-gray-200 dark:bg-surface-elevated"
-                                        />
+                                        <Avatar src={user.user.image} name={user.user.name} email={user.user.email} size="size-9" textClass="text-sm" />
                                         <div>
                                             <p className="font-medium text-gray-900 dark:text-ink">
                                                 {user.user?.name || "Unknown User"}

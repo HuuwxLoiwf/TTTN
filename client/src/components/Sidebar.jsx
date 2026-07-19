@@ -5,7 +5,7 @@ import { useUser } from '../context/AuthContext'
 import MyTasksSidebar from './MyTasksSidebar'
 import ProjectSidebar from './ProjectsSidebar'
 import WorkspaceDropdown from './WorkspaceDropdown'
-import { FolderOpenIcon, LayoutDashboardIcon, SettingsIcon, UsersIcon, ListTodoIcon, ShieldCheckIcon, UserCheckIcon, Trash2Icon, BarChart3Icon } from 'lucide-react'
+import { FolderOpenIcon, LayoutDashboardIcon, SettingsIcon, UsersIcon, ListTodoIcon, ShieldCheckIcon, UserCheckIcon, Trash2Icon, BarChart3Icon, CpuIcon } from 'lucide-react'
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
@@ -20,6 +20,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
         { name: 'Công việc của tôi', href: '/my-tasks', icon: ListTodoIcon },
         { name: 'Dự án', href: '/projects', icon: FolderOpenIcon },
         { name: 'Nhóm', href: '/team', icon: UsersIcon },
+        { name: 'Thiết bị', href: '/equipment', icon: CpuIcon },
         { name: 'Báo cáo', href: '/reports', icon: BarChart3Icon },
     ]
 

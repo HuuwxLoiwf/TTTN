@@ -33,6 +33,9 @@ import phaseRoutes from './routes/phases.js';
 import dependencyRoutes from './routes/dependencies.js';
 import trashRoutes from './routes/trash.js';
 import reportRoutes from './routes/reports.js';
+import equipmentRoutes from './routes/equipment.js';
+import riskRoutes from './routes/risks.js';
+import expenseRoutes from './routes/expenses.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -113,6 +116,9 @@ app.use('/api/phases', apiLimiter, phaseRoutes);
 app.use('/api/dependencies', apiLimiter, dependencyRoutes);
 app.use('/api/trash', apiLimiter, trashRoutes);
 app.use('/api/reports', apiLimiter, reportRoutes);
+app.use('/api/equipment', apiLimiter, equipmentRoutes);
+app.use('/api/risks', apiLimiter, riskRoutes);
+app.use('/api/expenses', apiLimiter, expenseRoutes);
 
 const PORT = process.env.PORT || 5000;
 

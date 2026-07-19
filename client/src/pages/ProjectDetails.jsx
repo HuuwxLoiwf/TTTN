@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUser } from "../context/AuthContext";
-import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, LayoutDashboard, FolderOpen, MessagesSquare, GanttChartIcon, LayersIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, LayoutDashboard, FolderOpen, MessagesSquare, GanttChartIcon, LayersIcon, ShieldAlertIcon, WalletIcon, CpuIcon } from "lucide-react";
 import ProjectAnalytics from "../components/ProjectAnalytics";
 import ProjectSettings from "../components/ProjectSettings";
 import CreateTaskDialog from "../components/CreateTaskDialog";
@@ -13,6 +13,9 @@ import ProjectFiles from "../components/ProjectFiles";
 import ProjectChat from "../components/ProjectChat";
 import ProjectGantt from "../components/ProjectGantt";
 import ProjectPhases from "../components/ProjectPhases";
+import ProjectRisks from "../components/ProjectRisks";
+import ProjectExpenses from "../components/ProjectExpenses";
+import ProjectEquipment from "../components/ProjectEquipment";
 import { addTask, updateTask, deleteTask, setProjectProgress } from "../features/workspaceSlice";
 import { joinProject, leaveProject, getSocket } from "../lib/socket";
 
@@ -157,6 +160,9 @@ export default function ProjectDetail() {
                         { key: "calendar", label: "Lịch", icon: CalendarIcon },
                         { key: "timeline", label: "Timeline", icon: GanttChartIcon },
                         { key: "analytics", label: "Phân tích", icon: BarChart3Icon },
+                        { key: "risks", label: "Rủi ro", icon: ShieldAlertIcon },
+                        { key: "expenses", label: "Chi phí", icon: WalletIcon },
+                        { key: "equipment", label: "Thiết bị", icon: CpuIcon },
                         { key: "files", label: "Tài liệu", icon: FolderOpen },
                         { key: "chat", label: "Thảo luận", icon: MessagesSquare },
                         // Tab Cài đặt chỉ hiện với ADMIN hoặc trưởng dự án
@@ -200,6 +206,21 @@ export default function ProjectDetail() {
                     {activeTab === "timeline" && (
                         <div className="dark:bg-canvas max-w-6xl p-4 bg-white dark:bg-surface-card rounded-lg">
                             <ProjectGantt tasks={tasks} />
+                        </div>
+                    )}
+                    {activeTab === "risks" && (
+                        <div className="dark:bg-canvas max-w-6xl">
+                            <ProjectRisks projectId={id} />
+                        </div>
+                    )}
+                    {activeTab === "expenses" && (
+                        <div className="dark:bg-canvas max-w-6xl">
+                            <ProjectExpenses projectId={id} />
+                        </div>
+                    )}
+                    {activeTab === "equipment" && (
+                        <div className="dark:bg-canvas max-w-6xl">
+                            <ProjectEquipment projectId={id} />
                         </div>
                     )}
                     {activeTab === "files" && (
