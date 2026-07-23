@@ -45,7 +45,7 @@ const TaskDetails = () => {
     const { currentWorkspace } = useSelector((state) => state.workspace);
 
     // Thao tác công việc (sửa, mục con, ghi giờ, phụ thuộc, xóa vào thùng rác):
-    // thành viên dự án — khớp server (requireProjectMember). VIEWER/người ngoài dự án chỉ xem.
+    // thành viên dự án — khớp server (requireProjectMember). Người ngoài dự án chỉ xem.
     const canOperate = canManageProject(currentWorkspace, project, user?.id);
 
     const handleDeleteTask = async () => {

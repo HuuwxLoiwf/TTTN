@@ -3,9 +3,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { useUser, useAuth } from "../context/AuthContext";
 import { toggleTheme } from "../features/themeSlice";
 import { updateWorkspace } from "../features/workspaceSlice";
-import { SettingsIcon, User, Building2, MoonIcon, SunIcon, Lock, ShieldCheck, Zap, Link2 } from "lucide-react";
+import { SettingsIcon, User, Building2, MoonIcon, SunIcon, Lock, ShieldCheck, Zap, Link2, ImageIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import { apiFetch } from "../lib/api";
+import { apiFetch, API_BASE_URL } from "../lib/api";
 
 export default function Settings() {
     const { user } = useUser();
@@ -49,6 +49,59 @@ export default function Settings() {
     const [autoOverdue, setAutoOverdue] = useState(!!wsSettings?.automations?.dailyOverdueDigest);
     const [webhookUrl, setWebhookUrl] = useState(wsSettings?.automations?.webhookUrl || "");
     const [savingWs, setSavingWs] = useState(false);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
+
+    // Tải logo từ máy (jpg/png...) → upload lấy URL → lưu vào image_url của workspace
+    const handleLogoUpload = async (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = ""; // cho phép chọn lại cùng file
+        if (!file) return;
+        if (!/\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name)) {
+            toast.error("Vui lòng chọn file ảnh (jpg, png, gif, webp, svg)");
+            return;
+        }
+        setUploadingLogo(true);
+        try {
+            const token = await getToken();
+            const formData = new FormData();
+            formData.append("file", file);
+            const res = await fetch(`${API_BASE_URL}/files/upload-image`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || "Tải logo thất bại");
+            }
+            const { url } = await res.json();
+            const ws = await apiFetch(token, `/workspaces/${currentWorkspace.id}`, {
+                method: "PUT",
+                body: { image_url: url },
+            });
+            dispatch(updateWorkspace(ws));
+            toast.success("Đã cập nhật logo không gian làm việc");
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setUploadingLogo(false);
+        }
+    };
+
+    const removeLogo = async () => {
+        if (!window.confirm("Gỡ logo hiện tại?")) return;
+        try {
+            const token = await getToken();
+            const ws = await apiFetch(token, `/workspaces/${currentWorkspace.id}`, {
+                method: "PUT",
+                body: { image_url: "" },
+            });
+            dispatch(updateWorkspace(ws));
+            toast.success("Đã gỡ logo");
+        } catch (err) {
+            toast.error(err.message);
+        }
+    };
 
     useEffect(() => {
         const s = currentWorkspace?.settings && typeof currentWorkspace.settings === "object" ? currentWorkspace.settings : {};
@@ -183,6 +236,33 @@ export default function Settings() {
                 </button>
                 {twoFA && <span className="ml-3 text-xs text-m-success">Đang bật ✓</span>}
             </div>
+
+            {/* Logo không gian làm việc — chỉ ADMIN */}
+            {isAdmin && currentWorkspace && (
+                <div className={card}>
+                    <h2 className="text-sm font-bold text-gray-700 dark:text-body-strong mb-4 flex items-center gap-2">
+                        <ImageIcon className="size-4 text-bmw-blue" /> Logo không gian làm việc
+                    </h2>
+                    <div className="flex items-center gap-4">
+                        <div className="size-16 rounded-xl bg-m-blue-light flex items-center justify-center overflow-hidden shadow-spotify-md flex-shrink-0">
+                            {currentWorkspace.image_url
+                                ? <img src={currentWorkspace.image_url} alt="Logo" className="size-full object-cover" />
+                                : <span className="text-black font-extrabold text-2xl">{(currentWorkspace.name || "U").charAt(0).toUpperCase()}</span>}
+                        </div>
+                        <div className="flex-1">
+                            <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-m-blue-light text-black font-bold text-sm cursor-pointer hover:scale-105 transition-transform ${uploadingLogo ? "opacity-50 pointer-events-none" : ""}`}>
+                                <ImageIcon className="size-4" />
+                                {uploadingLogo ? "Đang tải..." : "Chọn ảnh logo"}
+                                <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" disabled={uploadingLogo} />
+                            </label>
+                            {currentWorkspace.image_url && (
+                                <button onClick={removeLogo} className="ml-2 px-4 py-2 rounded-full text-sm text-m-red hover:bg-m-red/10 font-bold">Gỡ logo</button>
+                            )}
+                            <p className="text-xs text-gray-500 dark:text-muted mt-2">Ảnh jpg, png, webp... tối đa 10MB. Hiển thị ở thanh bên và trình chọn workspace.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Quản trị workspace — chỉ ADMIN */}
             {isAdmin && currentWorkspace && (

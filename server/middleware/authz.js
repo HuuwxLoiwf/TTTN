@@ -157,11 +157,6 @@ export const requireMember = ({ from = "workspace", param = "id", role } = {}) =
                 }
             }
 
-            // VIEWER chỉ được xem (GET). Chặn mọi thao tác ghi.
-            if (membership.role === "VIEWER" && req.method !== "GET") {
-                return res.status(403).json({ error: "Vai trò Người xem chỉ có quyền xem" });
-            }
-
             req.workspaceId = workspaceId;
             req.memberRole = membership.role;
             next();

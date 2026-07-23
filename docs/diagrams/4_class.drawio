@@ -10,7 +10,7 @@
         </mxCell>
 
         <!-- ============ User ============ -->
-        <mxCell id="cUser" value="User" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cUser" value="User" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="60" y="80" width="240" height="220" as="geometry" />
         </mxCell>
         <mxCell id="cUser_l" value="+ id : String (PK)&#10;+ name : String&#10;+ email : String (unique)&#10;+ password : String (hash)&#10;+ image : String&#10;+ emailVerified : Boolean&#10;+ approved : Boolean&#10;+ twoFactorEnabled : Boolean&#10;+ otpCode / otpExpiresAt&#10;+ resetToken / resetTokenExpiry&#10;+ createdAt : DateTime" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cUser">
@@ -18,7 +18,7 @@
         </mxCell>
 
         <!-- ============ Workspace ============ -->
-        <mxCell id="cWs" value="Workspace" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cWs" value="Workspace" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="440" y="80" width="240" height="160" as="geometry" />
         </mxCell>
         <mxCell id="cWs_l" value="+ id : String (PK)&#10;+ name : String&#10;+ slug : String (unique)&#10;+ description : String?&#10;+ ownerId : String (FK→User)&#10;+ settings : Json&#10;   (policies.taskCreate, webhookUrl)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cWs">
@@ -26,15 +26,15 @@
         </mxCell>
 
         <!-- ============ WorkspaceMember ============ -->
-        <mxCell id="cWm" value="WorkspaceMember" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cWm" value="WorkspaceMember" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="60" y="340" width="240" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="cWm_l" value="+ id : String (PK)&#10;+ userId : String (FK)&#10;+ workspaceId : String (FK)&#10;+ role : WorkspaceRole&#10;   (ADMIN/MANAGER/&#10;    MEMBER/VIEWER)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cWm">
+        <mxCell id="cWm_l" value="+ id : String (PK)&#10;+ userId : String (FK)&#10;+ workspaceId : String (FK)&#10;+ role : WorkspaceRole&#10;   (ADMIN/MANAGER/&#10;    MEMBER)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cWm">
           <mxGeometry x="0" y="30" width="240" height="90" as="geometry" />
         </mxCell>
 
         <!-- ============ Department ============ -->
-        <mxCell id="cDept" value="Department" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cDept" value="Department" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="820" y="80" width="210" height="110" as="geometry" />
         </mxCell>
         <mxCell id="cDept_l" value="+ id : String (PK)&#10;+ name : String&#10;+ description : String?&#10;+ workspaceId : String (FK)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cDept">
@@ -42,7 +42,7 @@
         </mxCell>
 
         <!-- ============ Project ============ -->
-        <mxCell id="cProj" value="Project" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cProj" value="Project" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="800" y="340" width="260" height="260" as="geometry" />
         </mxCell>
         <mxCell id="cProj_l" value="+ id : String (PK)&#10;+ name : String&#10;+ description : String?&#10;+ status : ProjectStatus&#10;   (PLANNING/ACTIVE/ON_HOLD/&#10;    COMPLETED/CANCELLED)&#10;+ priority : Priority&#10;+ start_date / end_date : DateTime?&#10;+ budget : Decimal?&#10;+ progress : Int  (% task DONE, tự tính)&#10;+ team_lead : String (FK→User)&#10;+ workspaceId : String (FK)&#10;+ departmentId : String? (FK)&#10;+ deletedAt : DateTime? (xóa mềm)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cProj">
@@ -50,7 +50,7 @@
         </mxCell>
 
         <!-- ============ ProjectMember ============ -->
-        <mxCell id="cPm" value="ProjectMember" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cPm" value="ProjectMember" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="440" y="340" width="220" height="100" as="geometry" />
         </mxCell>
         <mxCell id="cPm_l" value="+ id : String (PK)&#10;+ userId : String (FK)&#10;+ projectId : String (FK)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cPm">
@@ -58,7 +58,7 @@
         </mxCell>
 
         <!-- ============ Phase ============ -->
-        <mxCell id="cPhase" value="Phase" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cPhase" value="Phase" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="1120" y="80" width="230" height="170" as="geometry" />
         </mxCell>
         <mxCell id="cPhase_l" value="+ id : String (PK)&#10;+ projectId : String (FK)&#10;+ name : String&#10;+ description : String?&#10;+ order : Int&#10;+ startDate / endDate : DateTime?&#10;+ assigneeId : String? (FK→User)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cPhase">
@@ -66,7 +66,7 @@
         </mxCell>
 
         <!-- ============ Task ============ -->
-        <mxCell id="cTask" value="Task" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cTask" value="Task" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="1120" y="340" width="270" height="280" as="geometry" />
         </mxCell>
         <mxCell id="cTask_l" value="+ id : String (PK)&#10;+ title : String&#10;+ description : String?&#10;+ status : TaskStatus&#10;   (TODO/IN_PROGRESS/REVIEW/DONE)&#10;+ type : TaskType&#10;+ priority : Priority&#10;+ labels : String[]&#10;+ assigneeId : String? (FK→User)&#10;+ phaseId : String? (FK)&#10;+ due_date : DateTime?&#10;+ autoStatus : Boolean&#10;+ statusPlan : Json?  (số ngày/trạng thái)&#10;+ projectId : String (FK)&#10;+ deletedAt : DateTime? (xóa mềm)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cTask">
@@ -74,7 +74,7 @@
         </mxCell>
 
         <!-- ============ TaskDependency ============ -->
-        <mxCell id="cDep" value="TaskDependency" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cDep" value="TaskDependency" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="1460" y="340" width="220" height="100" as="geometry" />
         </mxCell>
         <mxCell id="cDep_l" value="+ id : String (PK)&#10;+ taskId : String (FK→Task)&#10;+ dependsOnId : String (FK→Task)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cDep">
@@ -82,7 +82,7 @@
         </mxCell>
 
         <!-- ============ Subtask ============ -->
-        <mxCell id="cSub" value="Subtask" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cSub" value="Subtask" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="1460" y="480" width="200" height="110" as="geometry" />
         </mxCell>
         <mxCell id="cSub_l" value="+ id : String (PK)&#10;+ taskId : String (FK)&#10;+ title : String&#10;+ done : Boolean" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cSub">
@@ -90,7 +90,7 @@
         </mxCell>
 
         <!-- ============ Comment ============ -->
-        <mxCell id="cCmt" value="Comment" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cCmt" value="Comment" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="1120" y="660" width="210" height="120" as="geometry" />
         </mxCell>
         <mxCell id="cCmt_l" value="+ id : String (PK)&#10;+ content : String&#10;+ userId : String (FK)&#10;+ taskId : String (FK)&#10;+ createdAt : DateTime" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cCmt">
@@ -98,7 +98,7 @@
         </mxCell>
 
         <!-- ============ TimeLog ============ -->
-        <mxCell id="cTime" value="TimeLog" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cTime" value="TimeLog" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="1360" y="660" width="210" height="130" as="geometry" />
         </mxCell>
         <mxCell id="cTime_l" value="+ id : String (PK)&#10;+ taskId : String (FK)&#10;+ userId : String (FK)&#10;+ minutes : Int&#10;+ note : String?&#10;+ workDate : DateTime" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cTime">
@@ -106,7 +106,7 @@
         </mxCell>
 
         <!-- ============ File ============ -->
-        <mxCell id="cFile" value="File" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cFile" value="File" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="800" y="660" width="260" height="190" as="geometry" />
         </mxCell>
         <mxCell id="cFile_l" value="+ id : String (PK)&#10;+ projectId : String? (FK)&#10;+ taskId : String? (FK)&#10;+ phaseId : String? (FK)&#10;+ uploadedBy : String (FK)&#10;+ fileName / fileUrl : String&#10;+ reviewStatus : FileReviewStatus&#10;   (PENDING/APPROVED/REJECTED)&#10;+ reviewNote / reviewedBy : String?&#10;+ reviewedAt : DateTime?" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cFile">
@@ -114,7 +114,7 @@
         </mxCell>
 
         <!-- ============ ProjectMessage ============ -->
-        <mxCell id="cMsg" value="ProjectMessage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cMsg" value="ProjectMessage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="440" y="500" width="230" height="130" as="geometry" />
         </mxCell>
         <mxCell id="cMsg_l" value="+ id : String (PK)&#10;+ projectId : String (FK)&#10;+ userId : String (FK)&#10;+ content : String&#10;+ fileUrl / fileName : String?" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cMsg">
@@ -122,7 +122,7 @@
         </mxCell>
 
         <!-- ============ ProjectMemberRequest ============ -->
-        <mxCell id="cReq" value="ProjectMemberRequest" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cReq" value="ProjectMemberRequest" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="60" y="500" width="240" height="150" as="geometry" />
         </mxCell>
         <mxCell id="cReq_l" value="+ id : String (PK)&#10;+ projectId : String (FK)&#10;+ userId : String (FK)&#10;+ requestedBy : String&#10;+ status : RequestStatus&#10;   (PENDING/APPROVED/REJECTED)&#10;+ note : String?" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cReq">
@@ -130,7 +130,7 @@
         </mxCell>
 
         <!-- ============ Notification ============ -->
-        <mxCell id="cNoti" value="Notification" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cNoti" value="Notification" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="60" y="700" width="220" height="120" as="geometry" />
         </mxCell>
         <mxCell id="cNoti_l" value="+ id : String (PK)&#10;+ userId : String (FK)&#10;+ title / message : String&#10;+ isRead : Boolean&#10;+ createdAt : DateTime" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cNoti">
@@ -138,7 +138,7 @@
         </mxCell>
 
         <!-- ============ Activity ============ -->
-        <mxCell id="cAct" value="Activity" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cAct" value="Activity" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="60" y="860" width="230" height="120" as="geometry" />
         </mxCell>
         <mxCell id="cAct_l" value="+ id : String (PK)&#10;+ workspaceId : String (FK)&#10;+ userId : String (FK)&#10;+ action / entityType : String&#10;+ entityId : String" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cAct">
@@ -146,7 +146,7 @@
         </mxCell>
 
         <!-- ============ AuditLog ============ -->
-        <mxCell id="cAudit" value="AuditLog" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cAudit" value="AuditLog" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="330" y="860" width="250" height="140" as="geometry" />
         </mxCell>
         <mxCell id="cAudit_l" value="+ id : String (PK)&#10;+ workspaceId : String (FK)&#10;+ userId : String (FK)&#10;+ action : CREATE/UPDATE/DELETE&#10;+ entityType / entityName : String&#10;+ changes : Json" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cAudit">
@@ -154,7 +154,7 @@
         </mxCell>
 
         <!-- ============ Equipment (Thiết bị/máy móc) ============ -->
-        <mxCell id="cEquip" value="Equipment" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cEquip" value="Equipment" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="640" y="860" width="260" height="170" as="geometry" />
         </mxCell>
         <mxCell id="cEquip_l" value="+ id : String (PK)&#10;+ workspaceId : String (FK)&#10;+ projectId : String? (FK, null=trong kho)&#10;+ name : String&#10;+ code : String (unique/workspace)&#10;+ status : EquipmentStatus&#10;   (AVAILABLE/IN_USE/&#10;    MAINTENANCE/BROKEN)&#10;+ note / imageUrl : String" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cEquip">
@@ -162,7 +162,7 @@
         </mxCell>
 
         <!-- ============ Expense (Chi phí dự án) ============ -->
-        <mxCell id="cExp" value="Expense" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cExp" value="Expense" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="960" y="860" width="250" height="160" as="geometry" />
         </mxCell>
         <mxCell id="cExp_l" value="+ id : String (PK)&#10;+ projectId : String (FK)&#10;+ title : String&#10;+ amount : Float (VNĐ)&#10;+ category : String?&#10;   (VẬT TƯ/THIẾT BỊ/NHÂN CÔNG)&#10;+ spentAt : DateTime&#10;+ createdBy : String (FK→User)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cExp">
@@ -170,7 +170,7 @@
         </mxCell>
 
         <!-- ============ Risk (Sổ rủi ro dự án) ============ -->
-        <mxCell id="cRisk" value="Risk" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
+        <mxCell id="cRisk" value="Risk" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;verticalAlign=top;fontStyle=1;fontSize=13;align=center;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="1270" y="860" width="260" height="180" as="geometry" />
         </mxCell>
         <mxCell id="cRisk_l" value="+ id : String (PK)&#10;+ projectId : String (FK)&#10;+ title / description : String&#10;+ likelihood : Priority (khả năng)&#10;+ impact : Priority (tác động)&#10;+ status : RiskStatus&#10;   (OPEN/MITIGATING/CLOSED)&#10;+ mitigation : String? (ứng phó)&#10;+ ownerId : String? (FK→User)&#10;+ createdBy : String (FK→User)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;" vertex="1" parent="cRisk">

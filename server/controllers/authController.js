@@ -38,6 +38,11 @@ export const register = async (req, res) => {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return res.status(400).json({ error: "Email không hợp lệ" });
         }
+        // Chỉ cho phép đăng ký bằng email công ty @umc.com (chống tài khoản rác).
+        // Chỉ áp dụng khi ĐĂNG KÝ MỚI; tài khoản cũ khác domain vẫn đăng nhập bình thường.
+        if (!/@umc\.com$/i.test(email.trim())) {
+            return res.status(400).json({ error: "Chỉ email công ty (@umc.com) mới được đăng ký tài khoản" });
+        }
         const pwErr = validatePassword(password);
         if (pwErr) return res.status(400).json({ error: pwErr });
 

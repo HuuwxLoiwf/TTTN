@@ -223,10 +223,10 @@ export const updateMemberRole = async (req, res) => {
 
     // Đổi vai trò (nếu có gửi role)
     if (role !== undefined) {
-      if (!["MANAGER", "MEMBER", "VIEWER"].includes(role)) {
+      if (!["MANAGER", "MEMBER"].includes(role)) {
         // Không có ADMIN trong danh sách: quản trị viên là duy nhất (chủ sở hữu),
         // chỉ được nâng thành viên tối đa lên Quản lý (MANAGER).
-        return res.status(400).json({ error: "Vai trò không hợp lệ — chỉ được gán Quản lý / Thành viên / Người xem. Mỗi không gian làm việc chỉ có một Quản trị viên." });
+        return res.status(400).json({ error: "Vai trò không hợp lệ — chỉ được gán Quản lý hoặc Thành viên. Mỗi không gian làm việc chỉ có một Quản trị viên." });
       }
       // Không cho hạ cấp chính chủ sở hữu workspace
       const workspace = await prisma.workspace.findUnique({ where: { id }, select: { ownerId: true } });

@@ -12,7 +12,6 @@ enum WorkspaceRole {
     ADMIN
     MANAGER
     MEMBER
-    VIEWER
 }
 
 enum TaskStatus {

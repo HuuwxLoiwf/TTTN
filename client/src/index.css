@@ -129,3 +129,76 @@
         background-color: #1ed760;
     }
 }
+
+/* ===== Premium Visual Utilities ===== */
+.glassmorphism {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+.dark .glassmorphism {
+    background-color: rgba(18, 18, 18, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.transition-premium {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow-green {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-glow-green:hover {
+    box-shadow: 0 0 20px rgba(30, 215, 96, 0.35);
+    transform: translateY(-2px);
+}
+
+.hover-glow-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-glow-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(30, 215, 96, 0.15);
+    transform: translateY(-4px);
+}
+
+.dark .hover-glow-card:hover {
+    background-color: #1f1f1f;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.animate-slideup {
+    animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.animate-fadein {
+    animation: fadeIn 0.35s ease-out forwards;
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        opacity: 0.8;
+        filter: drop-shadow(0 0 2px rgba(30, 215, 96, 0.2));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 8px rgba(30, 215, 96, 0.6));
+    }
+}
+.animate-pulse-glow {
+    animation: pulseGlow 3s infinite ease-in-out;
+}

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getFiles, uploadFile, deleteFile, reviewFile, upload } from '../controllers/fileController.js';
+import { getFiles, uploadFile, uploadImage, deleteFile, reviewFile, upload } from '../controllers/fileController.js';
 import { requireAuth, requireMember } from '../middleware/authz.js';
 
 const router = Router();
@@ -15,6 +15,8 @@ const uploadSingle = (req, res, next) => {
 // getFiles dùng query ?projectId / ?taskId → controller tự kiểm tra quyền thành viên workspace
 router.get('/', requireAuth, getFiles);
 router.post('/upload', requireAuth, uploadSingle, uploadFile);
+// Upload ảnh nhẹ (logo/avatar) — chỉ trả URL
+router.post('/upload-image', requireAuth, uploadSingle, uploadImage);
 router.put('/:id/review', requireMember({ from: 'file', param: 'id' }), reviewFile);
 router.delete('/:id', requireMember({ from: 'file', param: 'id' }), deleteFile);
 
