@@ -77,26 +77,26 @@ export default function StatsGrid() {
     }, [currentWorkspace, user?.id]);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 my-9">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 my-8">
             {statCards.map(
                 ({ icon: Icon, title, value, subtitle, textColor }, i) => (
-                    <div key={i} className="rounded-lg shadow-spotify-md bg-white dark:bg-surface-card p-6 py-4">
+                    <div key={i} className="group rounded-xl border border-gray-100 dark:border-hairline/10 hover:border-m-blue-light/20 shadow-spotify-md bg-white dark:bg-surface-card p-6 py-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),_0_8px_10px_-6px_rgba(30,215,96,0.1)] cursor-pointer">
                         <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-xs font-bold text-gray-500 dark:text-muted mb-1">
+                            <div className="space-y-1">
+                                <p className="text-[11px] uppercase tracking-[1px] font-extrabold text-gray-400 dark:text-muted">
                                     {title}
                                 </p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-ink">
+                                <p className="text-3.5xl font-black text-gray-900 dark:text-ink tracking-tight transition-all group-hover:text-m-blue-light">
                                     {value}
                                 </p>
                                 {subtitle && (
-                                    <p className="text-xs text-gray-400 dark:text-muted font-light mt-1">
+                                    <p className="text-xs text-gray-500 dark:text-muted font-normal">
                                         {subtitle}
                                     </p>
                                 )}
                             </div>
-                            <div className="p-3 rounded-full bg-black/5 dark:bg-white/10">
-                                <Icon size={20} className={textColor} />
+                            <div className="p-3 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-hairline/10 group-hover:bg-m-blue-light/10 group-hover:border-m-blue-light/30 transition-all duration-300">
+                                <Icon size={20} className={`${textColor} transition-transform duration-300 group-hover:scale-110`} />
                             </div>
                         </div>
                     </div>

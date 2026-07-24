@@ -25,7 +25,7 @@ const Navbar = ({ setIsSidebarOpen }) => {
     const initial = (user?.name || user?.email || "?")[0].toUpperCase();
 
     return (
-        <div className="w-full bg-white dark:bg-canvas px-6 xl:px-16 py-3 flex-shrink-0">
+        <div className="w-full sticky top-0 z-40 bg-white/70 dark:bg-canvas/75 backdrop-blur-md px-6 xl:px-16 py-3 border-b border-gray-100 dark:border-hairline/20 flex-shrink-0 shadow-sm transition-all duration-300">
             <div className="flex items-center justify-between max-w-6xl mx-auto">
                 {/* Left section */}
                 <div className="flex items-center gap-4 min-w-0 flex-1">

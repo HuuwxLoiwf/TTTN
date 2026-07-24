@@ -5,7 +5,7 @@
 //   - ADMIN / MANAGER của workspace  → mọi dự án
 //   - Trưởng dự án (project.team_lead)
 //   - Thành viên của dự án (project.members)
-// VIEWER và người ngoài dự án: chỉ xem.
+// Người ngoài dự án (thành viên workspace nhưng chưa vào dự án): chỉ xem.
 
 export const canManageProject = (workspace, project, userId) => {
     if (!userId) return false;

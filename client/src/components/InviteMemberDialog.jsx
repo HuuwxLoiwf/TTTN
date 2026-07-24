@@ -79,7 +79,6 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                             {/* Không có ADMIN: mỗi workspace chỉ có 1 Quản trị viên (chủ sở hữu) */}
                             <option value="MANAGER">Quản lý — quản lý dự án & phòng ban</option>
                             <option value="MEMBER">Thành viên — làm việc bình thường</option>
-                            <option value="VIEWER">Người xem — chỉ xem</option>
                         </select>
                     </div>
 

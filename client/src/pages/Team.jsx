@@ -13,7 +13,6 @@ import { setWorkspaceMember, removeWorkspaceMember } from "../features/workspace
 const ROLE_OPTIONS = [
     { value: "MANAGER", label: "Quản lý" },
     { value: "MEMBER", label: "Thành viên" },
-    { value: "VIEWER", label: "Người xem" },
 ];
 
 const Team = () => {

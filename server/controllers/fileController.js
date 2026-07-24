@@ -220,6 +220,31 @@ export const uploadFile = async (req, res) => {
     }
 };
 
+// Upload ảnh đơn giản (logo workspace / avatar): CHỈ trả URL, không tạo bản ghi File.
+// Chỉ nhận file ảnh. Dùng cho hình đại diện, logo — không gắn với dự án/công việc.
+export const uploadImage = async (req, res) => {
+    try {
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ error: 'Chưa đăng nhập' });
+        if (!req.file) return res.status(400).json({ error: 'Không có ảnh được tải lên' });
+        if (!/\.(jpg|jpeg|png|gif|webp|svg)$/i.test(req.file.originalname)) {
+            return res.status(400).json({ error: 'Chỉ chấp nhận file ảnh (jpg, png, gif, webp, svg)' });
+        }
+
+        let url;
+        if (useCloudinary) {
+            const result = await uploadBufferToCloudinary(req.file.buffer, fixFileName(req.file.originalname));
+            url = result.secure_url;
+        } else {
+            const baseUrl = `${req.protocol}://${req.get('host')}`;
+            url = `${baseUrl}/uploads/${req.file.filename}`;
+        }
+        res.status(201).json({ url });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Admin/trưởng dự án đánh giá tài liệu: APPROVED hoặc REJECTED + ghi chú
 export const reviewFile = async (req, res) => {
     try {

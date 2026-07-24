@@ -15,7 +15,7 @@ import { JWT_SECRET } from "../controllers/authController.js";
 
 const ts = Date.now();
 const EMAIL_A = `test-a-${ts}@umc-test.local`;   // chủ workspace (ADMIN)
-const EMAIL_B = `test-b-${ts}@umc-test.local`;   // người ngoài → sau thành VIEWER
+const EMAIL_B = `test-b-${ts}@umc-test.local`;   // người ngoài → sau thành MEMBER (không vào dự án)
 const EMAIL_REG = `test-reg-${ts}@umc-test.local`; // test luồng đăng ký
 
 let userA, userB, tokenA, tokenB;
@@ -139,23 +139,23 @@ describe("Workspace / Dự án / Phân quyền", () => {
         expect(res.status).toBe(403);
     });
 
-    it("VIEWER chỉ được xem, không được tạo task → 403", async () => {
-        // Mời userB làm VIEWER
+    it("MEMBER không thuộc dự án: xem được nhưng không tạo task → 403", async () => {
+        // Mời userB làm MEMBER của workspace (nhưng chưa vào dự án)
         const invite = await request(app)
             .post(`/api/workspaces/${workspaceId}/members`)
             .set(auth(tokenA))
-            .send({ email: EMAIL_B, role: "VIEWER" });
+            .send({ email: EMAIL_B, role: "MEMBER" });
         expect(invite.status).toBe(201);
 
-        // VIEWER đọc được dự án
+        // Thành viên workspace đọc được dự án
         const read = await request(app).get(`/api/projects/${projectId}`).set(auth(tokenB));
         expect(read.status).toBe(200);
 
-        // VIEWER không tạo được task
+        // Nhưng không phải thành viên DỰ ÁN nên không tạo được task (requireProjectMember)
         const write = await request(app)
             .post(`/api/tasks/project/${projectId}`)
             .set(auth(tokenB))
-            .send({ title: "Task của viewer" });
+            .send({ title: "Task người ngoài dự án" });
         expect(write.status).toBe(403);
     });
 });
@@ -240,7 +240,7 @@ describe("Thùng rác (soft-delete)", () => {
         expect(list2.body.some((t) => t.id === taskB.id)).toBe(true);
     });
 
-    it("VIEWER không xem được thùng rác → 403", async () => {
+    it("MEMBER không xem được thùng rác (chỉ ADMIN/MANAGER) → 403", async () => {
         const res = await request(app).get(`/api/trash/workspace/${workspaceId}`).set(auth(tokenB));
         expect(res.status).toBe(403);
     });

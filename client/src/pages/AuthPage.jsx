@@ -100,6 +100,11 @@ export default function AuthPage() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
+        // Chỉ cho phép email công ty @umc.com (chống tài khoản rác) — báo sớm phía client
+        if (!/@umc\.com$/i.test(form.email.trim())) {
+            toast.error("Chỉ email công ty (@umc.com) mới được đăng ký tài khoản");
+            return;
+        }
         setBusy(true);
         try {
             const data = await post("/auth/register", { name: form.name, email: form.email, password: form.password });
@@ -226,7 +231,8 @@ export default function AuthPage() {
                     <form onSubmit={handleRegister} className="space-y-3">
                         <h2 className={headCls}>Đăng ký</h2>
                         <input placeholder="Họ tên" value={form.name} onChange={set("name")} className={inputCls} required />
-                        <input type="email" placeholder="Email" value={form.email} onChange={set("email")} className={inputCls} required />
+                        <input type="email" placeholder="Email công ty (@umc.com)" value={form.email} onChange={set("email")} className={inputCls} required />
+                        <p className="text-xs text-muted -mt-1">Chỉ email công ty <b>@umc.com</b> mới được đăng ký.</p>
                         <input type="password" placeholder="Mật khẩu" value={form.password} onChange={set("password")} className={inputCls} required />
                         <button type="submit" disabled={busy} className={btnCls}>
                             {busy ? "Đang đăng ký..." : "Đăng ký"}

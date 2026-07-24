@@ -44,45 +44,65 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     }, [setIsSidebarOpen]);
 
     return (
-        <div ref={sidebarRef} className={`z-10 bg-white dark:bg-canvas min-w-68 flex flex-col h-screen max-sm:absolute transition-all ${isSidebarOpen ? 'left-0' : '-left-full'} `} >
-            <div className="px-5 py-4">
-                <p className="text-sm font-bold text-gray-900 dark:text-ink tracking-tight">UMC</p>
-                <p className="text-xs text-gray-500 dark:text-muted">Quản Lý Dự Án</p>
+        <div ref={sidebarRef} className={`z-10 bg-white dark:bg-canvas min-w-68 flex flex-col h-screen max-sm:absolute border-r border-gray-100 dark:border-hairline/25 shadow-sm transition-all duration-300 ${isSidebarOpen ? 'left-0' : '-left-full'} `} >
+            <div className="px-6 py-6 border-b border-gray-100 dark:border-hairline/20 flex items-center gap-3">
+                <div className="size-8 rounded-lg bg-m-blue-light flex items-center justify-center text-black font-extrabold text-lg shadow-spotify-md animate-pulse-glow overflow-hidden">
+                    {currentWorkspace?.image_url
+                        ? <img src={currentWorkspace.image_url} alt="Logo" className="size-full object-cover" />
+                        : (currentWorkspace?.name || "U").charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <p className="text-sm font-bold text-gray-900 dark:text-ink tracking-tight">UMC SaaS</p>
+                    <p className="text-[10px] text-gray-500 dark:text-muted uppercase tracking-[1px] font-semibold">Quản Lý Dự Án</p>
+                </div>
             </div>
             <WorkspaceDropdown />
             <div className='flex-1 overflow-y-scroll no-scrollbar flex flex-col'>
                 <div>
-                    <div className='p-3'>
+                    <div className='p-3 pl-0 pr-2 space-y-0.5'>
                         {menuItems.map((item) => (
-                            <NavLink to={item.href} key={item.name} className={({ isActive }) => `flex items-center gap-3 py-2.5 px-4 rounded-full text-gray-800 dark:text-body cursor-pointer transition-all font-bold text-sm ${isActive ? 'bg-gray-100 dark:bg-surface-elevated dark:text-ink' : 'hover:bg-gray-50 dark:hover:bg-surface-soft'}`} >
-                                <item.icon size={16} />
-                                <p className='text-sm truncate'>{item.name}</p>
+                            <NavLink to={item.href} key={item.name} className={({ isActive }) => `relative flex items-center gap-3 py-2.5 pl-6 pr-4 rounded-r-full text-gray-800 dark:text-body cursor-pointer transition-all duration-200 font-bold text-sm ${isActive ? 'bg-gray-100/70 dark:bg-surface-elevated text-m-blue-light dark:text-ink pl-7' : 'hover:bg-gray-50 dark:hover:bg-surface-soft hover:text-gray-950 dark:hover:text-ink hover:pl-7'}`} >
+                                {({ isActive }) => (
+                                    <>
+                                        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-m-blue-light rounded-r" />}
+                                        <item.icon size={16} className={isActive ? 'text-m-blue-light' : 'text-gray-500 dark:text-muted'} />
+                                        <p className='text-sm truncate'>{item.name}</p>
+                                    </>
+                                )}
                             </NavLink>
                         ))}
 
                         {/* Mục chỉ dành cho admin */}
                         {isAdmin && (
                             <>
-                                <p className="px-4 pt-3 pb-1 text-[11px] uppercase font-bold tracking-[1.4px] text-gray-400 dark:text-muted">Quản trị</p>
+                                <p className="px-6 pt-4 pb-1 text-[10px] uppercase font-bold tracking-[1.5px] text-gray-400 dark:text-muted">Quản trị</p>
                                 {adminItems.map((item) => (
-                                    <NavLink to={item.href} key={item.name} className={({ isActive }) => `flex items-center gap-3 py-2.5 px-4 rounded-full text-gray-800 dark:text-body cursor-pointer transition-all font-bold text-sm ${isActive ? 'bg-gray-100 dark:bg-surface-elevated dark:text-ink' : 'hover:bg-gray-50 dark:hover:bg-surface-soft'}`} >
-                                        <item.icon size={16} />
-                                        <p className='text-sm truncate'>{item.name}</p>
+                                    <NavLink to={item.href} key={item.name} className={({ isActive }) => `relative flex items-center gap-3 py-2.5 pl-6 pr-4 rounded-r-full text-gray-800 dark:text-body cursor-pointer transition-all duration-200 font-bold text-sm ${isActive ? 'bg-gray-100/70 dark:bg-surface-elevated text-m-blue-light dark:text-ink pl-7' : 'hover:bg-gray-50 dark:hover:bg-surface-soft hover:text-gray-950 dark:hover:text-ink hover:pl-7'}`} >
+                                        {({ isActive }) => (
+                                            <>
+                                                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-m-blue-light rounded-r" />}
+                                                <item.icon size={16} className={isActive ? 'text-m-blue-light' : 'text-gray-500 dark:text-muted'} />
+                                                <p className='text-sm truncate'>{item.name}</p>
+                                            </>
+                                        )}
                                     </NavLink>
                                 ))}
                             </>
                         )}
 
-                        <NavLink to="/settings" className={({ isActive }) => `flex w-full items-center gap-3 py-2.5 px-4 rounded-full text-gray-800 dark:text-body cursor-pointer transition-all mt-1 font-bold text-sm ${isActive ? 'bg-gray-100 dark:bg-surface-elevated dark:text-ink' : 'hover:bg-gray-50 dark:hover:bg-surface-soft'}`}>
-                            <SettingsIcon size={16} />
-                            <p className='text-sm truncate'>Cài đặt</p>
+                        <NavLink to="/settings" className={({ isActive }) => `relative flex items-center gap-3 py-2.5 pl-6 pr-4 rounded-r-full text-gray-800 dark:text-body cursor-pointer transition-all duration-200 font-bold text-sm ${isActive ? 'bg-gray-100/70 dark:bg-surface-elevated text-m-blue-light dark:text-ink pl-7' : 'hover:bg-gray-50 dark:hover:bg-surface-soft hover:text-gray-950 dark:hover:text-ink hover:pl-7'}`}>
+                            {({ isActive }) => (
+                                <>
+                                    {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-m-blue-light rounded-r" />}
+                                    <SettingsIcon size={16} className={isActive ? 'text-m-blue-light' : 'text-gray-500 dark:text-muted'} />
+                                    <p className='text-sm truncate'>Cài đặt</p>
+                                </>
+                            )}
                         </NavLink>
                     </div>
                     <MyTasksSidebar />
                     <ProjectSidebar />
                 </div>
-
-
             </div>
 
         </div>
