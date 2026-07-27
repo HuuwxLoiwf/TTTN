@@ -19,8 +19,7 @@ const ProjectExpenses = ({ projectId }) => {
     const { currentWorkspace } = useSelector((state) => state.workspace);
     const project = currentWorkspace?.projects?.find((p) => p.id === projectId);
     const isManager =
-        currentWorkspace?.members?.some((m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER")) ||
-        project?.team_lead === user?.id;
+        currentWorkspace?.members?.some((m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER"));
 
     const [data, setData] = useState({ expenses: [], total: 0, budget: null, remaining: null, overBudget: false });
     const [form, setForm] = useState(emptyForm);

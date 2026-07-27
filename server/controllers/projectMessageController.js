@@ -56,13 +56,13 @@ export const sendMessage = async (req, res) => {
 
         // Thông báo cho TẤT CẢ thành viên dự án (trừ người gửi) về tin nhắn mới.
         const [project, members] = await Promise.all([
-            prisma.project.findUnique({ where: { id: projectId }, select: { name: true, team_lead: true } }),
+            prisma.project.findUnique({ where: { id: projectId }, select: { name: true, ownerId: true } }),
             prisma.projectMember.findMany({ where: { projectId }, select: { userId: true } }),
         ]);
         const senderName = message.user?.name || message.user?.email || "Thành viên";
         const preview = content?.trim() ? content.trim().slice(0, 60) : "đã gửi một tệp đính kèm";
         const recipients = new Set(members.map((m) => m.userId));
-        if (project?.team_lead) recipients.add(project.team_lead); // đảm bảo cả trưởng dự án
+        if (project?.ownerId) recipients.add(project.ownerId); // đảm bảo cả người tạo dự án
         recipients.delete(userId);
         for (const rid of recipients) {
             notifyUser({

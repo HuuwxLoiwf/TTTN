@@ -47,7 +47,7 @@ Không gian làm việc (Workspace)  ← 1 tổ chức
 
 **Cơ chế phân quyền 2 tầng** (middleware `authz.js`):
 1. **`requireMember`** — kiểm tra là thành viên **workspace** (suy `workspaceId` từ nhiều nguồn: project/task/comment/subtask/phase/dependency/timelog/file). Gắn `req.workspaceId`, `req.memberRole`.
-2. **`requireProjectMember`** — kiểm tra là thành viên **dự án** (chặt hơn). ADMIN/MANAGER workspace và trưởng dự án được bỏ qua. Áp dụng cho sửa task, thêm phụ thuộc.
+2. **`requireProjectMember`** — kiểm tra là thành viên **dự án** (chặt hơn). ADMIN/MANAGER workspace được bỏ qua. Áp dụng cho sửa task, thêm phụ thuộc.
 
 ---
 
@@ -103,7 +103,7 @@ Tên phòng ban **không trùng** trong cùng workspace. Xóa phòng ban → d�
 |-----------|----------|-------|-------|
 | Danh sách theo workspace | `GET /projects/workspace/:workspaceId` | Thành viên | |
 | Chi tiết | `GET /projects/:id` | Thành viên | |
-| **Tạo** | `POST /projects/workspace/:workspaceId` | Thành viên | Validate tên (≤200) + **bắt buộc phòng ban** + **ngày bắt đầu ≥ hôm nay**. Người tạo là trưởng dự án (`team_lead`) + thành viên đầu tiên. Thêm nhiều thành viên qua email. Ghi Activity + Audit. |
+| **Tạo** | `POST /projects/workspace/:workspaceId` | Thành viên | Validate tên (≤200) + **bắt buộc phòng ban** + **ngày bắt đầu ≥ hôm nay**. Người tạo là chủ sở hữu (`ownerId`) + thành viên đầu tiên. Thêm nhiều thành viên qua email. Ghi Activity + Audit. |
 | Sửa | `PUT /projects/:id` | Thành viên | Ghi **audit từng trường thay đổi** (name/status/priority: old→new) |
 | **Xóa** | `DELETE /projects/:id` | ADMIN, MANAGER | Soft-delete → vào thùng rác |
 | Thêm thành viên | `POST /projects/:id/members` | Thành viên | Theo email; thông báo + ghi hoạt động |
@@ -164,8 +164,8 @@ Chia dự án thành các giai đoạn (Phase), gán công việc vào giai đo�
 | Chức năng | Endpoint | Luồng |
 |-----------|----------|-------|
 | Danh sách yêu cầu | `GET /member-requests/project/:projectId` | |
-| **Tạo yêu cầu** | `POST /member-requests/project/:projectId` | Kiểm tra chưa là thành viên, chưa có yêu cầu PENDING → tạo yêu cầu → **thông báo trưởng dự án + tất cả ADMIN**. |
-| **Duyệt** | `PUT /member-requests/:id/approve` | Chỉ ADMIN/trưởng dự án. Kiểm tra người được duyệt còn thuộc workspace → tạo `ProjectMember` → thông báo + ghi hoạt động. |
+| **Tạo yêu cầu** | `POST /member-requests/project/:projectId` | Kiểm tra chưa là thành viên, chưa có yêu cầu PENDING → tạo yêu cầu → **thông báo ADMIN/MANAGER + chủ sở hữu dự án**. |
+| **Duyệt** | `PUT /member-requests/:id/approve` | Chỉ ADMIN/MANAGER. Kiểm tra người được duyệt còn thuộc workspace → tạo `ProjectMember` → thông báo + ghi hoạt động. |
 | **Từ chối** | `PUT /member-requests/:id/reject` | Kèm ghi chú lý do → thông báo người bị từ chối. |
 
 ### B.12. Tài liệu (`/api/files`)
@@ -173,9 +173,9 @@ Chia dự án thành các giai đoạn (Phase), gán công việc vào giai đo�
 | Chức năng | Endpoint | Luồng chi tiết |
 |-----------|----------|----------------|
 | Danh sách | `GET /files?projectId=` hoặc `?taskId=` | Kiểm tra là thành viên workspace |
-| **Upload** | `POST /files/upload` (multipart) | **Whitelist** loại file (ảnh/pdf/doc/xls/ppt/txt/csv/nén), **giới hạn 10MB**. Lưu **Cloudinary** (nếu có env) hoặc **ổ đĩa**. Tài liệu **chung dự án** chỉ admin/trưởng dự án được up; user thường đính kèm vào công việc. File của admin/lead **tự động ĐẠT**. |
-| **Duyệt file** | `PUT /files/:id/review` | Chỉ ADMIN/trưởng dự án: APPROVED / REJECTED + ghi chú → **thông báo người upload** + ghi hoạt động. |
-| Xóa | `DELETE /files/:id` | Người upload, ADMIN, hoặc trưởng dự án. Xóa cả file vật lý (nếu ở đĩa). |
+| **Upload** | `POST /files/upload` (multipart) | **Whitelist** loại file (ảnh/pdf/doc/xls/ppt/txt/csv/nén), **giới hạn 10MB**. Lưu **Cloudinary** (nếu có env) hoặc **ổ đĩa**. Tài liệu **chung dự án** chỉ admin/quản lý được up; user thường đính kèm vào công việc. File của admin/quản lý **tự động ĐẠT**. |
+| **Duyệt file** | `PUT /files/:id/review` | Chỉ ADMIN/MANAGER: APPROVED / REJECTED + ghi chú → **thông báo người upload** + ghi hoạt động. |
+| Xóa | `DELETE /files/:id` | Người upload, ADMIN, hoặc MANAGER. Xóa cả file vật lý (nếu ở đĩa). |
 
 ### B.13. Theo dõi thời gian (`/api/time-logs`)
 
@@ -319,7 +319,7 @@ Người dùng tạo task
 ```
 Chat nhóm → @mention thành viên → họ nhận thông báo + email → có thể "Tóm tắt AI" toàn bộ thảo luận
 Bình luận trên task → realtime + thông báo người được giao
-Upload tài liệu → admin/trưởng dự án duyệt Đạt/Chưa đạt → người upload nhận thông báo
+Upload tài liệu → admin/quản lý duyệt Đạt/Chưa đạt → người upload nhận thông báo
 ```
 
 ### E.4. Quản trị & an toàn dữ liệu

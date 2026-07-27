@@ -13,7 +13,7 @@ const router = Router();
 router.get("/project/:projectId", requireMember({ from: "project", param: "projectId" }), getRequests);
 // Tạo yêu cầu — thành viên dự án/workspace gửi
 router.post("/project/:projectId", requireMember({ from: "project", param: "projectId" }), createRequest);
-// Duyệt / từ chối — controller tự kiểm tra quyền admin/trưởng dự án
+// Duyệt / từ chối — controller tự kiểm tra quyền admin/quản lý
 router.put("/:id/approve", requireAuth, approveRequest);
 router.put("/:id/reject", requireAuth, rejectRequest);
 

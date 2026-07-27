@@ -405,7 +405,7 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
                           status: _status,
                           startDate: _startDate,
                           endDate: _endDate,
-                          teamLead: apiService.currentUserId ?? '',
+                          ownerId: apiService.currentUserId ?? '',
                           workspaceId: ws.currentWorkspace?.id ?? '',
                         ), departmentId: _departmentId);
                         Navigator.pop(context);

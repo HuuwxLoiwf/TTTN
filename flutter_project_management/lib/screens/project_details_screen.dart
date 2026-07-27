@@ -172,8 +172,8 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   Widget _buildTabContent(Project project) {
     final ws = context.read<WorkspaceProvider>();
     final myId = apiService.currentUserId;
-    final isAdmin = ws.currentWorkspace?.members.any((m) => m.userId == myId && m.role == 'ADMIN') ?? false;
-    final canReview = isAdmin || project.teamLead == myId;
+    final isAdmin = ws.currentWorkspace?.members.any((m) => m.userId == myId && (m.role == 'ADMIN' || m.role == 'MANAGER')) ?? false;
+    final canReview = isAdmin;
 
     switch (_activeTab) {
       case 'calendar':

@@ -232,7 +232,7 @@ Nguồn: [`server/prisma/schema.prisma`](server/prisma/schema.prisma)
 | **Workspace** | Tổ chức / không gian làm việc | có nhiều Member, Project, Department, Activity, AuditLog |
 | **Department** | Phòng ban (trong workspace) | thuộc Workspace, có nhiều Project. `@@unique([workspaceId, name])` |
 | **WorkspaceMember** | Thành viên + vai trò | nối User↔Workspace, có `role`. `@@unique([userId, workspaceId])` |
-| **Project** | Dự án | thuộc Workspace + Department, có `team_lead` (owner), `progress`, status, priority |
+| **Project** | Dự án | thuộc Workspace + Department, có `ownerId` (người tạo/chủ sở hữu), `progress`, status, priority |
 | **ProjectMember** | Thành viên dự án | nối User↔Project. `@@unique([userId, projectId])` |
 | **ProjectMemberRequest** | Yêu cầu vào dự án | status PENDING/APPROVED/REJECTED |
 | **ProjectMessage** | Tin nhắn chat nhóm dự án | có `fileUrl/fileName` (đính kèm) |
@@ -417,7 +417,7 @@ Tạo task: POST /tasks/project/:projectId
 
 ### 7.3. Thêm thành viên dự án có duyệt
 ```
-ADMIN/Trưởng dự án: thêm trực tiếp (POST /projects/:id/members)
+ADMIN/MANAGER: thêm trực tiếp (POST /projects/:id/members)
 Thành viên thường:  tạo ProjectMemberRequest (PENDING)
   → admin/lead PUT /member-requests/:id/approve  → thêm vào ProjectMember + notify
                  hoặc /reject (kèm ghi chú)

@@ -12,7 +12,7 @@ router.get(
     getExpenses
 );
 
-// Ghi nhận chi phí: thành viên dự án (controller giới hạn ADMIN/MANAGER/trưởng dự án)
+// Ghi nhận chi phí: thành viên dự án (controller giới hạn ADMIN/MANAGER)
 router.post(
     "/project/:projectId",
     requireMember({ from: "project", param: "projectId" }),

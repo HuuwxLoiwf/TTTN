@@ -31,8 +31,7 @@ const ProjectRisks = ({ projectId }) => {
     const project = currentWorkspace?.projects?.find((p) => p.id === projectId);
     const members = project?.members || [];
     const isManager =
-        currentWorkspace?.members?.some((m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER")) ||
-        project?.team_lead === user?.id;
+        currentWorkspace?.members?.some((m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER"));
 
     const [risks, setRisks] = useState([]);
     const [form, setForm] = useState(emptyForm);

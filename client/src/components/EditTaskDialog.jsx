@@ -30,9 +30,9 @@ const EditTaskDialog = ({ task, projectId, onClose }) => {
     const members = project?.members || [];
     const [phases, setPhases] = useState([]);
 
-    // Quyền chỉnh chế độ tự động: ADMIN / MANAGER / trưởng dự án
+    // Quyền chỉnh chế độ tự động: ADMIN / MANAGER
     const myRole = currentWorkspace?.members?.find((m) => m.userId === user?.id)?.role;
-    const canManageAuto = myRole === "ADMIN" || myRole === "MANAGER" || project?.team_lead === user?.id;
+    const canManageAuto = myRole === "ADMIN" || myRole === "MANAGER";
 
     const [form, setForm] = useState({
         title: task.title || "",
@@ -181,7 +181,7 @@ const EditTaskDialog = ({ task, projectId, onClose }) => {
                         <input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} className={inputCls} />
                     </div>
 
-                    {/* Tự động chuyển trạng thái theo thời gian — ADMIN/MANAGER/trưởng dự án */}
+                    {/* Tự động chuyển trạng thái theo thời gian — ADMIN/MANAGER */}
                     {canManageAuto && form.due_date && (
                         <div className="rounded dark:shadow-spotify-inset p-3 space-y-2">
                             <label className="flex items-center gap-2 text-sm cursor-pointer">

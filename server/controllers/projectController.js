@@ -83,7 +83,7 @@ export const createProject = async (req, res) => {
         status: status || "PLANNING",
         start_date: start_date ? new Date(start_date) : null,
         end_date: end_date ? new Date(end_date) : null,
-        team_lead: userId,
+        ownerId: userId,
         workspaceId,
         ...(departmentId ? { departmentId } : {}),
         members: {
@@ -159,12 +159,12 @@ export const updateProject = async (req, res) => {
 
     const before = await prisma.project.findUnique({
       where: { id },
-      select: { name: true, status: true, priority: true, progress: true, team_lead: true },
+      select: { name: true, status: true, priority: true, progress: true },
     });
 
-    // Chỉ ADMIN hoặc trưởng dự án được sửa thông tin dự án (Cài đặt)
-    if (req.memberRole !== "ADMIN" && before?.team_lead !== userId) {
-      return res.status(403).json({ error: "Chỉ quản trị viên hoặc trưởng dự án mới được sửa dự án" });
+    // Chỉ ADMIN hoặc MANAGER được sửa thông tin dự án (Cài đặt)
+    if (req.memberRole !== "ADMIN" && req.memberRole !== "MANAGER") {
+      return res.status(403).json({ error: "Chỉ quản trị viên hoặc quản lý mới được sửa dự án" });
     }
 
     // Chặn đánh dấu dự án HOÀN THÀNH khi còn công việc chưa xong
@@ -255,15 +255,15 @@ export const addProjectMember = async (req, res) => {
 
     const project = await prisma.project.findUnique({
       where: { id },
-      select: { name: true, workspaceId: true, team_lead: true },
+      select: { name: true, workspaceId: true },
     });
     if (!project) return res.status(404).json({ error: "Dự án không tồn tại" });
 
-    // Chỉ ADMIN/MANAGER workspace hoặc trưởng dự án được thêm trực tiếp.
+    // Chỉ ADMIN/MANAGER workspace được thêm trực tiếp.
     // Thành viên thường phải dùng luồng yêu cầu duyệt (member-requests).
-    const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER" || project.team_lead === userId;
+    const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER";
     if (!isManager) {
-      return res.status(403).json({ error: "Chỉ quản trị viên hoặc trưởng dự án mới thêm trực tiếp. Hãy gửi yêu cầu duyệt." });
+      return res.status(403).json({ error: "Chỉ quản trị viên hoặc quản lý mới thêm trực tiếp. Hãy gửi yêu cầu duyệt." });
     }
 
     // BẮT BUỘC: người được thêm phải là thành viên của workspace chứa dự án
@@ -311,7 +311,7 @@ export const removeProjectMember = async (req, res) => {
 
     const project = await prisma.project.findUnique({
       where: { id },
-      select: { team_lead: true },
+      select: { ownerId: true },
     });
     if (!project) return res.status(404).json({ error: "Dự án không tồn tại" });
 
@@ -323,15 +323,15 @@ export const removeProjectMember = async (req, res) => {
       return res.status(404).json({ error: "Thành viên không thuộc dự án này" });
     }
 
-    // Quyền xóa: ADMIN/MANAGER, trưởng dự án, hoặc tự rời dự án.
-    const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER" || project.team_lead === userId;
+    // Quyền xóa: ADMIN/MANAGER, hoặc tự rời dự án.
+    const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER";
     const isSelf = target.userId === userId;
     if (!isManager && !isSelf) {
       return res.status(403).json({ error: "Bạn không có quyền xóa thành viên này" });
     }
-    // Không cho xóa trưởng dự án khỏi chính dự án của họ
-    if (target.userId === project.team_lead) {
-      return res.status(400).json({ error: "Không thể xóa trưởng dự án khỏi dự án" });
+    // Không cho xóa người tạo dự án khỏi chính dự án của họ
+    if (target.userId === project.ownerId) {
+      return res.status(400).json({ error: "Không thể xóa người tạo dự án khỏi dự án" });
     }
 
     await prisma.projectMember.delete({ where: { id: memberId } });
@@ -345,7 +345,7 @@ export const removeProjectMember = async (req, res) => {
  * NHÂN BẢN DỰ ÁN (dùng dự án cũ làm MẪU) — POST /api/projects/:id/duplicate
  * Sao chép: thông tin dự án + toàn bộ giai đoạn + công việc (đưa về TODO, bỏ người
  * được giao & hạn chót). KHÔNG sao chép: bình luận, file, giờ công, tin nhắn.
- * Quyền: ADMIN / MANAGER / trưởng dự án.
+ * Quyền: ADMIN / MANAGER.
  */
 export const duplicateProject = async (req, res) => {
   try {
@@ -361,12 +361,12 @@ export const duplicateProject = async (req, res) => {
     });
     if (!source) return res.status(404).json({ error: "Dự án không tồn tại" });
 
-    const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER" || source.team_lead === userId;
+    const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER";
     if (!isManager) {
-      return res.status(403).json({ error: "Chỉ quản trị viên/quản lý/trưởng dự án mới được nhân bản dự án" });
+      return res.status(403).json({ error: "Chỉ quản trị viên hoặc quản lý mới được nhân bản dự án" });
     }
 
-    // Tạo dự án mới (người nhân bản làm trưởng dự án)
+    // Tạo dự án mới (người nhân bản làm người tạo)
     const copy = await prisma.project.create({
       data: {
         name: `${source.name} (bản sao)`,
@@ -376,7 +376,7 @@ export const duplicateProject = async (req, res) => {
         workspaceId: source.workspaceId,
         departmentId: source.departmentId,
         budget: source.budget,
-        team_lead: userId,
+        ownerId: userId,
         members: { create: [{ userId }] },
       },
     });

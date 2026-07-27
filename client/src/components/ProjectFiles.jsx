@@ -32,10 +32,10 @@ const ProjectFiles = ({ projectId }) => {
     const { user } = useUser();
     const { currentWorkspace } = useSelector((state) => state.workspace);
 
-    // Admin workspace hoặc trưởng dự án mới được đánh giá tài liệu
+    // Quản trị viên / Quản lý workspace mới được đánh giá tài liệu
     const project = currentWorkspace?.projects?.find((p) => p.id === projectId);
-    const isAdmin = currentWorkspace?.members?.some((m) => m.userId === user?.id && m.role === "ADMIN");
-    const canReview = isAdmin || project?.team_lead === user?.id;
+    const isAdmin = currentWorkspace?.members?.some((m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER"));
+    const canReview = isAdmin;
 
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -133,7 +133,7 @@ const ProjectFiles = ({ projectId }) => {
 
     return (
         <div className="space-y-6">
-            {/* Upload Zone — chỉ admin/trưởng dự án (tài liệu chung của dự án).
+            {/* Upload Zone — chỉ admin/quản lý (tài liệu chung của dự án).
                 User thường upload tài liệu công việc của mình ở chi tiết task. */}
             {canReview ? (
                 <div
@@ -156,7 +156,7 @@ const ProjectFiles = ({ projectId }) => {
                 </div>
             ) : (
                 <div className="bg-surface-card rounded-lg p-4 text-center text-sm text-zinc-500 dark:text-muted">
-                    Tài liệu chung của dự án (chỉ quản trị viên/trưởng dự án đăng tải). Bạn có thể đính kèm tài liệu công việc trong từng công việc của mình.
+                    Tài liệu chung của dự án (chỉ quản trị viên/quản lý đăng tải). Bạn có thể đính kèm tài liệu công việc trong từng công việc của mình.
                 </div>
             )}
 
@@ -235,7 +235,7 @@ const ProjectFiles = ({ projectId }) => {
                                         </p>
                                     )}
 
-                                    {/* Nút đánh giá — chỉ admin/trưởng dự án, và CHỈ với file chưa duyệt.
+                                    {/* Nút đánh giá — chỉ admin/quản lý, và CHỈ với file chưa duyệt.
                                         File do admin up tự "Đạt" nên không hiện nút. */}
                                     {canReview && file.reviewStatus !== "APPROVED" && (
                                         <div className="mt-2 ml-12 flex gap-2">

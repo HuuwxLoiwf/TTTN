@@ -40,7 +40,7 @@ export const getExpenses = async (req, res) => {
     }
 };
 
-// Ghi nhận khoản chi (ADMIN / MANAGER / trưởng dự án)
+// Ghi nhận khoản chi (ADMIN / MANAGER)
 export const createExpense = async (req, res) => {
     try {
         const userId = req.auth?.userId;
@@ -49,13 +49,13 @@ export const createExpense = async (req, res) => {
 
         const project = await prisma.project.findUnique({
             where: { id: projectId },
-            select: { name: true, budget: true, team_lead: true, workspaceId: true },
+            select: { name: true, budget: true, ownerId: true, workspaceId: true },
         });
         if (!project) return res.status(404).json({ error: "Dự án không tồn tại" });
 
-        const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER" || project.team_lead === userId;
+        const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER";
         if (!isManager) {
-            return res.status(403).json({ error: "Chỉ quản trị viên, quản lý hoặc trưởng dự án mới được ghi nhận chi phí" });
+            return res.status(403).json({ error: "Chỉ quản trị viên hoặc quản lý mới được ghi nhận chi phí" });
         }
 
         if (!title?.trim()) return res.status(400).json({ error: "Nội dung khoản chi là bắt buộc" });
@@ -100,12 +100,12 @@ export const createExpense = async (req, res) => {
                 where: { workspaceId: project.workspaceId, role: "ADMIN" },
                 select: { userId: true },
             });
-            const recipients = new Set([project.team_lead, ...admins.map((a) => a.userId)]);
+            const recipients = new Set([project.ownerId, ...admins.map((a) => a.userId)]);
             for (const rid of recipients) {
                 if (!rid) continue;
                 notifyUser({
                     userId: rid,
-                    actorId: rid === userId ? null : userId, // vẫn báo cả người tạo nếu là lead/admin
+                    actorId: rid === userId ? null : userId, // vẫn báo cả người tạo nếu là owner/admin
                     title: "Cảnh báo vượt ngân sách",
                     message: `Dự án ${project.name} đã chi ${total.toLocaleString("vi-VN")}đ / ngân sách ${project.budget.toLocaleString("vi-VN")}đ (vượt ${(total - project.budget).toLocaleString("vi-VN")}đ).`,
                 });
@@ -118,15 +118,14 @@ export const createExpense = async (req, res) => {
     }
 };
 
-// Xóa khoản chi: người tạo, trưởng dự án, ADMIN hoặc MANAGER
+// Xóa khoản chi: người tạo, ADMIN hoặc MANAGER
 export const deleteExpense = async (req, res) => {
     try {
         const userId = req.auth?.userId;
         const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER";
-        const isLead = req.projectTeamLead === userId;
         const isCreator = req.expenseCreatorId === userId;
-        if (!isManager && !isLead && !isCreator) {
-            return res.status(403).json({ error: "Chỉ người tạo, trưởng dự án hoặc quản trị viên mới được xóa khoản chi" });
+        if (!isManager && !isCreator) {
+            return res.status(403).json({ error: "Chỉ người tạo, quản lý hoặc quản trị viên mới được xóa khoản chi" });
         }
         await prisma.expense.delete({ where: { id: req.params.id } });
         res.json({ message: "Đã xóa khoản chi" });

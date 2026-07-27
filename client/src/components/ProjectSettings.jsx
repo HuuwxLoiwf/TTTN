@@ -19,12 +19,12 @@ export default function ProjectSettings({ project }) {
     const { currentWorkspace } = useSelector((state) => state.workspace);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Chỉ ADMIN của workspace mới được xóa dự án (khớp phân quyền backend)
+    // ADMIN / MANAGER của workspace mới được xóa dự án (khớp phân quyền backend)
     const isAdmin = currentWorkspace?.members?.some(
-        (m) => m.userId === user?.id && m.role === "ADMIN"
+        (m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER")
     );
-    // Admin hoặc trưởng dự án mới được duyệt yêu cầu thành viên
-    const canReview = isAdmin || project?.team_lead === user?.id;
+    // Admin hoặc quản lý mới được duyệt yêu cầu thành viên
+    const canReview = isAdmin;
 
     // Sau khi duyệt yêu cầu: tải lại dự án để cập nhật danh sách thành viên
     const refetchProject = async () => {
@@ -222,14 +222,14 @@ export default function ProjectSettings({ project }) {
                             {project.members.map((member, index) => (
                                 <div key={index} className="flex items-center justify-between px-3 py-2 rounded-full bg-gray-50 dark:bg-surface-soft text-sm text-gray-900 dark:text-body" >
                                     <span> {member?.user?.email || "Unknown"} </span>
-                                    {project.team_lead === member.user.id && <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-surface-elevated text-muted">Trưởng nhóm</span>}
+                                    {project.ownerId === member.user.id && <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-surface-elevated text-muted">Người tạo</span>}
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
 
-                {/* Yêu cầu chờ duyệt — chỉ admin/trưởng dự án */}
+                {/* Yêu cầu chờ duyệt — chỉ admin/quản lý */}
                 {canReview && (
                     <PendingMemberRequests projectId={project.id} onApproved={refetchProject} />
                 )}

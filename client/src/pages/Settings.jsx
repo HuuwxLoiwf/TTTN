@@ -275,7 +275,7 @@ export default function Settings() {
                         <div>
                             <label className="text-xs text-gray-500 dark:text-muted">Ai được TẠO công việc?</label>
                             <select value={policyTaskCreate} onChange={(e) => setPolicyTaskCreate(e.target.value)} className={inputCls}>
-                                <option value="managers">Chỉ Quản trị viên / Quản lý / Trưởng dự án (mặc định)</option>
+                                <option value="managers">Chỉ Quản trị viên / Quản lý (mặc định)</option>
                                 <option value="members">Mọi thành viên của dự án</option>
                             </select>
                         </div>
@@ -284,7 +284,7 @@ export default function Settings() {
                         <div className="space-y-2">
                             <label className="flex items-center gap-2 text-sm cursor-pointer">
                                 <input type="checkbox" checked={autoNotifyDone} onChange={(e) => setAutoNotifyDone(e.target.checked)} className="accent-m-blue-dark" />
-                                Tự thông báo cho quản trị viên & trưởng dự án khi có công việc <b>Hoàn thành</b>
+                                Tự thông báo cho quản trị viên & quản lý khi có công việc <b>Hoàn thành</b>
                             </label>
                             <label className="flex items-center gap-2 text-sm cursor-pointer">
                                 <input type="checkbox" checked={autoOverdue} onChange={(e) => setAutoOverdue(e.target.checked)} className="accent-m-blue-dark" />

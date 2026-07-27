@@ -251,7 +251,7 @@ class _ProjectSettingsState extends State<ProjectSettings> {
                   ...widget.project.members.map((m) {
                     final name = m.user?.name ?? 'Unknown';
                     final isLead =
-                        m.userId == widget.project.teamLead;
+                        m.userId == widget.project.ownerId;
                     return Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 10),
@@ -278,7 +278,7 @@ class _ProjectSettingsState extends State<ProjectSettings> {
                                         : const Color(0xFFD4D4D8)),
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Text('Team Lead',
+                              child: const Text('Người tạo',
                                   style: TextStyle(fontSize: 11)),
                             ),
                         ],

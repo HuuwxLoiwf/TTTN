@@ -60,15 +60,15 @@ export const createRisk = async (req, res) => {
             entityId: risk.id,
         });
 
-        // Rủi ro CAO (điểm ≥ 6) → báo ngay trưởng dự án
+        // Rủi ro CAO (điểm ≥ 6) → báo ngay người tạo dự án
         if (riskScore(risk) >= 6) {
             const project = await prisma.project.findUnique({
                 where: { id: projectId },
-                select: { name: true, team_lead: true },
+                select: { name: true, ownerId: true },
             });
-            if (project?.team_lead) {
+            if (project?.ownerId) {
                 notifyUser({
-                    userId: project.team_lead,
+                    userId: project.ownerId,
                     actorId: userId,
                     title: "Rủi ro mức cao được ghi nhận",
                     message: `Rủi ro "${risk.title}" (dự án ${project.name}) có mức độ cao — cần xem xét kế hoạch ứng phó.`,
@@ -131,15 +131,14 @@ export const updateRisk = async (req, res) => {
     }
 };
 
-// Xóa rủi ro: người tạo, trưởng dự án, ADMIN hoặc MANAGER
+// Xóa rủi ro: người tạo, ADMIN hoặc MANAGER
 export const deleteRisk = async (req, res) => {
     try {
         const userId = req.auth?.userId;
         const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER";
-        const isLead = req.projectTeamLead === userId;
         const isCreator = req.riskCreatorId === userId;
-        if (!isManager && !isLead && !isCreator) {
-            return res.status(403).json({ error: "Chỉ người tạo, trưởng dự án hoặc quản trị viên mới được xóa rủi ro" });
+        if (!isManager && !isCreator) {
+            return res.status(403).json({ error: "Chỉ người tạo, quản lý hoặc quản trị viên mới được xóa rủi ro" });
         }
         await prisma.risk.delete({ where: { id: req.params.id } });
         res.json({ message: "Đã xóa rủi ro" });

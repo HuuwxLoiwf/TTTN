@@ -291,7 +291,7 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
                             status: _status,
                             startDate: _startDate,
                             endDate: _endDate,
-                            teamLead: 'user_1',
+                            ownerId: 'user_1',
                             workspaceId: ws.currentWorkspace?.id ?? '',
                           ),
                         );

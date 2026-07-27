@@ -7,15 +7,15 @@ import { notifyUser, logActivity } from "../utils/notify.js";
 const isWorkspaceAdmin = async (userId, projectId) => {
     const project = await prisma.project.findUnique({
         where: { id: projectId },
-        select: { workspaceId: true, team_lead: true },
+        select: { workspaceId: true },
     });
     if (!project) return { ok: false, project: null };
     const membership = await prisma.workspaceMember.findUnique({
         where: { userId_workspaceId: { userId, workspaceId: project.workspaceId } },
         select: { role: true },
     });
-    // Trưởng dự án cũng có quyền duyệt
-    const ok = membership?.role === "ADMIN" || project.team_lead === userId;
+    // Quyền duyệt: ADMIN hoặc MANAGER
+    const ok = membership?.role === "ADMIN" || membership?.role === "MANAGER";
     return { ok, project };
 };
 
@@ -66,15 +66,15 @@ export const createRequest = async (req, res) => {
 
         const project = await prisma.project.findUnique({
             where: { id: projectId },
-            select: { name: true, team_lead: true, workspaceId: true },
+            select: { name: true, ownerId: true, workspaceId: true },
         });
 
-        // Thông báo cho trưởng dự án + các ADMIN workspace
+        // Thông báo cho người tạo dự án + các ADMIN/MANAGER workspace (những người có quyền duyệt)
         const admins = await prisma.workspaceMember.findMany({
-            where: { workspaceId: project.workspaceId, role: "ADMIN" },
+            where: { workspaceId: project.workspaceId, role: { in: ["ADMIN", "MANAGER"] } },
             select: { userId: true },
         });
-        const recipientIds = new Set([project.team_lead, ...admins.map((a) => a.userId)]);
+        const recipientIds = new Set([project.ownerId, ...admins.map((a) => a.userId)]);
         recipientIds.delete(userId);
         for (const rid of recipientIds) {
             notifyUser({
@@ -102,7 +102,7 @@ export const approveRequest = async (req, res) => {
         if (request.status !== "PENDING") return res.status(400).json({ error: "Yêu cầu đã được xử lý" });
 
         const { ok, project } = await isWorkspaceAdmin(userId, request.projectId);
-        if (!ok) return res.status(403).json({ error: "Chỉ quản trị viên hoặc trưởng dự án mới được duyệt" });
+        if (!ok) return res.status(403).json({ error: "Chỉ quản trị viên hoặc quản lý mới được duyệt" });
 
         // Người được duyệt phải còn là thành viên workspace
         const inWorkspace = await prisma.workspaceMember.findUnique({
@@ -155,7 +155,7 @@ export const rejectRequest = async (req, res) => {
         if (request.status !== "PENDING") return res.status(400).json({ error: "Yêu cầu đã được xử lý" });
 
         const { ok, project } = await isWorkspaceAdmin(userId, request.projectId);
-        if (!ok) return res.status(403).json({ error: "Chỉ quản trị viên hoặc trưởng dự án mới được từ chối" });
+        if (!ok) return res.status(403).json({ error: "Chỉ quản trị viên hoặc quản lý mới được từ chối" });
 
         await prisma.projectMemberRequest.update({
             where: { id },

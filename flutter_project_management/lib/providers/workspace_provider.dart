@@ -166,7 +166,7 @@ class WorkspaceProvider extends ChangeNotifier {
           status: p.status,
           startDate: p.startDate,
           endDate: p.endDate,
-          teamLead: p.teamLead,
+          ownerId: p.ownerId,
           workspaceId: p.workspaceId,
           progress: p.progress,
           createdAt: p.createdAt,

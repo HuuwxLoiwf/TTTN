@@ -89,14 +89,14 @@ export const createTask = async (req, res) => {
     const { title, description, type, priority, status, assigneeId, due_date, phaseId, labels } = req.body;
 
     // Quyền tạo công việc theo CHÍNH SÁCH workspace (settings.policies.taskCreate):
-    //  - "managers" (mặc định): chỉ ADMIN / MANAGER / trưởng dự án
+    //  - "managers" (mặc định): chỉ ADMIN / MANAGER
     //  - "members": mọi thành viên của dự án cũng được tạo
     const projForPerm = await prisma.project.findUnique({
       where: { id: projectId },
-      select: { team_lead: true, workspace: { select: { settings: true } } },
+      select: { workspace: { select: { settings: true } } },
     });
     const policy = projForPerm?.workspace?.settings?.policies?.taskCreate || "managers";
-    const isManagerRole = req.memberRole === "ADMIN" || req.memberRole === "MANAGER" || projForPerm?.team_lead === userId;
+    const isManagerRole = req.memberRole === "ADMIN" || req.memberRole === "MANAGER";
     let canCreate = isManagerRole;
     if (!canCreate && policy === "members") {
       const pm = await prisma.projectMember.findUnique({
@@ -106,7 +106,7 @@ export const createTask = async (req, res) => {
       canCreate = !!pm;
     }
     if (!canCreate) {
-      return res.status(403).json({ error: "Chỉ quản trị viên hoặc trưởng dự án mới được tạo công việc (chính sách workspace)" });
+      return res.status(403).json({ error: "Chỉ quản trị viên hoặc quản lý mới được tạo công việc (chính sách workspace)" });
     }
 
     if (!title?.trim()) return res.status(400).json({ error: "Tiêu đề công việc là bắt buộc" });
@@ -198,12 +198,11 @@ export const updateTask = async (req, res) => {
       where: { id },
       select: {
         status: true, assigneeId: true, createdAt: true, due_date: true, statusPlan: true,
-        project: { select: { team_lead: true, workspaceId: true, name: true } },
+        project: { select: { workspaceId: true, name: true, ownerId: true } },
       },
     });
 
     const isManager = req.memberRole === "ADMIN" || req.memberRole === "MANAGER";
-    const isLead = prev?.project?.team_lead === userId;
 
     // Chuẩn hóa due_date: chuỗi rỗng / null → xóa hạn; chuỗi không hợp lệ → 400.
     let dueDateData;
@@ -218,11 +217,11 @@ export const updateTask = async (req, res) => {
     }
 
     // Bật/tắt tự động chuyển trạng thái + chỉnh kế hoạch số ngày mỗi trạng thái.
-    // Chỉ ADMIN/MANAGER/trưởng dự án được chỉnh (kế hoạch quyết định mốc được phép DONE).
+    // Chỉ ADMIN/MANAGER được chỉnh (kế hoạch quyết định mốc được phép DONE).
     const autoData = {};
     if (autoStatus !== undefined || statusPlan !== undefined) {
-      if (!isManager && !isLead) {
-        return res.status(403).json({ error: "Chỉ quản trị viên/quản lý/trưởng dự án mới chỉnh chế độ tự động" });
+      if (!isManager) {
+        return res.status(403).json({ error: "Chỉ quản trị viên hoặc quản lý mới chỉnh chế độ tự động" });
       }
       if (autoStatus !== undefined) autoData.autoStatus = !!autoStatus;
       if (statusPlan !== undefined) {
@@ -245,11 +244,11 @@ export const updateTask = async (req, res) => {
       }
     }
 
-    // Đổi trạng thái: ADMIN / MANAGER / trưởng dự án / người được giao việc.
+    // Đổi trạng thái: ADMIN / MANAGER / người được giao việc.
     // (Khớp với kéo-thả Kanban — không chỉ riêng ADMIN.)
     if (status !== undefined && status !== prev?.status) {
       const isAssignee = prev?.assigneeId === userId;
-      if (!isManager && !isLead && !isAssignee) {
+      if (!isManager && !isAssignee) {
         return res.status(403).json({ error: "Bạn không có quyền đổi trạng thái công việc này" });
       }
 
@@ -331,13 +330,13 @@ export const updateTask = async (req, res) => {
       if (status === "DONE") {
         const wsId = prev?.project?.workspaceId;
         const settings = await getWorkspaceSettings(wsId);
-        // Báo trưởng dự án + các ADMIN (nếu bật automation "notifyOnDone")
+        // Báo người tạo dự án + các ADMIN (nếu bật automation "notifyOnDone")
         if (settings?.automations?.notifyOnDone) {
           const admins = await prisma.workspaceMember.findMany({
             where: { workspaceId: wsId, role: "ADMIN" },
             select: { userId: true },
           });
-          const recipients = new Set([prev?.project?.team_lead, ...admins.map((a) => a.userId)]);
+          const recipients = new Set([prev?.project?.ownerId, ...admins.map((a) => a.userId)]);
           recipients.delete(userId);
           for (const rid of recipients) {
             if (!rid) continue;

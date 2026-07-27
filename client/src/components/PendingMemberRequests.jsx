@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { apiFetch } from "../lib/api";
 
 /**
- * Danh sách yêu cầu thêm thành viên đang chờ duyệt — chỉ hiện cho admin/trưởng dự án.
+ * Danh sách yêu cầu thêm thành viên đang chờ duyệt — chỉ hiện cho admin/quản lý.
  * onApproved: callback để cha refetch dự án (cập nhật danh sách thành viên).
  */
 const PendingMemberRequests = ({ projectId, onApproved }) => {

@@ -24,7 +24,7 @@ router.put(
     updateRisk
 );
 
-// Xóa rủi ro: kiểm tra quyền chi tiết trong controller (người tạo / trưởng dự án / ADMIN / MANAGER)
+// Xóa rủi ro: kiểm tra quyền chi tiết trong controller (người tạo / ADMIN / MANAGER)
 router.delete(
     "/:id",
     requireMember({ from: "risk", param: "id" }),

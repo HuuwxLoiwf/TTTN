@@ -32,7 +32,7 @@ class Project {
   final String status;
   final DateTime? startDate;
   final DateTime? endDate;
-  final String teamLead;
+  final String ownerId;
   final String workspaceId;
   final int progress;
   final DateTime createdAt;
@@ -49,7 +49,7 @@ class Project {
     this.status = 'ACTIVE',
     this.startDate,
     this.endDate,
-    required this.teamLead,
+    required this.ownerId,
     required this.workspaceId,
     this.progress = 0,
     DateTime? createdAt,
@@ -72,7 +72,7 @@ class Project {
           : null,
       endDate:
           json['end_date'] != null ? DateTime.parse(json['end_date']) : null,
-      teamLead: json['team_lead'],
+      ownerId: json['ownerId'],
       workspaceId: json['workspaceId'],
       progress: json['progress'] ?? 0,
       createdAt: json['createdAt'] != null

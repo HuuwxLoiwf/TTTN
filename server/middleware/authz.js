@@ -108,38 +108,35 @@ export const requireMember = ({ from = "workspace", param = "id", role } = {}) =
             } else if (from === "risk") {
                 const risk = await prisma.risk.findUnique({
                     where: { id: req.params[param] },
-                    select: { createdBy: true, projectId: true, project: { select: { workspaceId: true, team_lead: true } } },
+                    select: { createdBy: true, projectId: true, project: { select: { workspaceId: true } } },
                 });
                 if (!risk) return res.status(404).json({ error: "Rủi ro không tồn tại" });
                 workspaceId = risk.project?.workspaceId;
                 req.projectId = risk.projectId;
                 req.riskCreatorId = risk.createdBy;
-                req.projectTeamLead = risk.project?.team_lead;
             } else if (from === "expense") {
                 const exp = await prisma.expense.findUnique({
                     where: { id: req.params[param] },
-                    select: { createdBy: true, projectId: true, project: { select: { workspaceId: true, team_lead: true } } },
+                    select: { createdBy: true, projectId: true, project: { select: { workspaceId: true } } },
                 });
                 if (!exp) return res.status(404).json({ error: "Khoản chi không tồn tại" });
                 workspaceId = exp.project?.workspaceId;
                 req.projectId = exp.projectId;
                 req.expenseCreatorId = exp.createdBy;
-                req.projectTeamLead = exp.project?.team_lead;
             } else if (from === "file") {
                 const file = await prisma.file.findUnique({
                     where: { id: req.params[param] },
                     select: {
                         uploadedBy: true,
                         projectId: true,
-                        project: { select: { workspaceId: true, team_lead: true } },
-                        task: { select: { projectId: true, project: { select: { workspaceId: true, team_lead: true } } } },
+                        project: { select: { workspaceId: true } },
+                        task: { select: { projectId: true, project: { select: { workspaceId: true } } } },
                     },
                 });
                 if (!file) return res.status(404).json({ error: "File không tồn tại" });
                 workspaceId = file.project?.workspaceId || file.task?.project?.workspaceId;
                 req.fileOwnerId = file.uploadedBy;
                 req.fileProjectId = file.projectId || file.task?.projectId || null;
-                req.fileTeamLead = file.project?.team_lead || file.task?.project?.team_lead || null;
             }
 
             if (!workspaceId) return res.status(404).json({ error: "Không tìm thấy không gian làm việc" });
@@ -209,16 +206,7 @@ export const requireProjectMember = ({ from = "project", param = "id" } = {}) =>
             }
             if (!projectId) return res.status(404).json({ error: "Không tìm thấy dự án" });
 
-            // Trưởng dự án luôn được phép
-            const project = await prisma.project.findUnique({
-                where: { id: projectId },
-                select: { team_lead: true },
-            });
-            if (project?.team_lead === userId) {
-                req.projectId = projectId;
-                return next();
-            }
-
+            // Chỉ cần là thành viên của dự án (ADMIN/MANAGER đã được cho qua ở trên)
             const member = await prisma.projectMember.findUnique({
                 where: { userId_projectId: { userId, projectId } },
                 select: { id: true },

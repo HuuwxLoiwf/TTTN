@@ -23,8 +23,7 @@ const ProjectPhases = ({ projectId, tasks }) => {
     const { currentWorkspace } = useSelector((state) => state.workspace);
     const project = currentWorkspace?.projects?.find((p) => p.id === projectId);
     const members = project?.members || [];
-    const isManager = currentWorkspace?.members?.some((m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER")) ||
-        project?.team_lead === user?.id;
+    const isManager = currentWorkspace?.members?.some((m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER"));
 
     const [phases, setPhases] = useState([]);
     const [form, setForm] = useState({ name: "", startDate: "", endDate: "", assigneeId: "" });
@@ -171,7 +170,7 @@ const ProjectPhases = ({ projectId, tasks }) => {
         <div className="space-y-5">
             <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
 
-            {/* Thêm giai đoạn (admin/quản lý/trưởng dự án) — có thời gian + người phụ trách */}
+            {/* Thêm giai đoạn (admin/quản lý) — có thời gian + người phụ trách */}
             {isManager && (
                 <form onSubmit={addPhase} className="bg-surface-card rounded-lg p-4 space-y-3">
                     <div className="flex gap-2 flex-wrap">

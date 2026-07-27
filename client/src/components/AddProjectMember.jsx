@@ -18,12 +18,11 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }) => {
     const project = currentWorkspace?.projects.find((p) => p.id === id);
     const projectMembersEmails = project?.members.map((member) => member.user.email) || [];
 
-    // Admin workspace hoặc trưởng dự án → thêm thẳng; còn lại → gửi yêu cầu duyệt
-    const isWsAdmin = currentWorkspace?.members?.some(
-        (m) => m.userId === user?.id && m.role === "ADMIN"
+    // Quản trị viên / Quản lý workspace → thêm thẳng; còn lại → gửi yêu cầu duyệt
+    const isWsManager = currentWorkspace?.members?.some(
+        (m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER")
     );
-    const isLead = project?.team_lead === user?.id;
-    const canAddDirectly = isWsAdmin || isLead;
+    const canAddDirectly = isWsManager;
 
     const [email, setEmail] = useState('');
     const [isAdding, setIsAdding] = useState(false);
@@ -73,7 +72,7 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }) => {
                     )}
                     {!canAddDirectly && (
                         <p className="text-xs text-m-warning mt-1">
-                            Bạn không phải quản trị viên — yêu cầu sẽ được gửi tới quản trị viên/trưởng dự án để duyệt.
+                            Bạn không phải quản trị viên/quản lý — yêu cầu sẽ được gửi tới quản trị viên/quản lý để duyệt.
                         </p>
                     )}
                 </div>

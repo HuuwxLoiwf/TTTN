@@ -21,7 +21,6 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
         start_date: "",
         end_date: "",
         team_members: [],
-        team_lead: "",
         departmentId: "",
         progress: 0,
     });
@@ -139,7 +138,7 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
             });
             dispatch(addProject(project));
             setIsDialogOpen(false);
-            setFormData({ name: "", description: "", status: "PLANNING", priority: "MEDIUM", start_date: "", end_date: "", team_members: [], team_lead: "", departmentId: "", progress: 0 });
+            setFormData({ name: "", description: "", status: "PLANNING", priority: "MEDIUM", start_date: "", end_date: "", team_members: [], departmentId: "", progress: 0 });
             setMemberEmail("");
             toast.success("Tạo dự án thành công!");
         } catch (err) {
@@ -236,19 +235,6 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                             <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Ngày kết thúc</label>
                             <input type="date" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })} min={formData.start_date} className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" />
                         </div>
-                    </div>
-
-                    {/* Lead */}
-                    <div>
-                        <label className="block text-xs font-bold uppercase tracking-[1.5px] text-gray-600 dark:text-body mb-1">Trưởng dự án</label>
-                        <select value={formData.team_lead} onChange={(e) => setFormData({ ...formData, team_lead: e.target.value, team_members: e.target.value ? [...new Set([...formData.team_members, e.target.value])] : formData.team_members, })} className="w-full px-3 py-2 bg-white dark:bg-surface-elevated rounded mt-1 text-gray-900 dark:text-ink text-sm dark:shadow-spotify-inset focus:outline-none focus:outline-1 focus:outline-white" >
-                            <option value="">Chưa có</option>
-                            {currentWorkspace?.members?.map((member) => (
-                                <option key={member.user.email} value={member.user.email}>
-                                    {member.user.email}
-                                </option>
-                            ))}
-                        </select>
                     </div>
 
                     {/* Team Members */}

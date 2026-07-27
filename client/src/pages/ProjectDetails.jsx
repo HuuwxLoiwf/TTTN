@@ -31,7 +31,7 @@ export default function ProjectDetail() {
     const currentWorkspace = useSelector((state) => state?.workspace?.currentWorkspace);
     const projects = useMemo(() => currentWorkspace?.projects || [], [currentWorkspace]);
 
-    // Chỉ ADMIN hoặc trưởng dự án được vào tab Cài đặt (sửa/xóa dự án)
+    // Chỉ ADMIN hoặc MANAGER được vào tab Cài đặt (sửa/xóa dự án)
     const myRole = currentWorkspace?.members?.find((m) => m.userId === user?.id)?.role;
 
     const [project, setProject] = useState(null);
@@ -123,8 +123,8 @@ export default function ProjectDetail() {
                         </span>
                     </div>
                 </div>
-                {/* Chỉ ADMIN hoặc trưởng dự án được tạo công việc */}
-                {(myRole === "ADMIN" || project?.team_lead === user?.id) && (
+                {/* Chỉ ADMIN hoặc MANAGER được tạo công việc */}
+                {(myRole === "ADMIN" || myRole === "MANAGER") && (
                     <button onClick={() => setShowCreateTask(true)} className="flex items-center gap-2 px-5 py-2.5 text-sm bg-m-blue-light text-black font-bold hover:bg-m-blue-dark transition-colors rounded-full shadow-spotify-md" >
                         <PlusIcon className="size-4" />
                         Công việc mới
@@ -165,8 +165,8 @@ export default function ProjectDetail() {
                         { key: "equipment", label: "Thiết bị", icon: CpuIcon },
                         { key: "files", label: "Tài liệu", icon: FolderOpen },
                         { key: "chat", label: "Thảo luận", icon: MessagesSquare },
-                        // Tab Cài đặt chỉ hiện với ADMIN hoặc trưởng dự án
-                        ...(myRole === "ADMIN" || project?.team_lead === user?.id
+                        // Tab Cài đặt chỉ hiện với ADMIN hoặc MANAGER
+                        ...(myRole === "ADMIN" || myRole === "MANAGER"
                             ? [{ key: "settings", label: "Cài đặt", icon: SettingsIcon }]
                             : []),
                     ].map((tabItem) => (
@@ -234,12 +234,12 @@ export default function ProjectDetail() {
                         </div>
                     )}
                     {activeTab === "settings" && (
-                        (myRole === "ADMIN" || project?.team_lead === user?.id) ? (
+                        (myRole === "ADMIN" || myRole === "MANAGER") ? (
                             <div className="dark:bg-canvas max-w-6xl">
                                 <ProjectSettings project={project} />
                             </div>
                         ) : (
-                            <p className="text-sm text-gray-500 dark:text-muted p-4">Chỉ quản trị viên hoặc trưởng dự án mới được vào phần Cài đặt.</p>
+                            <p className="text-sm text-gray-500 dark:text-muted p-4">Chỉ quản trị viên hoặc quản lý mới được vào phần Cài đặt.</p>
                         )
                     )}
                 </div>
