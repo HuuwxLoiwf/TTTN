@@ -4,9 +4,6 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" parent="1" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="SƠ ĐỒ USE CASE TỔNG QUÁT — HỆ THỐNG QUẢN LÝ DỰ ÁN UMC" vertex="1">
-          <mxGeometry height="30" width="640" x="340" y="10" as="geometry" />
-        </mxCell>
         <mxCell id="boundary" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=13;fillColor=none;strokeColor=#000000;" value="Hệ thống Quản lý Dự án UMC" vertex="1">
           <mxGeometry height="850" width="850" x="260" y="50" as="geometry" />
         </mxCell>
