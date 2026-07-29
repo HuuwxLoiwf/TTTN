@@ -1,0 +1,129 @@
+--- PR1 - Tai khoan & Bao mat : 10 use case ---
+    Đăng nhập
+    Đăng ký tài khoản
+    Quên / đặt lại mật khẩu
+    Đổi mật khẩu
+    Cập nhật hồ sơ&nbsp;
+    Đăng xuất
+    Gửi & xác minh mã OTP
+    Gửi lại mã OTP
+    Duyệt / từ chối tài khoản đăng ký mới
+    Xem danh sách tài khoản chờ duyệt
+
+--- PR2 - Quan ly Du an : 14 use case ---
+    Đăng nhập
+    Xem danh sách / chi tiết dự án
+    Gửi yêu cầu tham gia dự án
+    Tự rời khỏi dự án
+    Tạo dự án
+    Sửa thông tin / ngân sách dự án
+    Quản lý giai đoạn dự án
+    Quản lý thành viên dự án
+    Duyệt / từ chối yêu cầu tham gia
+    Nhân bản dự án làm mẫu
+    Xóa dự án (vào thùng rác)
+    Bắt buộc chọn phòng ban
++ ngày bắt đầu ≥ hôm nay
+    Chỉ Hoàn thành khi tiến độ = 100%
+    Không xóa được người tạo dự án
+
+--- PR3 - Quan ly Cong viec : 14 use case ---
+    Đăng nhập
+    Đổi trạng thái công việc
+(kéo - thả Kanban)
+    Quản lý việc con (checklist)
+    Ghi nhận giờ làm (TimeLog)
+    Việc tiên quyết đã xong
++ đúng mốc kế hoạch
+    Tính lại tiến độ dự án
++ phát sự kiện realtime
+    Hạn công việc ≤ ngày kết thúc dự án
+    Thông báo cho người được giao
+    Tạo & giao công việc
+    Cập nhật thông tin công việc
+    Thiết lập phụ thuộc công việc
+    Bật tự động chuyển trạng thái
+    Không tạo vòng lặp phụ thuộc
+    Xóa công việc (vào thùng rác)
+
+--- PR4 - Cong tac & Thong bao : 12 use case ---
+    Đăng nhập
+    Gửi tin nhắn nhóm dự án
+(thời gian thực)
+    Bình luận trên công việc
+    Nhắc tên thành viên&nbsp;
+    Nhận thông báo
+(realtime / email)
+    Đánh dấu đã đọc
+(từng / tất cả)
+    Tóm tắt thảo luận nhóm bằng AI
+    Hỏi - đáp trợ lý AI
+    Đính kèm tệp vào tin nhắn
+    Tải tin nhắn cũ (30 tin / lần)
+    Gửi thông báo cho người được nhắc
+    Nhắc việc sắp / quá hạn
+
+--- PR5 - Quan ly Tai lieu : 11 use case ---
+    Đăng nhập
+    Tải tài liệu lên
+(công việc / giai đoạn)
+    Xem / tải xuống tài liệu
+    Xóa tài liệu mình đã tải lên
+    Lọc loại tệp an toàn&nbsp;
+    Đặt trạng thái Chờ duyệt
+    Thông báo kết quả cho người nộp
+    Duyệt tài liệu (Đạt / Chưa đạt)
+    Đăng tài liệu chung của dự án
+(tự động ĐẠT)
+    Xóa tài liệu bất kỳ của dự án
+    Ghi chú yêu cầu chỉnh sửa
+(nếu Chưa đạt)
+
+--- PR6 - Bao cao & Quan tri : 13 use case ---
+    Đăng nhập
+    Xem tổng quan không gian làm việc
+    Xem biểu đồ Gantt / Burndown
+    Xem bảng chấm công (timesheet)
+    Xuất báo cáo Excel / PDF / CSV
+    Báo cáo giờ làm theo thành viên
+    Quản lý thùng rác
+(khôi phục / xóa vĩnh viễn)
+    Quản lý phòng ban
+    Phân tích rủi ro dự án bằng AI
+    Tự dọn vĩnh viễn mục quá 30 ngày
+    Xem nhật ký kiểm toán (Audit)
+    Cấu hình chính sách hệ thống
+    Cấu hình webhook thông báo
+
+--- PR7 - Nguon luc dien tu : 12 use case ---
+    Đăng nhập
+    Xem danh sách thiết bị / máy móc
+    Xem danh sách chi phí dự án
+    <div><br></div>Xem sổ rủi ro<div><br></div>
+    So sánh chi phí với ngân sách
+    Cảnh báo khi vượt ngân sách
+    Thêm / sửa thiết bị
+    Đổi trạng thái / gán thiết bị cho dự án
+    Ghi khoản chi của dự án
+    Thêm / sửa rủi ro dự án
+    Đổi trạng thái rủi ro
+(Mở / Đang xử lý / Đã đóng)
+    Xóa thiết bị
+
+--- PR8 - Quan ly Khong gian lam viec : 12 use case ---
+    Đăng nhập
+    Tạo không gian làm việc
+    Xem danh sách không gian làm việc của mình
+    Tự sinh mã định danh (slug)
++ gán người tạo làm Quản trị viên
+    Người được mời phải có tài khoản
++ không mời vai trò Quản trị viên
+    Xóa toàn bộ dự án & dữ liệu liên quan
+    Sửa thông tin không gian làm việc
+    Mời thành viên vào không gian làm việc
+    Đổi vai trò thành viên
+(Quản lý / Thành viên)
+    Xóa thành viên khỏi không gian làm việc
+    Xóa không gian làm việc
+    Đặt đơn giá giờ công (VNĐ/giờ)
+

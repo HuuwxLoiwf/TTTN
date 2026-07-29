@@ -1,62 +1,129 @@
 <mxfile host="app.diagrams.net">
   <diagram id="kientruc" name="Kien truc he thong">
-    <mxGraphModel dx="1200" dy="800" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1250" pageHeight="700" math="0" shadow="0">
+    <mxGraphModel dx="1212" dy="660" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1250" pageHeight="700" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-
-        <mxCell id="title" value="KIẾN TRÚC TỔNG THỂ HỆ THỐNG QUẢN LÝ DỰ ÁN UMC" style="text;html=1;fontSize=17;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="300" y="25" width="650" height="30" as="geometry" /></mxCell>
-
-        <!-- ===== NHAN TANG ===== -->
-        <mxCell id="lb1" value="TẦNG TRÌNH DIỄN&#10;(Presentation Layer)" style="text;html=1;fontSize=11;fontStyle=2;align=center;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="70" y="90" width="240" height="34" as="geometry" /></mxCell>
-        <mxCell id="lb2" value="TẦNG XỬ LÝ NGHIỆP VỤ&#10;(Application Layer)" style="text;html=1;fontSize=11;fontStyle=2;align=center;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="505" y="90" width="240" height="34" as="geometry" /></mxCell>
-        <mxCell id="lb3" value="TẦNG DỮ LIỆU&#10;(Data Layer)" style="text;html=1;fontSize=11;fontStyle=2;align=center;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="940" y="90" width="240" height="34" as="geometry" /></mxCell>
-
-        <!-- ===== KHOI 1: TRINH DUYET ===== -->
-        <mxCell id="c1" value="TRÌNH DUYỆT&#10;(React SPA)" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=13;fillColor=#ffffff;strokeColor=#000000;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="70" y="135" width="240" height="290" as="geometry" /></mxCell>
-        <mxCell id="c1l" value="" style="endArrow=none;html=1;strokeColor=#000000;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="70" y="185" as="sourcePoint" /><mxPoint x="310" y="185" as="targetPoint" /></mxGeometry></mxCell>
-        <mxCell id="c1a" value="React 19 + Vite" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="95" y="200" width="190" height="32" as="geometry" /></mxCell>
-        <mxCell id="c1b" value="Redux Toolkit&#10;(quản lý trạng thái)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="95" y="242" width="190" height="38" as="geometry" /></mxCell>
-        <mxCell id="c1c" value="React Router&#10;(điều hướng trang)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="95" y="290" width="190" height="38" as="geometry" /></mxCell>
-        <mxCell id="c1d" value="Tailwind CSS&#10;(giao diện)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="95" y="338" width="190" height="38" as="geometry" /></mxCell>
-        <mxCell id="c1e" value="Socket.IO Client" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="95" y="386" width="190" height="28" as="geometry" /></mxCell>
-
-        <!-- ===== KHOI 2: MAY CHU ===== -->
-        <mxCell id="c2" value="MÁY CHỦ ỨNG DỤNG&#10;(Node.js + Express)" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=13;fillColor=#ffffff;strokeColor=#000000;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="505" y="135" width="240" height="290" as="geometry" /></mxCell>
-        <mxCell id="c2l" value="" style="endArrow=none;html=1;strokeColor=#000000;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="505" y="185" as="sourcePoint" /><mxPoint x="745" y="185" as="targetPoint" /></mxGeometry></mxCell>
-        <mxCell id="c2a" value="Express 5 — REST API&#10;(routes / controllers)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="530" y="200" width="190" height="38" as="geometry" /></mxCell>
-        <mxCell id="c2b" value="Middleware phân quyền&#10;(JWT + RBAC)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="530" y="248" width="190" height="38" as="geometry" /></mxCell>
-        <mxCell id="c2c" value="Socket.IO Server&#10;(sự kiện thời gian thực)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="530" y="296" width="190" height="38" as="geometry" /></mxCell>
-        <mxCell id="c2d" value="Prisma ORM&#10;(truy vấn CSDL)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="530" y="344" width="190" height="38" as="geometry" /></mxCell>
-        <mxCell id="c2e" value="Multer / Cloudinary (tệp)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="530" y="392" width="190" height="28" as="geometry" /></mxCell>
-
-        <!-- ===== KHOI 3: CSDL ===== -->
-        <mxCell id="c3" value="CƠ SỞ DỮ LIỆU&#10;(PostgreSQL)" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=13;fillColor=#ffffff;strokeColor=#000000;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="940" y="135" width="240" height="290" as="geometry" /></mxCell>
-        <mxCell id="c3l" value="" style="endArrow=none;html=1;strokeColor=#000000;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="940" y="185" as="sourcePoint" /><mxPoint x="1180" y="185" as="targetPoint" /></mxGeometry></mxCell>
-        <mxCell id="c3db" value="" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1000" y="205" width="120" height="80" as="geometry" /></mxCell>
-        <mxCell id="c3t" value="PostgreSQL 16&#10;(dịch vụ đám mây Neon)" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="1"><mxGeometry x="965" y="292" width="190" height="34" as="geometry" /></mxCell>
-        <mxCell id="c3a" value="21 bảng dữ liệu&#10;(User, Workspace, Project,&#10;Task, File, Equipment…)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="965" y="332" width="190" height="52" as="geometry" /></mxCell>
-        <mxCell id="c3b" value="Ràng buộc khóa chính / khóa ngoại" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="965" y="392" width="190" height="28" as="geometry" /></mxCell>
-
-        <!-- ===== MUI TEN: TRINH DUYET <-> MAY CHU ===== -->
-        <mxCell id="e1" value="HTTP / JSON  (REST API)" style="endArrow=classic;startArrow=classic;html=1;fontSize=11;strokeColor=#000000;verticalAlign=bottom;labelBackgroundColor=#ffffff;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="312" y="235" as="sourcePoint" /><mxPoint x="503" y="235" as="targetPoint" /></mxGeometry></mxCell>
-        <mxCell id="e1n" value="Yêu cầu / phản hồi dữ liệu&#10;kèm token xác thực JWT" style="text;html=1;align=center;fontSize=9;fontStyle=2;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="310" y="245" width="195" height="30" as="geometry" /></mxCell>
-
-        <mxCell id="e2" value="WebSocket  (Socket.IO)" style="endArrow=classic;startArrow=classic;html=1;fontSize=11;strokeColor=#000000;dashed=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="312" y="330" as="sourcePoint" /><mxPoint x="503" y="330" as="targetPoint" /></mxGeometry></mxCell>
-        <mxCell id="e2n" value="Đẩy sự kiện thời gian thực&#10;(công việc, tin nhắn, thông báo)" style="text;html=1;align=center;fontSize=9;fontStyle=2;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="308" y="340" width="200" height="30" as="geometry" /></mxCell>
-
-        <!-- ===== MUI TEN: MAY CHU <-> CSDL ===== -->
-        <mxCell id="e3" value="SQL qua Prisma ORM" style="endArrow=classic;startArrow=classic;html=1;fontSize=11;strokeColor=#000000;verticalAlign=bottom;labelBackgroundColor=#ffffff;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="747" y="280" as="sourcePoint" /><mxPoint x="938" y="280" as="targetPoint" /></mxGeometry></mxCell>
-        <mxCell id="e3n" value="Truy vấn / cập nhật dữ liệu&#10;qua kết nối bảo mật" style="text;html=1;align=center;fontSize=9;fontStyle=2;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="745" y="290" width="195" height="30" as="geometry" /></mxCell>
-
-        <!-- ===== DICH VU NGOAI ===== -->
-        <mxCell id="ex" value="DỊCH VỤ BÊN NGOÀI" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fillColor=none;strokeColor=#000000;dashed=1;spacingTop=6;" vertex="1" parent="1"><mxGeometry x="430" y="480" width="390" height="115" as="geometry" /></mxCell>
-        <mxCell id="ex1" value="Máy chủ Email (SMTP)&#10;gửi OTP, thông báo" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="515" width="170" height="60" as="geometry" /></mxCell>
-        <mxCell id="ex2" value="Gemini AI&#10;tóm tắt, gợi ý, phân tích" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" vertex="1" parent="1"><mxGeometry x="632" y="515" width="170" height="60" as="geometry" /></mxCell>
-        <mxCell id="e4" value="HTTPS / API" style="endArrow=classic;html=1;fontSize=10;strokeColor=#000000;dashed=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="c2" target="ex"><mxGeometry relative="1" as="geometry" /></mxCell>
-
-        <!-- ===== GHI CHU ===== -->
-        <mxCell id="note" value="Ghi chú: Hệ thống được xây dựng theo kiến trúc ba tầng (Three-tier Architecture). Tầng trình diễn chạy trên trình duyệt của người dùng dưới dạng ứng dụng một trang (SPA), giao tiếp với máy chủ qua hai kênh song song: REST API theo giao thức HTTP/JSON cho các thao tác dữ liệu thông thường, và WebSocket qua thư viện Socket.IO cho các sự kiện cần cập nhật tức thời. Máy chủ ứng dụng xử lý toàn bộ nghiệp vụ, xác thực bằng JWT và kiểm soát phân quyền theo vai trò trước khi truy cập cơ sở dữ liệu thông qua Prisma ORM." style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=2;fontColor=#000000;" vertex="1" parent="1"><mxGeometry x="70" y="615" width="1110" height="60" as="geometry" /></mxCell>
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=17;fontStyle=1;align=center;" value="KIẾN TRÚC TỔNG THỂ HỆ THỐNG QUẢN LÝ DỰ ÁN UMC" vertex="1">
+          <mxGeometry height="30" width="650" x="300" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="lb1" parent="1" style="text;html=1;fontSize=11;fontStyle=2;align=center;fontColor=#555555;" value="TẦNG TRÌNH DIỄN&#xa;(Presentation Layer)" vertex="1">
+          <mxGeometry height="34" width="240" x="70" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="lb2" parent="1" style="text;html=1;fontSize=11;fontStyle=2;align=center;fontColor=#555555;" value="TẦNG XỬ LÝ NGHIỆP VỤ&#xa;(Application Layer)" vertex="1">
+          <mxGeometry height="34" width="240" x="505" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="lb3" parent="1" style="text;html=1;fontSize=11;fontStyle=2;align=center;fontColor=#555555;" value="TẦNG DỮ LIỆU&#xa;(Data Layer)" vertex="1">
+          <mxGeometry height="34" width="240" x="940" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=13;fillColor=#ffffff;strokeColor=#000000;spacingTop=8;" value="TRÌNH DUYỆT&#xa;(React SPA)" vertex="1">
+          <mxGeometry height="290" width="240" x="70" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="c1l" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#000000;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="70" y="185" as="sourcePoint" />
+            <mxPoint x="310" y="185" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c1a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="React 19 + Vite" vertex="1">
+          <mxGeometry height="32" width="190" x="95" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="c1b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Redux Toolkit&#xa;(quản lý trạng thái)" vertex="1">
+          <mxGeometry height="38" width="190" x="95" y="242" as="geometry" />
+        </mxCell>
+        <mxCell id="c1c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="React Router&#xa;(điều hướng trang)" vertex="1">
+          <mxGeometry height="38" width="190" x="95" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="c1d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Tailwind CSS&#xa;(giao diện)" vertex="1">
+          <mxGeometry height="38" width="190" x="95" y="338" as="geometry" />
+        </mxCell>
+        <mxCell id="c1e" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Socket.IO Client" vertex="1">
+          <mxGeometry height="28" width="190" x="95" y="386" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=13;fillColor=#ffffff;strokeColor=#000000;spacingTop=8;" value="MÁY CHỦ ỨNG DỤNG&#xa;(Node.js + Express)" vertex="1">
+          <mxGeometry height="290" width="240" x="505" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="c2l" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#000000;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="185" as="sourcePoint" />
+            <mxPoint x="745" y="185" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c2a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Express 5 — REST API&#xa;(routes / controllers)" vertex="1">
+          <mxGeometry height="38" width="190" x="530" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="c2b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Middleware phân quyền&#xa;(JWT + RBAC)" vertex="1">
+          <mxGeometry height="38" width="190" x="530" y="248" as="geometry" />
+        </mxCell>
+        <mxCell id="c2c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Socket.IO Server&#xa;(sự kiện thời gian thực)" vertex="1">
+          <mxGeometry height="38" width="190" x="530" y="296" as="geometry" />
+        </mxCell>
+        <mxCell id="c2d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Prisma ORM&#xa;(truy vấn CSDL)" vertex="1">
+          <mxGeometry height="38" width="190" x="530" y="344" as="geometry" />
+        </mxCell>
+        <mxCell id="c2e" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Multer / Cloudinary (tệp)" vertex="1">
+          <mxGeometry height="28" width="190" x="530" y="392" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=13;fillColor=#ffffff;strokeColor=#000000;spacingTop=8;" value="CƠ SỞ DỮ LIỆU&#xa;(PostgreSQL)" vertex="1">
+          <mxGeometry height="290" width="240" x="940" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="c3l" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#000000;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="940" y="185" as="sourcePoint" />
+            <mxPoint x="1180" y="185" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c3db" parent="1" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="" vertex="1">
+          <mxGeometry height="80" width="120" x="1000" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="c3t" parent="1" style="text;html=1;align=center;fontSize=11;" value="PostgreSQL 16&#xa;(dịch vụ đám mây Neon)" vertex="1">
+          <mxGeometry height="34" width="190" x="965" y="292" as="geometry" />
+        </mxCell>
+        <mxCell id="c3a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="21 bảng dữ liệu&#xa;(User, Workspace, Project,&#xa;Task, File, Equipment…)" vertex="1">
+          <mxGeometry height="52" width="190" x="965" y="332" as="geometry" />
+        </mxCell>
+        <mxCell id="c3b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Ràng buộc khóa chính / khóa ngoại" vertex="1">
+          <mxGeometry height="28" width="190" x="965" y="392" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" style="endArrow=classic;startArrow=classic;html=1;fontSize=11;strokeColor=#000000;verticalAlign=bottom;labelBackgroundColor=#ffffff;" value="HTTP / JSON  (REST API)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="312" y="235" as="sourcePoint" />
+            <mxPoint x="503" y="235" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e1n" parent="1" style="text;html=1;align=center;fontSize=9;fontStyle=2;fontColor=#555555;" value="Yêu cầu / phản hồi dữ liệu&#xa;kèm token xác thực JWT" vertex="1">
+          <mxGeometry height="30" width="195" x="310" y="245" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" style="endArrow=classic;startArrow=classic;html=1;fontSize=11;strokeColor=#000000;dashed=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;" value="WebSocket  (Socket.IO)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="312" y="330" as="sourcePoint" />
+            <mxPoint x="503" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2n" parent="1" style="text;html=1;align=center;fontSize=9;fontStyle=2;fontColor=#555555;" value="Đẩy sự kiện thời gian thực&#xa;(công việc, tin nhắn, thông báo)" vertex="1">
+          <mxGeometry height="30" width="200" x="308" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" style="endArrow=classic;startArrow=classic;html=1;fontSize=11;strokeColor=#000000;verticalAlign=bottom;labelBackgroundColor=#ffffff;" value="SQL qua Prisma ORM">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="747" y="280" as="sourcePoint" />
+            <mxPoint x="938" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3n" parent="1" style="text;html=1;align=center;fontSize=9;fontStyle=2;fontColor=#555555;" value="Truy vấn / cập nhật dữ liệu&#xa;qua kết nối bảo mật" vertex="1">
+          <mxGeometry height="30" width="195" x="745" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="ex" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fillColor=none;strokeColor=#000000;dashed=1;spacingTop=6;" value="DỊCH VỤ BÊN NGOÀI" vertex="1">
+          <mxGeometry height="115" width="390" x="430" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="ex1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Máy chủ Email (SMTP)&#xa;gửi OTP, thông báo" vertex="1">
+          <mxGeometry height="60" width="170" x="450" y="515" as="geometry" />
+        </mxCell>
+        <mxCell id="ex2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;" value="Gemini AI&#xa;tóm tắt, gợi ý, phân tích" vertex="1">
+          <mxGeometry height="60" width="170" x="632" y="515" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="c2" style="endArrow=classic;html=1;fontSize=10;strokeColor=#000000;dashed=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ex" value="HTTPS / API">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>

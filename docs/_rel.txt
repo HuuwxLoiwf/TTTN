@@ -1,0 +1,64 @@
+=== ENUM ===
+  WorkspaceRole          ADMIN, MANAGER, MEMBER
+  TaskStatus             TODO, IN_PROGRESS, REVIEW, DONE
+  TaskType               TASK, BUG, FEATURE, IMPROVEMENT, OTHER
+  ProjectStatus          ACTIVE, PLANNING, COMPLETED, ON_HOLD, CANCELLED
+  Priority               LOW, MEDIUM, HIGH
+  RequestStatus          PENDING, APPROVED, REJECTED
+  FileReviewStatus       PENDING, APPROVED, REJECTED
+  EquipmentStatus        AVAILABLE // sẵn sàng trong kho, IN_USE // đang dùng cho dự án, MAINTENANCE // đang bảo trì, BROKEN // hỏng, chờ sửa/thanh lý
+  RiskStatus             OPEN // mới ghi nhận, MITIGATING // đang xử lý giảm thiểu, CLOSED // đã đóng
+
+=== QUAN HE (co @relation fields) ===
+  Workspace             .owner            -> User                    fk=ownerId        ref=id     onDelete=Cascade  
+  Department            .workspace        -> Workspace               fk=workspaceId    ref=id     onDelete=Cascade  
+  WorkspaceMember       .user             -> User                    fk=userId         ref=id     onDelete=Cascade  
+  WorkspaceMember       .workspace        -> Workspace               fk=workspaceId    ref=id     onDelete=Cascade  
+  Project               .owner            -> User                    fk=ownerId        ref=id     onDelete=Cascade  rel:ProjectOwner
+  Project               .workspace        -> Workspace               fk=workspaceId    ref=id     onDelete=Cascade  
+  Project               .department       -> Department              fk=departmentId   ref=id     onDelete=SetNull  
+  Phase                 .project          -> Project                 fk=projectId      ref=id     onDelete=Cascade  
+  Phase                 .assignee         -> User                    fk=assigneeId     ref=id     onDelete=SetNull  rel:PhaseAssignee
+  ProjectMemberRequest  .project          -> Project                 fk=projectId      ref=id     onDelete=Cascade  
+  ProjectMemberRequest  .user             -> User                    fk=userId         ref=id     onDelete=Cascade  rel:RequestedUser
+  ProjectMessage        .project          -> Project                 fk=projectId      ref=id     onDelete=Cascade  
+  ProjectMessage        .user             -> User                    fk=userId         ref=id     onDelete=Cascade  
+  ProjectMember         .user             -> User                    fk=userId         ref=id     onDelete=Cascade  
+  ProjectMember         .project          -> Project                 fk=projectId      ref=id     onDelete=Cascade  
+  Task                  .project          -> Project                 fk=projectId      ref=id     onDelete=Cascade  
+  Task                  .assignee         -> User                    fk=assigneeId     ref=id     onDelete=SetNull  rel:TaskAssignee
+  Task                  .phase            -> Phase                   fk=phaseId        ref=id     onDelete=SetNull  
+  TaskDependency        .task             -> Task                    fk=taskId         ref=id     onDelete=Cascade  rel:DependentTask
+  TaskDependency        .dependsOn        -> Task                    fk=dependsOnId    ref=id     onDelete=Cascade  rel:BlockingTask
+  Subtask               .task             -> Task                    fk=taskId         ref=id     onDelete=Cascade  
+  TimeLog               .task             -> Task                    fk=taskId         ref=id     onDelete=Cascade  
+  TimeLog               .user             -> User                    fk=userId         ref=id     onDelete=Cascade  
+  Comment               .user             -> User                    fk=userId         ref=id     onDelete=Cascade  
+  Comment               .task             -> Task                    fk=taskId         ref=id     onDelete=Cascade  
+  Activity              .user             -> User                    fk=userId         ref=id     onDelete=Cascade  
+  Activity              .workspace        -> Workspace               fk=workspaceId    ref=id     onDelete=Cascade  
+  AuditLog              .user             -> User                    fk=userId         ref=id     onDelete=Cascade  
+  AuditLog              .workspace        -> Workspace               fk=workspaceId    ref=id     onDelete=Cascade  
+  Notification          .user             -> User                    fk=userId         ref=id     onDelete=Cascade  
+  File                  .project          -> Project                 fk=projectId      ref=id     onDelete=Cascade  
+  File                  .task             -> Task                    fk=taskId         ref=id     onDelete=Cascade  
+  File                  .phase            -> Phase                   fk=phaseId        ref=id     onDelete=SetNull  
+  File                  .uploader         -> User                    fk=uploadedBy     ref=id     onDelete=Cascade  rel:FileUploader
+  Equipment             .workspace        -> Workspace               fk=workspaceId    ref=id     onDelete=Cascade  
+  Equipment             .project          -> Project                 fk=projectId      ref=id     onDelete=SetNull  
+  Risk                  .project          -> Project                 fk=projectId      ref=id     onDelete=Cascade  
+  Risk                  .owner            -> User                    fk=ownerId        ref=id     onDelete=SetNull  rel:RiskOwner
+  Risk                  .creator          -> User                    fk=createdBy      ref=id     onDelete=Cascade  rel:RiskCreator
+  Expense               .project          -> Project                 fk=projectId      ref=id     onDelete=Cascade  
+  Expense               .creator          -> User                    fk=createdBy      ref=id     onDelete=Cascade  rel:ExpenseCreator
+
+=== UNIQUE / INDEX ===
+  User                   email         String    @unique
+  Workspace              slug        String   @unique
+  Department             @@unique([workspaceId, name]) // tên phòng ban không trùng trong cùng workspace
+  WorkspaceMember        @@unique([userId, workspaceId]) // prevent duplicate membership
+  ProjectMemberRequest   @@unique([projectId, userId, status])
+  ProjectMember          @@unique([userId, projectId]) // prevent duplicate membership
+  TaskDependency         @@unique([taskId, dependsOnId])
+  AuditLog               @@index([workspaceId, createdAt])
+  Equipment              @@unique([workspaceId, code]) // mã thiết bị không trùng trong cùng workspace

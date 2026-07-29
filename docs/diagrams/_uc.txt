@@ -1,0 +1,195 @@
+
+### PR1 - Tai khoan & Bao mat
+ACTOR: Thành viên&nbsp; | Quản trị viên
+(ADMIN) | Máy chủ Email
+(SMTP)
+  <Thành viên&nbsp;> => Đăng ký tài khoản ; Quên / đặt lại mật khẩu ; Đổi mật khẩu ; Cập nhật hồ sơ&nbsp; ; Đăng xuất ; Đăng nhập
+  <Quản trị viên
+(ADMIN)> => Duyệt / từ chối tài khoản đăng ký mới ; Xem danh sách tài khoản chờ duyệt
+  <Máy chủ Email
+(SMTP)> => Gửi & xác minh mã OTP ; Quên / đặt lại mật khẩu
+  -- include/extend --
+    «include» : Đổi mật khẩu -> Đăng nhập
+    «include» : Cập nhật hồ sơ&nbsp; -> Đăng nhập
+    «include» : Đăng xuất -> Đăng nhập
+    «include» : Duyệt / từ chối tài khoản đăng ký mới -> Đăng nhập
+    «include» : Xem danh sách tài khoản chờ duyệt -> Đăng nhập
+    «include» : Đăng ký tài khoản -> Gửi & xác minh mã OTP
+    «extend»&nbsp; : Gửi & xác minh mã OTP -> Đăng nhập
+    «extend» khi OTP hết hạn : Gửi lại mã OTP -> Gửi & xác minh mã OTP
+
+### PR2 - Quan ly Du an
+ACTOR: Thành viên
+(MEMBER) | Quản lý /
+Quản trị viên
+  <Thành viên
+(MEMBER)> => Xem danh sách / chi tiết dự án ; Gửi yêu cầu tham gia dự án ; Tự rời khỏi dự án
+  <Quản lý /
+Quản trị viên> => Tạo dự án ; Sửa thông tin / ngân sách dự án ; Quản lý giai đoạn dự án ; Quản lý thành viên dự án ; Duyệt / từ chối yêu cầu tham gia ; Nhân bản dự án làm mẫu ; Xóa dự án (vào thùng rác)
+  -- include/extend --
+    «include» : Xem danh sách / chi tiết dự án -> Đăng nhập
+    «include» : Gửi yêu cầu tham gia dự án -> Đăng nhập
+    «include» : Tự rời khỏi dự án -> Đăng nhập
+    «include» : Tạo dự án -> Đăng nhập
+    «include» : Nhân bản dự án làm mẫu -> Đăng nhập
+    «include» : Xóa dự án (vào thùng rác) -> Đăng nhập
+    «include» : Tạo dự án -> Bắt buộc chọn phòng ban
++ ngày bắt đầu ≥ hôm nay
+    «include» : Quản lý thành viên dự án -> Không xóa được người tạo dự án
+    «extend» : Chỉ Hoàn thành khi tiến độ = 100% -> Sửa thông tin / ngân sách dự án
+
+### PR3 - Quan ly Cong viec
+ACTOR: Thành viên dự án
+(người được giao) | Quản lý
+(MANAGER) | Quản trị viên
+(ADMIN)
+  <Thành viên dự án
+(người được giao)> => Đổi trạng thái công việc
+(kéo - thả Kanban) ; Quản lý việc con (checklist) ; Ghi nhận giờ làm (TimeLog)
+  <Quản lý
+(MANAGER)> => Tạo & giao công việc ; Cập nhật thông tin công việc ; Thiết lập phụ thuộc công việc ; Bật tự động chuyển trạng thái
+  <Quản trị viên
+(ADMIN)> => Xóa công việc (vào thùng rác)
+  -- include/extend --
+    «include» : Đổi trạng thái công việc
+(kéo - thả Kanban) -> Đăng nhập
+    «include» : Quản lý việc con (checklist) -> Đăng nhập
+    «include» : Ghi nhận giờ làm (TimeLog) -> Đăng nhập
+    «include» : Tạo & giao công việc -> Đăng nhập
+    «include» : Thiết lập phụ thuộc công việc -> Đăng nhập
+    «include» : Xóa công việc (vào thùng rác) -> Đăng nhập
+    «include» : Đổi trạng thái công việc
+(kéo - thả Kanban) -> Việc tiên quyết đã xong
++ đúng mốc kế hoạch
+    «include» : Đổi trạng thái công việc
+(kéo - thả Kanban) -> Tính lại tiến độ dự án
++ phát sự kiện realtime
+    «include» : Tạo & giao công việc -> Hạn công việc ≤ ngày kết thúc dự án
+    «include» : Tạo & giao công việc -> Thông báo cho người được giao
+    «include» : Thiết lập phụ thuộc công việc -> Không tạo vòng lặp phụ thuộc
+    «extend» : Bật tự động chuyển trạng thái -> Đổi trạng thái công việc
+(kéo - thả Kanban)
+
+### PR4 - Cong tac & Thong bao
+ACTOR: Thành viên dự án | Máy chủ Email
+(SMTP) | Gemini AI | Quản lí
+  <Thành viên dự án> => Gửi tin nhắn nhóm dự án
+(thời gian thực) ; Bình luận trên công việc ; Nhắc tên thành viên&nbsp; ; Nhận thông báo
+(realtime / email) ; Đánh dấu đã đọc
+(từng / tất cả) ; Tóm tắt thảo luận nhóm bằng AI ; Hỏi - đáp trợ lý AI
+  <Máy chủ Email
+(SMTP)> => Nhận thông báo
+(realtime / email)
+  <Gemini AI> => Tóm tắt thảo luận nhóm bằng AI ; Hỏi - đáp trợ lý AI
+  -- include/extend --
+    «include» : Gửi tin nhắn nhóm dự án
+(thời gian thực) -> Đăng nhập
+    «include» : Bình luận trên công việc -> Đăng nhập
+    «include» : Nhắc tên thành viên&nbsp; -> Đăng nhập
+    «include» : Nhận thông báo
+(realtime / email) -> Đăng nhập
+    «include» : None -> Đăng nhập
+    «include» : Tóm tắt thảo luận nhóm bằng AI -> Đăng nhập
+    «include» : Hỏi - đáp trợ lý AI -> Đăng nhập
+    «include» : Nhắc tên thành viên&nbsp; -> Gửi thông báo cho người được nhắc
+    «extend» : Đính kèm tệp vào tin nhắn -> Gửi tin nhắn nhóm dự án
+(thời gian thực)
+    «extend» : Tải tin nhắn cũ (30 tin / lần) -> Gửi tin nhắn nhóm dự án
+(thời gian thực)
+    «extend» : Nhắc việc sắp / quá hạn -> Nhận thông báo
+(realtime / email)
+
+### PR5 - Quan ly Tai lieu
+ACTOR: Thành viên dự án | Quản lý /
+Quản trị viên
+  <Thành viên dự án> => Tải tài liệu lên
+(công việc / giai đoạn) ; Xem / tải xuống tài liệu ; Xóa tài liệu mình đã tải lên
+  <Quản lý /
+Quản trị viên> => Duyệt tài liệu (Đạt / Chưa đạt) ; Đăng tài liệu chung của dự án
+(tự động ĐẠT) ; Xóa tài liệu bất kỳ của dự án
+  -- include/extend --
+    «include» : Tải tài liệu lên
+(công việc / giai đoạn) -> Đăng nhập
+    «include» : Xem / tải xuống tài liệu -> Đăng nhập
+    «include» : Xóa tài liệu mình đã tải lên -> Đăng nhập
+    «include» : Duyệt tài liệu (Đạt / Chưa đạt) -> Đăng nhập
+    «include» : Đăng tài liệu chung của dự án
+(tự động ĐẠT) -> Đăng nhập
+    «include» : Xóa tài liệu bất kỳ của dự án -> Đăng nhập
+    «include» : Tải tài liệu lên
+(công việc / giai đoạn) -> Lọc loại tệp an toàn&nbsp;
+    «include» : Tải tài liệu lên
+(công việc / giai đoạn) -> Đặt trạng thái Chờ duyệt
+    «include» : Duyệt tài liệu (Đạt / Chưa đạt) -> Thông báo kết quả cho người nộp
+    «extend» : Ghi chú yêu cầu chỉnh sửa
+(nếu Chưa đạt) -> Duyệt tài liệu (Đạt / Chưa đạt)
+
+### PR6 - Bao cao & Quan tri
+ACTOR: Thành viên
+(MEMBER) | Quản lý
+(MANAGER) | Quản trị viên
+(ADMIN) | Gemini AI
+  <Thành viên
+(MEMBER)> => Xem tổng quan không gian làm việc ; Xem biểu đồ Gantt / Burndown ; Xem bảng chấm công (timesheet) ; Xuất báo cáo Excel / PDF / CSV ; Báo cáo giờ làm theo thành viên
+  <Quản lý
+(MANAGER)> => Quản lý thùng rác
+(khôi phục / xóa vĩnh viễn) ; Quản lý phòng ban ; Phân tích rủi ro dự án bằng AI
+  <Quản trị viên
+(ADMIN)> => Xem nhật ký kiểm toán (Audit) ; Cấu hình chính sách hệ thống ; Cấu hình webhook thông báo
+  <Gemini AI> => Phân tích rủi ro dự án bằng AI
+  -- include/extend --
+    «include» : Xem tổng quan không gian làm việc -> Đăng nhập
+    «include» : Xem biểu đồ Gantt / Burndown -> Đăng nhập
+    «include» : Xem bảng chấm công (timesheet) -> Đăng nhập
+    «include» : Xuất báo cáo Excel / PDF / CSV -> Đăng nhập
+    «include» : Quản lý thùng rác
+(khôi phục / xóa vĩnh viễn) -> Đăng nhập
+    «include» : Phân tích rủi ro dự án bằng AI -> Đăng nhập
+    «include» : Cấu hình chính sách hệ thống -> Đăng nhập
+    «include» : Quản lý thùng rác
+(khôi phục / xóa vĩnh viễn) -> Tự dọn vĩnh viễn mục quá 30 ngày
+    «extend» : Xuất báo cáo Excel / PDF / CSV -> Xem tổng quan không gian làm việc
+    «extend» : Cấu hình webhook thông báo -> Cấu hình chính sách hệ thống
+
+### PR7 - Nguon luc dien tu
+ACTOR: Thành viên dự án | Quản lý /
+Quản trị viên
+  <Thành viên dự án> => Xem danh sách thiết bị / máy móc ; Xem danh sách chi phí dự án ; <div><br></div>Xem sổ rủi ro<div><br></div>
+  <Quản lý /
+Quản trị viên> => Thêm / sửa thiết bị ; Đổi trạng thái / gán thiết bị cho dự án ; Ghi khoản chi của dự án ; Thêm / sửa rủi ro dự án ; Đổi trạng thái rủi ro
+(Mở / Đang xử lý / Đã đóng) ; Xóa thiết bị
+  -- include/extend --
+    «include» : Xem danh sách thiết bị / máy móc -> Đăng nhập
+    «include» : Xem danh sách chi phí dự án -> Đăng nhập
+    «include» : <div><br></div>Xem sổ rủi ro<div><br></div> -> Đăng nhập
+    «include» : Thêm / sửa thiết bị -> Đăng nhập
+    «include» : Ghi khoản chi của dự án -> Đăng nhập
+    «include» : Xóa thiết bị -> Đăng nhập
+    «include» : So sánh chi phí với ngân sách -> Đăng nhập
+    «include» : Ghi khoản chi của dự án -> So sánh chi phí với ngân sách
+    «extend» khi vượt : Cảnh báo khi vượt ngân sách -> So sánh chi phí với ngân sách
+
+### PR8 - Quan ly Khong gian lam viec
+ACTOR: Người dùng
+(đã đăng nhập) | Quản trị viên
+(ADMIN)
+  <Người dùng
+(đã đăng nhập)> => Tạo không gian làm việc ; Xem danh sách không gian làm việc của mình
+  <Quản trị viên
+(ADMIN)> => Sửa thông tin không gian làm việc ; Mời thành viên vào không gian làm việc ; Đổi vai trò thành viên
+(Quản lý / Thành viên) ; Xóa thành viên khỏi không gian làm việc ; Xóa không gian làm việc
+  -- include/extend --
+    «include» : Tạo không gian làm việc -> Đăng nhập
+    «include» : Xem danh sách không gian làm việc của mình -> Đăng nhập
+    «include» : Sửa thông tin không gian làm việc -> Đăng nhập
+    «include» : Mời thành viên vào không gian làm việc -> Đăng nhập
+    «include» : Đổi vai trò thành viên
+(Quản lý / Thành viên) -> Đăng nhập
+    «include» : Xóa không gian làm việc -> Đăng nhập
+    «include» : Tạo không gian làm việc -> Tự sinh mã định danh (slug)
++ gán người tạo làm Quản trị viên
+    «include» : Mời thành viên vào không gian làm việc -> Người được mời phải có tài khoản
++ không mời vai trò Quản trị viên
+    «include» : Xóa không gian làm việc -> Xóa toàn bộ dự án & dữ liệu liên quan
+    «extend» : Đặt đơn giá giờ công (VNĐ/giờ) -> Đổi vai trò thành viên
+(Quản lý / Thành viên)

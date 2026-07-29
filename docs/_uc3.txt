@@ -1,0 +1,28 @@
+=== HINH use case trong bao cao ===
+  P701   Hình 3.1: Sơ đồ use case tổng quát
+  P705   Hình 3.2: Sơ đồ use case quản lý tài khoản và bảo mật
+  P709   Hình 3.3: Sơ đồ use case quản lý dự án
+  P713   Hình 3.4: Sơ đồ use case quản lý công việc
+  P717   Hình 3.5: Sơ đồ use case cộng tác nhóm và thông báo
+  P721   Hình 3.6: Sơ đồ use case quản lý tài liệu
+  P725   Hình 3.7: Sơ đồ use case báo cáo thống kê và quản trị hệ thống
+  P729   Hình 3.8: Sơ đồ use case quản lý nguồn lực dự án
+  P733   Hình 3.9: Sơ đồ use case quản lý không gian làm việc
+
+=== BANG dac ta trong bao cao ===
+  P737   Bảng 3.1: Đặc tả Use Case Đăng nhập
+  P740   Bảng 3.2: Đặc tả Use Case Đăng ký tài khoản
+  P743   Bảng 3.3: Đặc tả Use Case Duyệt tài khoản đăng ký
+  P746   Bảng 3.4: Đặc tả Use Case Khôi phục mật khẩu
+  P749   Bảng 3.5: Đặc tả Use Case Quản lý dự án
+  P752   Bảng 3.6: Đặc tả Use Case Quản lý thành viên dự án
+  P755   Bảng 3.7: Đặc tả Use Case Quản lý công việc
+  P758   Bảng 3.8: Đặc tả Use Case Cập nhật tiến độ công việc
+  P761   Bảng 3.9: Đặc tả Use Case Bình luận và nhắc tên thành viên
+  P764   Bảng 3.10: Đặc tả Use Case Quản lý tài liệu
+  P767   Bảng 3.11: Đặc tả Use Case Quản lý thiết bị và máy móc
+  P770   Bảng 3.12: Đặc tả Use Case Quản lý rủi ro dự án
+  P773   Bảng 3.13: Đặc tả Use Case Quản lý chi phí và ngân sách
+  P776   Bảng 3.14: Đặc tả Use Case Xem báo cáo thống kê
+  P779   Bảng 3.15: Đặc tả Use Case Quản lý thùng rác
+  P782   Bảng 3.16: Đặc tả Use Case Tra cứu nhật ký kiểm toán

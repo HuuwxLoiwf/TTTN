@@ -1,0 +1,30 @@
+Bang (thuc the): 21 | Dong truong: 178 | Canh (quan he): 41
+
+Model schema: 21 | Bang ERD: 21
+Thieu: khong
+Thua : khong
+
+Canh tro sai khoa chinh: 0
+
+So truong moi bang:
+  Activity                 7
+  AuditLog                 9
+  Comment                  5
+  Department               6
+  Equipment                10
+  Expense                  9
+  File                     12
+  Notification             6
+  Phase                    9
+  Project                  15
+  ProjectMember            3
+  ProjectMemberRequest     8
+  ProjectMessage           7
+  Risk                     12
+  Subtask                  5
+  Task                     16
+  TaskDependency           3
+  TimeLog                  7
+  User                     14
+  Workspace                9
+  WorkspaceMember          6

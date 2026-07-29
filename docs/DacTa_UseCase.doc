@@ -17,839 +17,1454 @@ td.lbl { width:26%; font-weight:bold; }
 .note { font-size:12pt; font-style:italic; color:#444444; }
 </style>
 </head>
-<body>
-<div class="Section1">
+<body><div class="Section1">
+<h1>Đặc tả Use Case<br>Hệ thống Quản lý Dự án Công ty UMC</h1>
+<p class="note">Tài liệu đặc tả chi tiết các use case của hệ thống, được xây dựng tương ứng với tám sơ đồ use case phân rã (PR1 – PR8). Mỗi use case được mô tả theo cấu trúc chuẩn gồm: Tên use case, Actor, Mục tiêu, Tiền điều kiện, Luồng chính, Điều kiện cuối và Luồng phụ (các trường hợp ngoại lệ).</p>
+<p class="note">Quy ước phân quyền trong toàn bộ tài liệu: hệ thống có ba vai trò người dùng là Thành viên (MEMBER), Quản lý (MANAGER) và Quản trị viên (ADMIN), trong đó Quản lý kế thừa toàn bộ quyền của Thành viên và Quản trị viên kế thừa toàn bộ quyền của Quản lý. Trừ hai use case Đăng ký tài khoản và Quên/đặt lại mật khẩu, tất cả các use case còn lại đều bao hàm («include») use case Đăng nhập.</p>
 
-<h1>ĐẶC TẢ USE CASE<br>HỆ THỐNG QUẢN LÝ DỰ ÁN VÀ CỘNG TÁC NHÓM (UMC)</h1>
-
-<p class="note">Tài liệu đặc tả chi tiết cho các use case trong sơ đồ use case phân rã (xem tệp 5_usecase_detail.drawio). Nội dung được xây dựng theo đúng luồng xử lý và điều kiện ràng buộc thực tế của hệ thống.</p>
-
-<!-- ==================== PR1 ==================== -->
-<h2>1. NHÓM CHỨC NĂNG: QUẢN LÝ TÀI KHOẢN VÀ BẢO MẬT</h2>
-
+<h2>1. Nhóm use case Quản lý tài khoản và bảo mật (PR1)</h2>
 <p class="cap">Đặc tả Use case Đăng ký tài khoản</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Đăng ký tài khoản</td></tr>
-<tr><td class="lbl">Actor</td><td>Khách (người dùng chưa có tài khoản).</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên (người dùng chưa có tài khoản); Máy chủ Email (SMTP) tham gia gửi mã xác minh.</td></tr>
 <tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng tạo tài khoản mới để sử dụng hệ thống.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Người dùng truy cập được trang đăng nhập của hệ thống và địa chỉ email chưa từng được đăng ký.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Người dùng truy cập được trang đăng ký và địa chỉ email chưa từng được đăng ký trong hệ thống.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Khách chọn chức năng Đăng ký.<br>
-2. Hệ thống hiển thị biểu mẫu đăng ký gồm họ tên, email, mật khẩu.<br>
-3. Khách nhập đầy đủ thông tin và bấm Đăng ký.<br>
-4. Hệ thống kiểm tra định dạng email, kiểm tra mật khẩu đủ mạnh (tối thiểu 8 ký tự, có ít nhất một chữ cái và một chữ số) và kiểm tra email chưa tồn tại trong CSDL.<br>
-5. Hệ thống mã hóa mật khẩu, lưu tài khoản vào CSDL với trạng thái chưa xác minh, sinh mã OTP gồm 6 chữ số có hiệu lực 10 phút.<br>
-6. Hệ thống gửi mã OTP tới email của khách và thông báo "Đăng ký thành công. Vui lòng nhập mã OTP gửi tới email".
+1. Người dùng chọn chức năng Đăng ký tài khoản.<br>
+2. Hệ thống hiển thị biểu mẫu gồm họ tên, địa chỉ email và mật khẩu.<br>
+3. Người dùng nhập đầy đủ thông tin và bấm nút Đăng ký.<br>
+4. Hệ thống kiểm tra định dạng email, kiểm tra mật khẩu đủ mạnh (tối thiểu 8 ký tự, có ít nhất một chữ cái và một chữ số) và kiểm tra email chưa tồn tại trong cơ sở dữ liệu.<br>
+5. Hệ thống mã hóa mật khẩu bằng thuật toán băm một chiều, lưu tài khoản với trạng thái chưa xác minh email và chưa được duyệt.<br>
+6. Hệ thống sinh mã OTP gồm sáu chữ số có hiệu lực trong 10 phút và gọi use case Gửi và xác minh mã OTP.<br>
+7. Hệ thống hiển thị thông báo đăng ký thành công và hướng dẫn người dùng kiểm tra hộp thư để lấy mã xác minh.
 </td></tr>
 <tr><td class="lbl">Điều kiện cuối</td><td>Tài khoản được tạo trong hệ thống ở trạng thái chưa xác minh email, chờ người dùng nhập mã OTP.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Khách nhập thiếu thông tin bắt buộc. Hệ thống hiển thị thông báo "Vui lòng nhập đủ tên, email, mật khẩu" và yêu cầu nhập lại.<br>
-2. Khách nhập email sai định dạng. Hệ thống hiển thị thông báo "Email không hợp lệ".<br>
-3. Khách nhập mật khẩu không đủ mạnh. Hệ thống hiển thị thông báo "Mật khẩu tối thiểu 8 ký tự", "Mật khẩu phải chứa ít nhất 1 chữ cái" hoặc "Mật khẩu phải chứa ít nhất 1 chữ số".<br>
-4. Email đã được đăng ký trước đó. Hệ thống hiển thị thông báo "Email đã được đăng ký" và yêu cầu nhập email khác.
+1. Người dùng nhập thiếu thông tin bắt buộc. Hệ thống hiển thị thông báo "Vui lòng nhập đủ tên, email, mật khẩu" và yêu cầu nhập lại.<br>
+2. Người dùng nhập email sai định dạng. Hệ thống hiển thị thông báo "Email không hợp lệ".<br>
+3. Mật khẩu không đủ mạnh. Hệ thống hiển thị thông báo tương ứng: "Mật khẩu tối thiểu 8 ký tự", "Mật khẩu phải chứa ít nhất 1 chữ cái" hoặc "Mật khẩu phải chứa ít nhất 1 chữ số".<br>
+4. Email đã được đăng ký trước đó. Hệ thống hiển thị thông báo "Email đã được đăng ký" và yêu cầu nhập email khác.<br>
+5. Không gửi được email do lỗi dịch vụ SMTP. Hệ thống ghi nhận lỗi và cho phép người dùng yêu cầu gửi lại mã.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Xác minh mã OTP</p>
+<p class="cap">Đặc tả Use case Gửi và xác minh mã OTP</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Xác minh mã OTP</td></tr>
-<tr><td class="lbl">Actor</td><td>Khách (người dùng vừa đăng ký).</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Xác minh quyền sở hữu địa chỉ email của người dùng vừa đăng ký.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng ký tài khoản đã thực hiện thành công, tài khoản đang ở trạng thái chưa xác minh email.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Gửi và xác minh mã OTP</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên (người dùng vừa đăng ký hoặc đang đăng nhập có bật 2FA); Máy chủ Email (SMTP).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Xác minh quyền sở hữu địa chỉ email của người dùng, bảo đảm tài khoản được đăng ký bởi chính chủ.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng ký tài khoản đã thực hiện, hoặc người dùng đang đăng nhập với tài khoản có bật bảo mật hai lớp.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Hệ thống hiển thị màn hình nhập mã OTP.<br>
-2. Khách mở email, lấy mã OTP và nhập vào hệ thống.<br>
-3. Hệ thống kiểm tra mã OTP có khớp với mã đã lưu và còn trong thời hạn 10 phút hay không.<br>
-4. Hệ thống cập nhật tài khoản thành đã xác minh email, xóa mã OTP khỏi CSDL.<br>
-5. Hệ thống thông báo "Xác minh email thành công. Tài khoản đang chờ quản trị viên duyệt".
+1. Hệ thống sinh mã OTP gồm sáu chữ số ngẫu nhiên và lưu kèm thời điểm hết hạn là 10 phút kể từ lúc sinh.<br>
+2. Hệ thống gửi mã OTP tới địa chỉ email của người dùng thông qua máy chủ thư điện tử.<br>
+3. Người dùng mở hộp thư, lấy mã và nhập vào ô xác minh trên giao diện.<br>
+4. Hệ thống đối chiếu mã người dùng nhập với mã đã lưu và kiểm tra thời hạn hiệu lực.<br>
+5. Nếu mã đúng và còn hiệu lực, hệ thống đánh dấu email đã được xác minh và xóa mã OTP khỏi cơ sở dữ liệu.<br>
+6. Hệ thống hiển thị thông báo xác minh thành công và chuyển người dùng sang trạng thái chờ quản trị viên duyệt tài khoản.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Tài khoản ở trạng thái đã xác minh email nhưng chưa được duyệt, chưa thể đăng nhập.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Email của người dùng được xác minh; tài khoản chuyển sang trạng thái chờ duyệt.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Khách nhập sai mã OTP. Hệ thống hiển thị thông báo "Mã OTP không đúng" và cho phép nhập lại.<br>
-2. Mã OTP quá 10 phút. Hệ thống hiển thị thông báo "Mã OTP đã hết hạn".<br>
-3. Khách chọn chức năng Gửi lại mã. Hệ thống sinh mã OTP mới, cập nhật thời hạn và gửi lại qua email; mã cũ không còn giá trị.<br>
-4. Tài khoản đã được xác minh trước đó. Hệ thống hiển thị thông báo "Tài khoản đã xác minh".
+1. Người dùng nhập sai mã OTP. Hệ thống hiển thị thông báo "Mã xác minh không đúng" và cho phép nhập lại.<br>
+2. Mã OTP đã quá 10 phút. Hệ thống hiển thị thông báo "Mã xác minh đã hết hạn" và gợi ý sử dụng chức năng Gửi lại mã OTP.<br>
+3. Người dùng nhập sai nhiều lần liên tiếp. Hệ thống tạm khóa chức năng xác minh trong một khoảng thời gian nhằm chống dò mã tự động.
 </td></tr>
 </table>
-
+<p class="cap">Đặc tả Use case Gửi lại mã OTP</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Gửi lại mã OTP</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên (người dùng chưa xác minh được email); Máy chủ Email (SMTP).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cấp lại mã xác minh mới cho người dùng khi mã cũ bị sai, thất lạc hoặc đã hết hạn.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Gửi và xác minh mã OTP đã được kích hoạt nhưng người dùng chưa xác minh thành công. Đây là luồng mở rộng («extend») của use case Gửi và xác minh mã OTP.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng chọn chức năng Gửi lại mã OTP trên màn hình xác minh.<br>
+2. Hệ thống kiểm tra khoảng thời gian kể từ lần gửi gần nhất để tránh gửi liên tục gây quá tải.<br>
+3. Hệ thống hủy hiệu lực mã OTP cũ, sinh mã mới gồm sáu chữ số và đặt lại thời hạn 10 phút.<br>
+4. Hệ thống gửi mã mới tới email của người dùng.<br>
+5. Hệ thống hiển thị thông báo đã gửi lại mã và hướng dẫn kiểm tra hộp thư.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Mã OTP mới được gửi tới email của người dùng, mã cũ không còn hiệu lực.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng bấm gửi lại quá nhanh so với thời gian chờ tối thiểu. Hệ thống hiển thị thông báo yêu cầu đợi thêm trước khi gửi lại.<br>
+2. Không gửi được email do lỗi dịch vụ. Hệ thống hiển thị thông báo lỗi và ghi nhận sự cố vào nhật ký hệ thống.
+</td></tr>
+</table>
 <p class="cap">Đặc tả Use case Đăng nhập</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Đăng nhập</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên (mọi người dùng đã có tài khoản).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Xác thực danh tính người dùng và cấp phiên làm việc để truy cập các chức năng của hệ thống.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Người dùng đã có tài khoản, đã xác minh email và đã được quản trị viên duyệt.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng truy cập trang đăng nhập, nhập địa chỉ email và mật khẩu.<br>
+2. Hệ thống tìm tài khoản theo email và so khớp mật khẩu đã băm.<br>
+3. Hệ thống kiểm tra trạng thái tài khoản: email đã xác minh và đã được quản trị viên duyệt.<br>
+4. Nếu tài khoản có bật bảo mật hai lớp, hệ thống gọi use case Gửi và xác minh mã OTP («extend») và chỉ tiếp tục khi mã đúng.<br>
+5. Hệ thống sinh mã thông báo xác thực JWT có hiệu lực 7 ngày và trả về cho phía máy khách.<br>
+6. Hệ thống chuyển người dùng tới màn hình chính tương ứng với vai trò của họ.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng có phiên làm việc hợp lệ; mã thông báo JWT được lưu ở phía máy khách để gửi kèm các yêu cầu tiếp theo.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Sai email hoặc mật khẩu. Hệ thống hiển thị thông báo "Email hoặc mật khẩu không đúng" mà không chỉ rõ sai ở trường nào nhằm tránh lộ thông tin.<br>
+2. Tài khoản chưa xác minh email. Hệ thống chuyển người dùng sang màn hình nhập mã OTP.<br>
+3. Tài khoản chưa được quản trị viên duyệt. Hệ thống hiển thị thông báo "Tài khoản đang chờ duyệt".<br>
+4. Người dùng bật 2FA nhưng nhập sai mã OTP. Hệ thống từ chối cấp mã thông báo và yêu cầu nhập lại.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Đăng xuất</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Đăng xuất</td></tr>
 <tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng xác thực danh tính để truy cập vào hệ thống theo đúng vai trò được phân.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng ký tài khoản và Xác minh mã OTP đã hoàn tất; tài khoản đã được quản trị viên duyệt.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Kết thúc phiên làm việc hiện tại và bảo vệ tài khoản khi người dùng rời khỏi thiết bị.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng chọn chức năng Đăng nhập.<br>
-2. Hệ thống hiển thị màn hình đăng nhập gồm email và mật khẩu.<br>
-3. Người dùng nhập email, mật khẩu và bấm Đăng nhập.<br>
-4. Hệ thống kiểm tra email tồn tại và so khớp mật khẩu đã mã hóa.<br>
-5. Hệ thống kiểm tra tài khoản đã xác minh email và đã được quản trị viên duyệt.<br>
-6. Hệ thống kiểm tra tài khoản có bật bảo mật hai lớp hay không. Nếu không bật, hệ thống cấp mã thông báo JWT có hiệu lực 7 ngày.<br>
-7. Hệ thống chuyển người dùng vào giao diện làm việc tương ứng với vai trò của họ.
+1. Người dùng chọn chức năng Đăng xuất từ trình đơn tài khoản.<br>
+2. Hệ thống xóa mã thông báo JWT khỏi bộ nhớ của trình duyệt.<br>
+3. Hệ thống ngắt kết nối thời gian thực và rời khỏi tất cả các kênh sự kiện mà người dùng đang tham gia.<br>
+4. Hệ thống chuyển người dùng về trang đăng nhập.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng đăng nhập thành công, nhận được mã thông báo JWT và truy cập được các chức năng theo vai trò.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Phiên làm việc kết thúc; người dùng phải đăng nhập lại để tiếp tục sử dụng hệ thống.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Email chưa từng đăng ký. Hệ thống hiển thị thông báo "Tài khoản chưa đăng ký" và gợi ý chuyển sang chức năng Đăng ký.<br>
-2. Mật khẩu không đúng. Hệ thống hiển thị thông báo "Mật khẩu không đúng".<br>
-3. Tài khoản chưa xác minh email. Hệ thống hiển thị thông báo "Tài khoản chưa xác minh email" và chuyển sang màn hình nhập OTP.<br>
-4. Tài khoản chưa được duyệt. Hệ thống hiển thị thông báo "Tài khoản đang chờ quản trị viên duyệt" và không cấp mã thông báo.<br>
-5. Tài khoản có bật bảo mật hai lớp. Hệ thống chuyển sang use case Xác minh đăng nhập hai lớp trước khi cấp mã thông báo.
+1. Mã thông báo đã hết hạn từ trước. Hệ thống vẫn xóa dữ liệu phiên ở phía máy khách và chuyển về trang đăng nhập.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Xác minh đăng nhập hai lớp (2FA)</p>
+<p class="cap">Đặc tả Use case Quên và đặt lại mật khẩu</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Xác minh đăng nhập hai lớp (2FA)</td></tr>
-<tr><td class="lbl">Actor</td><td>Người dùng đã bật bảo mật hai lớp.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Tăng cường bảo mật bằng cách yêu cầu thêm một lớp xác thực OTP qua email trước khi cấp quyền truy cập.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện đúng email và mật khẩu; tài khoản có bật chức năng bảo mật hai lớp.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Quên và đặt lại mật khẩu</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên; Máy chủ Email (SMTP).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Giúp người dùng khôi phục quyền truy cập khi quên mật khẩu, thông qua liên kết gửi tới email đã đăng ký.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Người dùng đã có tài khoản trong hệ thống và truy cập được hộp thư của địa chỉ email đã đăng ký. Use case này không yêu cầu đăng nhập trước.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Hệ thống sinh mã OTP gồm 6 chữ số có hiệu lực 10 phút và gửi tới email của người dùng.<br>
-2. Hệ thống hiển thị màn hình nhập mã OTP xác thực hai lớp.<br>
-3. Người dùng nhập mã OTP nhận được từ email.<br>
-4. Hệ thống kiểm tra mã OTP khớp và còn hiệu lực, đồng thời kiểm tra lại điều kiện tài khoản đã xác minh và đã được duyệt.<br>
-5. Hệ thống xóa mã OTP, cấp mã thông báo JWT hiệu lực 7 ngày và cho phép truy cập hệ thống.
+1. Người dùng chọn chức năng Quên mật khẩu và nhập địa chỉ email.<br>
+2. Hệ thống kiểm tra email có tồn tại trong cơ sở dữ liệu hay không.<br>
+3. Hệ thống sinh mã đặt lại ngẫu nhiên có hiệu lực 30 phút và lưu kèm tài khoản.<br>
+4. Hệ thống gửi liên kết đặt lại mật khẩu kèm mã tới email của người dùng.<br>
+5. Người dùng mở liên kết, nhập mật khẩu mới và xác nhận lại mật khẩu.<br>
+6. Hệ thống kiểm tra độ mạnh của mật khẩu mới, mã hóa và cập nhật vào cơ sở dữ liệu, đồng thời hủy hiệu lực mã đặt lại.<br>
+7. Hệ thống hiển thị thông báo đặt lại thành công và chuyển người dùng về trang đăng nhập.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng hoàn tất đăng nhập hai lớp và nhận được mã thông báo JWT.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Mật khẩu của tài khoản được cập nhật; mã đặt lại không còn hiệu lực.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng nhập sai mã OTP. Hệ thống hiển thị thông báo "Mã OTP không đúng" và cho phép nhập lại.<br>
-2. Mã OTP quá 10 phút. Hệ thống hiển thị thông báo "Mã OTP đã hết hạn — hãy đăng nhập lại" và người dùng phải thực hiện lại use case Đăng nhập.
+1. Email không tồn tại trong hệ thống. Hệ thống vẫn hiển thị thông báo chung nhằm tránh để lộ danh sách email đã đăng ký.<br>
+2. Liên kết đặt lại đã quá 30 phút. Hệ thống hiển thị thông báo "Liên kết đã hết hạn" và yêu cầu thực hiện lại từ đầu.<br>
+3. Mật khẩu mới không đủ mạnh. Hệ thống hiển thị thông báo yêu cầu nhập mật khẩu khác.<br>
+4. Hai lần nhập mật khẩu không trùng khớp. Hệ thống yêu cầu nhập lại.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Quên mật khẩu và đặt lại mật khẩu</p>
-<table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Quên mật khẩu và đặt lại mật khẩu</td></tr>
-<tr><td class="lbl">Actor</td><td>Người dùng đã có tài khoản.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng khôi phục quyền truy cập khi quên mật khẩu, thông qua liên kết đặt lại gửi qua email.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Người dùng đã có tài khoản trong hệ thống và truy cập được hộp thư email đã đăng ký.</td></tr>
-<tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng chọn chức năng Quên mật khẩu tại màn hình đăng nhập.<br>
-2. Hệ thống hiển thị ô nhập email.<br>
-3. Người dùng nhập email đã đăng ký và bấm gửi.<br>
-4. Hệ thống sinh mã thông báo đặt lại ngẫu nhiên, mã hóa và lưu vào CSDL kèm thời hạn 30 phút.<br>
-5. Hệ thống gửi liên kết đặt lại mật khẩu tới email và hiển thị thông báo chung "Nếu email tồn tại, liên kết đặt lại mật khẩu đã được gửi".<br>
-6. Người dùng mở liên kết trong email, hệ thống hiển thị màn hình nhập mật khẩu mới.<br>
-7. Người dùng nhập mật khẩu mới. Hệ thống kiểm tra mã thông báo còn hiệu lực và mật khẩu mới đủ mạnh.<br>
-8. Hệ thống mã hóa và cập nhật mật khẩu mới, xóa mã thông báo đặt lại, thông báo "Đặt lại mật khẩu thành công. Vui lòng đăng nhập".
-</td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Mật khẩu của tài khoản được thay đổi thành công; mã thông báo đặt lại bị vô hiệu hóa và không thể dùng lại.</td></tr>
-<tr><td class="lbl">Luồng phụ</td><td>
-1. Email không tồn tại trong hệ thống. Hệ thống vẫn hiển thị thông báo chung nhằm không tiết lộ email nào đã đăng ký, nhưng không gửi liên kết.<br>
-2. Liên kết đặt lại quá 30 phút hoặc đã được sử dụng. Hệ thống hiển thị thông báo "Liên kết không hợp lệ hoặc đã hết hạn" và yêu cầu thực hiện lại từ đầu.<br>
-3. Mật khẩu mới không đủ mạnh. Hệ thống hiển thị thông báo yêu cầu mật khẩu tối thiểu 8 ký tự, có chữ và số.
-</td></tr>
-</table>
-
 <p class="cap">Đặc tả Use case Đổi mật khẩu</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Đổi mật khẩu</td></tr>
-<tr><td class="lbl">Actor</td><td>Người dùng đã đăng nhập.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng thay đổi mật khẩu hiện tại của tài khoản.</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng chủ động thay đổi mật khẩu khi đang đăng nhập nhằm tăng cường an toàn tài khoản.</td></tr>
 <tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng vào trang Cài đặt và chọn chức năng Đổi mật khẩu.<br>
-2. Hệ thống hiển thị biểu mẫu gồm mật khẩu hiện tại và mật khẩu mới.<br>
-3. Người dùng nhập thông tin và bấm xác nhận.<br>
-4. Hệ thống kiểm tra mật khẩu mới đủ mạnh và so khớp mật khẩu hiện tại với dữ liệu đã mã hóa.<br>
-5. Hệ thống mã hóa và cập nhật mật khẩu mới vào CSDL.<br>
-6. Hệ thống thông báo "Đổi mật khẩu thành công".
+1. Người dùng vào mục Tài khoản cá nhân và chọn chức năng Đổi mật khẩu.<br>
+2. Hệ thống hiển thị biểu mẫu gồm mật khẩu hiện tại, mật khẩu mới và xác nhận mật khẩu mới.<br>
+3. Người dùng nhập đầy đủ thông tin và xác nhận.<br>
+4. Hệ thống so khớp mật khẩu hiện tại với mật khẩu đã băm trong cơ sở dữ liệu.<br>
+5. Hệ thống kiểm tra độ mạnh của mật khẩu mới và kiểm tra hai lần nhập trùng khớp.<br>
+6. Hệ thống mã hóa và cập nhật mật khẩu mới, hiển thị thông báo thành công.
 </td></tr>
 <tr><td class="lbl">Điều kiện cuối</td><td>Mật khẩu của tài khoản được cập nhật; các lần đăng nhập sau phải dùng mật khẩu mới.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Mật khẩu hiện tại nhập không đúng. Hệ thống hiển thị thông báo "Mật khẩu hiện tại không đúng" và không thực hiện thay đổi.<br>
-2. Mật khẩu mới không đủ mạnh. Hệ thống hiển thị thông báo yêu cầu mật khẩu tối thiểu 8 ký tự, có chữ và số.
+1. Mật khẩu hiện tại không đúng. Hệ thống hiển thị thông báo "Mật khẩu hiện tại không đúng".<br>
+2. Mật khẩu mới không đủ mạnh. Hệ thống hiển thị thông báo yêu cầu nhập mật khẩu khác.<br>
+3. Hai lần nhập mật khẩu mới không trùng khớp. Hệ thống yêu cầu nhập lại.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Bật hoặc tắt bảo mật hai lớp</p>
+<p class="cap">Đặc tả Use case Cập nhật hồ sơ cá nhân</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Bật hoặc tắt bảo mật hai lớp (2FA)</td></tr>
-<tr><td class="lbl">Actor</td><td>Người dùng đã đăng nhập.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng tự bật hoặc tắt lớp xác thực OTP bổ sung khi đăng nhập.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Cập nhật hồ sơ cá nhân</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng chỉnh sửa thông tin cá nhân như họ tên và ảnh đại diện, đồng thời bật hoặc tắt bảo mật hai lớp.</td></tr>
 <tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng vào trang Cài đặt, mục Bảo mật.<br>
-2. Hệ thống hiển thị trạng thái hiện tại của chức năng bảo mật hai lớp.<br>
-3. Người dùng bật hoặc tắt công tắc bảo mật hai lớp.<br>
-4. Hệ thống cập nhật thuộc tính bảo mật hai lớp của tài khoản vào CSDL.<br>
-5. Hệ thống hiển thị thông báo cập nhật thành công và trạng thái mới.
+1. Người dùng vào mục Tài khoản cá nhân.<br>
+2. Hệ thống hiển thị thông tin hiện tại gồm họ tên, email, ảnh đại diện và trạng thái bảo mật hai lớp.<br>
+3. Người dùng chỉnh sửa họ tên hoặc tải lên ảnh đại diện mới, có thể bật hoặc tắt bảo mật hai lớp.<br>
+4. Hệ thống kiểm tra định dạng và dung lượng của tệp ảnh nếu người dùng có tải ảnh lên.<br>
+5. Hệ thống lưu thông tin vào cơ sở dữ liệu và cập nhật lại giao diện.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Thiết lập bảo mật hai lớp được lưu; các lần đăng nhập sau sẽ áp dụng theo thiết lập mới.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Thông tin hồ sơ của người dùng được cập nhật và hiển thị ở mọi nơi trong hệ thống.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Phiên đăng nhập đã hết hạn. Hệ thống hiển thị thông báo "Chưa đăng nhập" và chuyển về màn hình đăng nhập.
+1. Tệp ảnh vượt quá dung lượng cho phép hoặc sai định dạng. Hệ thống từ chối và hiển thị thông báo tương ứng.<br>
+2. Người dùng để trống họ tên. Hệ thống yêu cầu nhập lại vì đây là trường bắt buộc.<br>
+3. Địa chỉ email không cho phép chỉnh sửa vì là định danh đăng nhập của tài khoản.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Duyệt tài khoản đăng ký</p>
+<p class="cap">Đặc tả Use case Xem danh sách tài khoản chờ duyệt</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Duyệt tài khoản đăng ký</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép quản trị viên kiểm soát và phê duyệt những tài khoản mới trước khi họ được phép sử dụng hệ thống.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Quản trị viên đã đăng nhập hệ thống; tồn tại tài khoản đã xác minh email nhưng chưa được duyệt.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Xem danh sách tài khoản chờ duyệt</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Giúp quản trị viên nắm được các tài khoản đã xác minh email nhưng chưa được kích hoạt để xử lý kịp thời.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công; người dùng có vai trò Quản trị viên.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Quản trị viên chọn chức năng Duyệt tài khoản.<br>
-2. Hệ thống kiểm tra quyền quản trị viên và hiển thị danh sách các tài khoản đang chờ duyệt gồm họ tên, email, ngày đăng ký.<br>
-3. Quản trị viên xem thông tin và chọn Duyệt đối với tài khoản hợp lệ.<br>
-4. Hệ thống cập nhật trạng thái tài khoản thành đã được duyệt.<br>
-5. Hệ thống thông báo "Đã duyệt tài khoản" và loại tài khoản đó khỏi danh sách chờ.
+1. Quản trị viên vào mục Quản lý tài khoản.<br>
+2. Hệ thống kiểm tra vai trò của người dùng có phải Quản trị viên hay không.<br>
+3. Hệ thống truy vấn các tài khoản có trạng thái đã xác minh email nhưng chưa được duyệt.<br>
+4. Hệ thống hiển thị danh sách gồm họ tên, email và thời điểm đăng ký của từng tài khoản.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Tài khoản được duyệt và người dùng có thể đăng nhập vào hệ thống.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Quản trị viên xem được danh sách đầy đủ các tài khoản đang chờ duyệt.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Quản trị viên chọn Từ chối. Hệ thống kiểm tra tài khoản chưa được duyệt trước đó rồi xóa tài khoản khỏi CSDL và thông báo "Đã từ chối và xóa tài khoản".<br>
-2. Người dùng không có quyền quản trị viên truy cập chức năng này. Hệ thống hiển thị thông báo "Chỉ quản trị viên mới xem được" và từ chối thao tác.<br>
-3. Quản trị viên cố xóa một tài khoản đã được duyệt. Hệ thống hiển thị thông báo "Không thể xóa tài khoản đã duyệt".
+1. Người dùng không phải Quản trị viên. Hệ thống từ chối truy cập và hiển thị thông báo không đủ quyền.<br>
+2. Không có tài khoản nào chờ duyệt. Hệ thống hiển thị thông báo danh sách trống.
 </td></tr>
 </table>
-
-<!-- ==================== PR2 ==================== -->
-<h2>2. NHÓM CHỨC NĂNG: QUẢN LÝ DỰ ÁN VÀ GIAI ĐOẠN</h2>
-
+<p class="cap">Đặc tả Use case Duyệt hoặc từ chối tài khoản đăng ký mới</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Duyệt hoặc từ chối tài khoản đăng ký mới</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Kiểm soát việc gia nhập hệ thống, bảo đảm chỉ những người thuộc tổ chức mới được cấp quyền sử dụng.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Xem danh sách tài khoản chờ duyệt đã thực hiện; tồn tại ít nhất một tài khoản đang chờ duyệt.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Quản trị viên chọn một tài khoản trong danh sách chờ duyệt.<br>
+2. Hệ thống hiển thị thông tin chi tiết của tài khoản.<br>
+3. Quản trị viên chọn Duyệt hoặc Từ chối.<br>
+4. Nếu chọn Duyệt, hệ thống cập nhật trạng thái tài khoản thành đã được duyệt và gửi thông báo tới người dùng.<br>
+5. Nếu chọn Từ chối, hệ thống xóa tài khoản khỏi cơ sở dữ liệu.<br>
+6. Hệ thống ghi nhận thao tác vào nhật ký kiểm toán và cập nhật lại danh sách chờ duyệt.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Tài khoản được kích hoạt và có thể đăng nhập, hoặc bị xóa khỏi hệ thống.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người thực hiện không phải Quản trị viên. Hệ thống từ chối và hiển thị thông báo không đủ quyền.<br>
+2. Tài khoản đã được xử lý bởi quản trị viên khác. Hệ thống thông báo và làm mới danh sách.
+</td></tr>
+</table>
+<h2>2. Nhóm use case Quản lý dự án (PR2)</h2>
+<p class="cap">Đặc tả Use case Xem danh sách và chi tiết dự án</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xem danh sách và chi tiết dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng theo dõi các dự án trong không gian làm việc và xem thông tin chi tiết của từng dự án.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của không gian làm việc chứa dự án.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng chọn một không gian làm việc.<br>
+2. Hệ thống kiểm tra người dùng có phải thành viên của không gian làm việc hay không.<br>
+3. Hệ thống truy vấn danh sách dự án chưa bị xóa mềm của không gian làm việc đó.<br>
+4. Hệ thống hiển thị danh sách kèm tên, trạng thái, độ ưu tiên, tiến độ và phòng ban phụ trách.<br>
+5. Người dùng chọn một dự án để xem chi tiết gồm mô tả, ngân sách, giai đoạn, danh sách thành viên và công việc.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nắm được thông tin tổng quan và chi tiết của các dự án mình được phép truy cập.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không thuộc không gian làm việc. Hệ thống từ chối truy cập và hiển thị thông báo không đủ quyền.<br>
+2. Dự án đã bị xóa mềm. Hệ thống không hiển thị trong danh sách thông thường.<br>
+3. Không gian làm việc chưa có dự án nào. Hệ thống hiển thị thông báo danh sách trống.
+</td></tr>
+</table>
 <p class="cap">Đặc tả Use case Tạo dự án</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Tạo dự án</td></tr>
-<tr><td class="lbl">Actor</td><td>Thành viên của không gian làm việc.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng khởi tạo một dự án mới trong không gian làm việc và trở thành người tạo (chủ sở hữu) của dự án đó.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công; người dùng là thành viên của không gian làm việc và trong không gian đã tồn tại ít nhất một phòng ban.</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Khởi tạo một dự án mới trong không gian làm việc để bắt đầu triển khai công việc.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên; không gian làm việc đã có ít nhất một phòng ban.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
 1. Người dùng chọn chức năng Tạo dự án.<br>
-2. Hệ thống hiển thị biểu mẫu tạo dự án gồm tên, mô tả, phòng ban, độ ưu tiên, ngày bắt đầu, ngày kết thúc, danh sách thành viên.<br>
-3. Người dùng nhập thông tin và bấm Tạo.<br>
-4. Hệ thống kiểm tra tên dự án không rỗng và không quá 200 ký tự, phòng ban đã được chọn, ngày bắt đầu không nằm trong quá khứ.<br>
-5. Hệ thống lưu dự án vào CSDL, gán người tạo làm chủ sở hữu và tự động thêm họ vào danh sách thành viên dự án.<br>
-6. Hệ thống thêm các thành viên được chọn vào dự án, ghi nhật ký hoạt động và nhật ký kiểm toán.<br>
-7. Hệ thống thông báo tạo dự án thành công và hiển thị dự án mới trong danh sách.
+2. Hệ thống hiển thị biểu mẫu gồm tên, mô tả, phòng ban, độ ưu tiên, ngày bắt đầu, ngày kết thúc và ngân sách.<br>
+3. Người dùng nhập thông tin và bấm nút Tạo.<br>
+4. Hệ thống kiểm tra ràng buộc: tên dự án không rỗng và không quá 200 ký tự, bắt buộc chọn phòng ban, ngày bắt đầu không được trước ngày hiện tại, ngày kết thúc phải sau ngày bắt đầu («include» Bắt buộc chọn phòng ban và ngày bắt đầu ≥ hôm nay).<br>
+5. Hệ thống lưu dự án với trạng thái Lên kế hoạch, tiến độ bằng 0 phần trăm và gán người tạo làm chủ sở hữu dự án.<br>
+6. Hệ thống tự động thêm người tạo vào danh sách thành viên dự án.<br>
+7. Hệ thống ghi nhật ký hoạt động và hiển thị dự án vừa tạo.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Dự án được tạo với trạng thái Lên kế hoạch, tiến độ bằng 0%, người tạo giữ vai trò chủ sở hữu dự án.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Dự án mới được tạo trong không gian làm việc, sẵn sàng để thêm giai đoạn và công việc.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng bỏ trống tên dự án. Hệ thống hiển thị thông báo "Tên dự án là bắt buộc".<br>
-2. Người dùng không chọn phòng ban. Hệ thống hiển thị thông báo "Vui lòng chọn phòng ban cho dự án".<br>
-3. Người dùng chọn ngày bắt đầu trong quá khứ. Hệ thống hiển thị thông báo "Ngày bắt đầu không được trước ngày hôm nay" và yêu cầu chọn lại.<br>
-4. Người dùng không phải thành viên của dự án chứa tài nguyên. Hệ thống chặn thao tác và hiển thị thông báo không đủ quyền.
+1. Người dùng không đủ quyền. Hệ thống hiển thị thông báo chỉ Quản lý hoặc Quản trị viên mới được tạo dự án.<br>
+2. Chưa chọn phòng ban. Hệ thống hiển thị thông báo "Vui lòng chọn phòng ban cho dự án".<br>
+3. Ngày bắt đầu trước ngày hiện tại. Hệ thống hiển thị thông báo "Ngày bắt đầu không được trước ngày hôm nay".<br>
+4. Ngày kết thúc trước ngày bắt đầu. Hệ thống hiển thị thông báo "Ngày kết thúc phải sau ngày bắt đầu".<br>
+5. Ngân sách nhập giá trị âm. Hệ thống hiển thị thông báo ngân sách phải là số không âm.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Cập nhật thông tin dự án</p>
+<p class="cap">Đặc tả Use case Sửa thông tin và ngân sách dự án</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Cập nhật thông tin dự án</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép chỉnh sửa thông tin của dự án như tên, mô tả, độ ưu tiên, trạng thái, mốc thời gian, phòng ban và ngân sách.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng là quản trị viên hoặc quản lý của không gian làm việc.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Sửa thông tin và ngân sách dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cập nhật thông tin dự án khi có thay đổi về phạm vi, thời gian, độ ưu tiên hoặc ngân sách.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên trong không gian làm việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở dự án và chọn thẻ Cài đặt.<br>
-2. Hệ thống kiểm tra quyền và hiển thị biểu mẫu thông tin dự án hiện tại.<br>
-3. Người dùng chỉnh sửa các trường thông tin và bấm Lưu.<br>
-4. Hệ thống kiểm tra tính hợp lệ của dữ liệu, trong đó ngân sách phải là số không âm.<br>
-5. Hệ thống cập nhật thông tin dự án vào CSDL.<br>
-6. Hệ thống ghi nhật ký kiểm toán các trường đã thay đổi kèm giá trị cũ và giá trị mới.<br>
-7. Hệ thống thông báo cập nhật thành công.
+1. Người dùng mở dự án và vào tab Cài đặt.<br>
+2. Hệ thống kiểm tra vai trò của người dùng.<br>
+3. Hệ thống hiển thị biểu mẫu với thông tin hiện tại của dự án.<br>
+4. Người dùng chỉnh sửa các trường cần thay đổi và xác nhận.<br>
+5. Hệ thống kiểm tra ràng buộc dữ liệu tương tự khi tạo dự án.<br>
+6. Hệ thống lưu thay đổi, ghi nhật ký hoạt động và cập nhật giao diện.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Thông tin dự án được cập nhật trong CSDL và được lưu vết trong nhật ký kiểm toán.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Thông tin dự án được cập nhật; các thành viên nhìn thấy dữ liệu mới ngay lập tức.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng không phải quản trị viên và cũng không phải quản lý. Hệ thống hiển thị thông báo "Chỉ quản trị viên hoặc quản lý mới được sửa dự án".<br>
-2. Người dùng đánh dấu dự án Hoàn thành trong khi tiến độ chưa đạt 100%. Hệ thống từ chối và hiển thị thông báo "Không thể đánh dấu dự án hoàn thành: tiến độ mới đạt x% — vẫn còn công việc chưa xong".<br>
-3. Người dùng nhập ngân sách là số âm. Hệ thống hiển thị thông báo "Ngân sách phải là số không âm".
+1. Người dùng là Thành viên thông thường. Hệ thống từ chối và hiển thị thông báo chỉ Quản lý hoặc Quản trị viên mới được sửa dự án.<br>
+2. Người dùng đánh dấu dự án Hoàn thành khi tiến độ chưa đạt 100 phần trăm. Hệ thống từ chối và thông báo còn công việc chưa xong («extend» Chỉ Hoàn thành khi tiến độ = 100%).<br>
+3. Dữ liệu nhập không hợp lệ. Hệ thống hiển thị thông báo lỗi tương ứng với từng trường.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Nhân bản dự án làm mẫu</p>
-<table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Nhân bản dự án làm mẫu</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép sao chép cấu trúc của một dự án đã có (giai đoạn và công việc) để tạo nhanh dự án mới có quy trình tương tự.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; tồn tại dự án nguồn và người dùng là quản trị viên hoặc quản lý của không gian làm việc.</td></tr>
-<tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng chọn dự án nguồn và chọn chức năng Nhân bản dự án.<br>
-2. Hệ thống kiểm tra quyền của người dùng đối với dự án nguồn.<br>
-3. Hệ thống tạo dự án mới với tên là tên dự án cũ kèm hậu tố "(bản sao)", giữ nguyên mô tả, độ ưu tiên, phòng ban, ngân sách; trạng thái đặt về Lên kế hoạch và người nhân bản làm chủ sở hữu dự án.<br>
-4. Hệ thống sao chép toàn bộ giai đoạn của dự án nguồn theo đúng thứ tự, không sao chép ngày và người phụ trách.<br>
-5. Hệ thống sao chép các công việc chưa bị xóa, đặt lại trạng thái về Chờ làm, bỏ người thực hiện và hạn chót, giữ nguyên nhãn và giai đoạn tương ứng.<br>
-6. Hệ thống ghi nhật ký kiểm toán và hiển thị dự án mới cho người dùng.
-</td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Dự án mới được tạo với đầy đủ giai đoạn và công việc ở trạng thái ban đầu; các bình luận, tệp, giờ công và tin nhắn không được sao chép.</td></tr>
-<tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng không đủ quyền. Hệ thống hiển thị thông báo "Chỉ quản trị viên hoặc quản lý mới được nhân bản dự án".<br>
-2. Dự án nguồn không tồn tại hoặc đã bị xóa. Hệ thống hiển thị thông báo "Dự án không tồn tại".
-</td></tr>
-</table>
-
 <p class="cap">Đặc tả Use case Quản lý giai đoạn dự án</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Quản lý giai đoạn dự án</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép chia dự án thành các giai đoạn có mốc thời gian và người phụ trách, phục vụ theo dõi tiến độ từng chặng.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng là thành viên của không gian làm việc chứa dự án.</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Chia dự án thành các giai đoạn để dễ theo dõi tiến độ và phân bổ công việc theo mốc thời gian.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở dự án và chọn chức năng Quản lý giai đoạn.<br>
-2. Hệ thống hiển thị danh sách giai đoạn hiện có kèm tiến độ, người phụ trách và tài liệu đã nộp.<br>
-3. Người dùng chọn Thêm giai đoạn và nhập tên, mô tả, ngày bắt đầu, ngày kết thúc, người phụ trách.<br>
-4. Hệ thống kiểm tra tên giai đoạn không rỗng, đã nhập đủ hai mốc thời gian và người phụ trách, ngày kết thúc phải sau ngày bắt đầu.<br>
-5. Hệ thống lưu giai đoạn với thứ tự nối tiếp các giai đoạn đã có.<br>
-6. Hệ thống hiển thị giai đoạn mới với tiến độ ban đầu bằng 0%.
+1. Người dùng mở dự án và vào tab Giai đoạn.<br>
+2. Hệ thống hiển thị danh sách giai đoạn hiện có theo thứ tự.<br>
+3. Người dùng chọn thêm mới, chỉnh sửa hoặc xóa một giai đoạn.<br>
+4. Khi thêm hoặc sửa, hệ thống yêu cầu nhập tên, ngày bắt đầu, ngày kết thúc và người phụ trách.<br>
+5. Hệ thống kiểm tra ngày kết thúc phải sau ngày bắt đầu và nằm trong khoảng thời gian của dự án.<br>
+6. Hệ thống lưu giai đoạn, sắp xếp lại thứ tự và cập nhật giao diện.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Giai đoạn được tạo trong dự án; tiến độ giai đoạn sẽ được tính tự động theo tỷ lệ công việc hoàn thành thuộc giai đoạn đó.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Danh sách giai đoạn của dự án được cập nhật; công việc có thể được gán vào giai đoạn tương ứng.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng bỏ trống tên giai đoạn. Hệ thống hiển thị thông báo "Tên giai đoạn là bắt buộc".<br>
-2. Người dùng không nhập đủ ngày bắt đầu và ngày kết thúc. Hệ thống hiển thị thông báo "Vui lòng nhập ngày bắt đầu và ngày kết thúc giai đoạn".<br>
-3. Người dùng không chọn người phụ trách. Hệ thống hiển thị thông báo "Vui lòng chọn người phụ trách giai đoạn".<br>
-4. Ngày kết thúc nhỏ hơn ngày bắt đầu. Hệ thống hiển thị thông báo "Ngày kết thúc giai đoạn phải sau ngày bắt đầu".<br>
-5. Người dùng chọn Xóa giai đoạn. Hệ thống xóa giai đoạn và tự động gỡ liên kết giai đoạn khỏi các công việc thuộc giai đoạn đó.
+1. Người dùng không đủ quyền. Hệ thống từ chối thao tác.<br>
+2. Thiếu thông tin bắt buộc. Hệ thống hiển thị thông báo yêu cầu nhập đủ tên, thời gian và người phụ trách.<br>
+3. Ngày kết thúc trước ngày bắt đầu. Hệ thống hiển thị thông báo lỗi.<br>
+4. Xóa giai đoạn đang chứa công việc. Hệ thống cảnh báo và yêu cầu xác nhận trước khi thực hiện.
 </td></tr>
 </table>
-
 <p class="cap">Đặc tả Use case Quản lý thành viên dự án</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Quản lý thành viên dự án</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý, Thành viên dự án (chỉ với thao tác tự rời dự án).</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép thêm hoặc gỡ thành viên tham gia dự án; thành viên cũng có thể tự rời khỏi dự án.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người được thêm phải là thành viên của không gian làm việc chứa dự án.</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Thêm hoặc loại bỏ thành viên tham gia dự án nhằm bảo đảm đúng người có quyền truy cập dữ liệu dự án.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên; người được thêm phải là thành viên của không gian làm việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở dự án và chọn chức năng Thêm thành viên.<br>
-2. Hệ thống kiểm tra người thao tác là quản trị viên hoặc quản lý.<br>
-3. Hệ thống hiển thị danh sách các thành viên của không gian làm việc chưa tham gia dự án.<br>
-4. Người dùng chọn thành viên cần thêm và xác nhận.<br>
-5. Hệ thống kiểm tra người được thêm thuộc không gian làm việc và chưa là thành viên dự án.<br>
-6. Hệ thống thêm thành viên vào dự án, gửi thông báo cho người được thêm và ghi nhật ký hoạt động.
+1. Người dùng mở dự án và vào tab Thành viên.<br>
+2. Hệ thống hiển thị danh sách thành viên hiện tại của dự án.<br>
+3. Người dùng nhập địa chỉ email của người cần thêm và xác nhận.<br>
+4. Hệ thống kiểm tra người được thêm đã có tài khoản và thuộc không gian làm việc chứa dự án.<br>
+5. Hệ thống thêm người dùng vào danh sách thành viên dự án và gửi thông báo cho họ.<br>
+6. Khi cần loại bỏ, người dùng chọn thành viên và xác nhận xóa; hệ thống kiểm tra không cho phép xóa người tạo dự án («include» Không xóa được người tạo dự án).
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Danh sách thành viên dự án được cập nhật; người được thêm có thể truy cập và thao tác trong dự án.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Danh sách thành viên dự án được cập nhật; quyền truy cập dữ liệu dự án thay đổi tương ứng.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người thao tác là thành viên thường. Hệ thống từ chối và hiển thị thông báo "Chỉ quản trị viên hoặc quản lý mới thêm trực tiếp. Hãy gửi yêu cầu duyệt", chuyển sang use case Gửi yêu cầu tham gia dự án.<br>
-2. Người được thêm chưa thuộc không gian làm việc. Hệ thống hiển thị thông báo "Người này chưa thuộc không gian làm việc. Hãy mời họ vào workspace trước".<br>
-3. Người được thêm đã là thành viên dự án. Hệ thống hiển thị thông báo "Người dùng đã là thành viên dự án".<br>
-4. Người dùng chọn xóa người tạo dự án khỏi dự án. Hệ thống từ chối và hiển thị thông báo "Không thể xóa người tạo dự án khỏi dự án".<br>
-5. Thành viên tự chọn rời khỏi dự án. Hệ thống cho phép và gỡ họ khỏi danh sách thành viên dự án.
+1. Người được thêm chưa thuộc không gian làm việc. Hệ thống thông báo cần mời họ vào không gian làm việc trước.<br>
+2. Người được thêm đã là thành viên dự án. Hệ thống hiển thị thông báo trùng lặp.<br>
+3. Người thực hiện cố xóa người tạo dự án. Hệ thống từ chối và hiển thị thông báo "Không thể xóa người tạo dự án khỏi dự án".<br>
+4. Người dùng không đủ quyền. Hệ thống từ chối và gợi ý sử dụng luồng gửi yêu cầu tham gia.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Gửi và duyệt yêu cầu tham gia dự án</p>
+<p class="cap">Đặc tả Use case Gửi yêu cầu tham gia dự án</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Gửi và duyệt yêu cầu tham gia dự án</td></tr>
-<tr><td class="lbl">Actor</td><td>Thành viên (gửi yêu cầu); Quản trị viên, Quản lý (duyệt yêu cầu).</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép thành viên thường đề xuất thêm người vào dự án và để quản trị viên hoặc quản lý phê duyệt đề xuất đó.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người gửi là thành viên của không gian làm việc chứa dự án.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Gửi yêu cầu tham gia dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên (MEMBER).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cho phép thành viên chủ động đề nghị được tham gia một dự án mà mình chưa thuộc về.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của không gian làm việc nhưng chưa thuộc dự án.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Thành viên mở dự án và chọn chức năng Thêm thành viên.<br>
-2. Do không đủ quyền thêm trực tiếp, hệ thống chuyển sang biểu mẫu Gửi yêu cầu tham gia.<br>
-3. Thành viên chọn người cần thêm và gửi yêu cầu.<br>
-4. Hệ thống kiểm tra người được đề xuất tồn tại, chưa là thành viên dự án và chưa có yêu cầu nào đang chờ duyệt.<br>
-5. Hệ thống lưu yêu cầu với trạng thái Chờ duyệt và gửi thông báo tới các quản lý và quản trị viên.<br>
-6. Quản lý hoặc quản trị viên mở danh sách yêu cầu và chọn Duyệt.<br>
-7. Hệ thống kiểm tra người được duyệt vẫn thuộc không gian làm việc, thêm họ vào dự án, cập nhật yêu cầu thành Đã duyệt và gửi thông báo cho người liên quan.
+1. Thành viên mở dự án mà mình chưa tham gia.<br>
+2. Thành viên chọn chức năng Gửi yêu cầu tham gia.<br>
+3. Hệ thống kiểm tra người dùng chưa phải thành viên dự án và chưa có yêu cầu nào đang chờ duyệt.<br>
+4. Hệ thống tạo bản ghi yêu cầu với trạng thái Chờ duyệt.<br>
+5. Hệ thống gửi thông báo tới các Quản lý và Quản trị viên của không gian làm việc.<br>
+6. Hệ thống hiển thị thông báo yêu cầu đã được gửi.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Người được đề xuất trở thành thành viên dự án; yêu cầu chuyển sang trạng thái Đã duyệt.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Yêu cầu tham gia được ghi nhận với trạng thái Chờ duyệt, hiển thị trong danh sách chờ xử lý.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người được đề xuất đã là thành viên dự án. Hệ thống hiển thị thông báo "Người này đã là thành viên dự án".<br>
-2. Đã tồn tại yêu cầu đang chờ duyệt cho người đó. Hệ thống hiển thị thông báo "Đã có yêu cầu đang chờ duyệt cho người này".<br>
-3. Người duyệt chọn Từ chối kèm ghi chú. Hệ thống cập nhật yêu cầu thành Bị từ chối và gửi thông báo kèm lý do cho người gửi yêu cầu.<br>
-4. Người được duyệt không còn thuộc không gian làm việc. Hệ thống hiển thị thông báo "Người này không còn thuộc không gian làm việc" và không thêm vào dự án.<br>
-5. Người thực hiện duyệt không phải quản trị viên hoặc quản lý. Hệ thống hiển thị thông báo "Chỉ quản trị viên hoặc quản lý mới được duyệt".
+1. Người dùng đã là thành viên dự án. Hệ thống hiển thị thông báo không cần gửi yêu cầu.<br>
+2. Đã tồn tại yêu cầu đang chờ duyệt. Hệ thống thông báo và không tạo yêu cầu trùng lặp.<br>
+3. Người dùng không thuộc không gian làm việc. Hệ thống từ chối truy cập.
 </td></tr>
 </table>
-
+<p class="cap">Đặc tả Use case Duyệt hoặc từ chối yêu cầu tham gia dự án</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Duyệt hoặc từ chối yêu cầu tham gia dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Kiểm soát việc gia nhập dự án, bảo đảm chỉ người có nhiệm vụ liên quan mới truy cập được dữ liệu dự án.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Gửi yêu cầu tham gia dự án đã thực hiện; người xử lý có vai trò Quản lý hoặc Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở danh sách yêu cầu tham gia đang chờ duyệt.<br>
+2. Hệ thống kiểm tra vai trò của người xử lý.<br>
+3. Hệ thống hiển thị danh sách yêu cầu kèm thông tin người gửi và thời điểm gửi.<br>
+4. Người dùng chọn Duyệt hoặc Từ chối cho từng yêu cầu.<br>
+5. Nếu Duyệt, hệ thống kiểm tra người được duyệt còn thuộc không gian làm việc, sau đó thêm vào danh sách thành viên dự án.<br>
+6. Hệ thống cập nhật trạng thái yêu cầu, gửi thông báo cho người gửi và ghi nhật ký hoạt động.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Yêu cầu chuyển sang trạng thái Đã duyệt hoặc Đã từ chối; nếu duyệt thì người gửi trở thành thành viên dự án.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người xử lý không đủ quyền. Hệ thống hiển thị thông báo chỉ Quản trị viên hoặc Quản lý mới được duyệt.<br>
+2. Người gửi yêu cầu đã rời khỏi không gian làm việc. Hệ thống từ chối duyệt và thông báo lý do.<br>
+3. Yêu cầu đã được xử lý trước đó. Hệ thống thông báo và làm mới danh sách.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Tự rời khỏi dự án</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Tự rời khỏi dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên (MEMBER).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cho phép thành viên tự rút khỏi dự án khi không còn tham gia công việc của dự án đó.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng đang là thành viên của dự án.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Thành viên mở dự án và vào tab Thành viên.<br>
+2. Thành viên chọn chức năng Rời khỏi dự án.<br>
+3. Hệ thống hiển thị hộp thoại xác nhận kèm cảnh báo sẽ mất quyền truy cập dữ liệu dự án.<br>
+4. Thành viên xác nhận.<br>
+5. Hệ thống kiểm tra người thực hiện không phải là người tạo dự án.<br>
+6. Hệ thống xóa bản ghi thành viên và chuyển người dùng về danh sách dự án.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng không còn thuộc dự án và mất quyền truy cập dữ liệu của dự án đó.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người thực hiện là người tạo dự án. Hệ thống từ chối và thông báo không thể rời khỏi dự án do mình tạo.<br>
+2. Người dùng còn công việc chưa hoàn thành trong dự án. Hệ thống cảnh báo trước khi cho phép rời đi.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Nhân bản dự án làm mẫu</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Nhân bản dự án làm mẫu</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Tạo nhanh một dự án mới dựa trên cấu trúc của dự án đã có, tiết kiệm thời gian thiết lập cho các dự án lặp lại.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; tồn tại dự án nguồn; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng chọn dự án nguồn và chọn chức năng Nhân bản.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+3. Hệ thống tạo dự án mới với tên là tên dự án nguồn kèm hậu tố "(bản sao)".<br>
+4. Hệ thống sao chép mô tả, độ ưu tiên, phòng ban và ngân sách; đặt trạng thái Lên kế hoạch.<br>
+5. Hệ thống sao chép toàn bộ giai đoạn và công việc, đưa công việc về trạng thái Chưa làm, bỏ người được giao và hạn chót.<br>
+6. Hệ thống gán người thực hiện làm chủ sở hữu dự án mới và thêm vào danh sách thành viên.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Dự án mới được tạo với cấu trúc giai đoạn và công việc giống dự án nguồn, sẵn sàng để phân công lại.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không đủ quyền. Hệ thống hiển thị thông báo chỉ Quản trị viên hoặc Quản lý mới được nhân bản dự án.<br>
+2. Dự án nguồn không tồn tại hoặc đã bị xóa. Hệ thống thông báo lỗi.<br>
+3. Hệ thống không sao chép bình luận, tệp đính kèm, giờ công và tin nhắn nhằm bảo đảm dự án mới bắt đầu với dữ liệu sạch.
+</td></tr>
+</table>
 <p class="cap">Đặc tả Use case Xóa dự án</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Xóa dự án</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép đưa một dự án không còn sử dụng vào thùng rác, đồng thời vẫn có thể khôi phục khi cần.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng có vai trò quản trị viên hoặc quản lý trong không gian làm việc.</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Loại bỏ dự án không còn sử dụng khỏi danh sách hoạt động nhưng vẫn giữ khả năng khôi phục.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng chọn dự án cần xóa và chọn chức năng Xóa dự án.<br>
-2. Hệ thống kiểm tra quyền của người dùng và hiển thị hộp thoại xác nhận.<br>
-3. Người dùng xác nhận xóa.<br>
-4. Hệ thống thực hiện xóa mềm bằng cách đánh dấu thời điểm xóa cho dự án, không xóa dữ liệu khỏi CSDL.<br>
-5. Hệ thống ghi nhật ký kiểm toán hành động xóa.<br>
-6. Hệ thống loại dự án khỏi mọi danh sách, thống kê và báo cáo, đồng thời đưa vào thùng rác.
+1. Người dùng mở dự án và vào tab Cài đặt.<br>
+2. Người dùng chọn chức năng Xóa dự án.<br>
+3. Hệ thống hiển thị hộp thoại xác nhận kèm cảnh báo về phạm vi ảnh hưởng.<br>
+4. Người dùng xác nhận.<br>
+5. Hệ thống thực hiện xóa mềm bằng cách đánh dấu thời điểm xóa thay vì xóa vật lý khỏi cơ sở dữ liệu.<br>
+6. Hệ thống chuyển dự án vào thùng rác, ghi nhật ký kiểm toán và cập nhật danh sách.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Dự án nằm trong thùng rác, không hiển thị ở giao diện làm việc nhưng dữ liệu vẫn được giữ để có thể khôi phục.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Dự án biến mất khỏi danh sách hoạt động và nằm trong thùng rác, có thể khôi phục trong vòng 30 ngày.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng không đủ quyền. Hệ thống hiển thị thông báo "Bạn không đủ quyền thực hiện thao tác này".<br>
-2. Người dùng hủy thao tác tại hộp thoại xác nhận. Hệ thống giữ nguyên hiện trạng.
+1. Người dùng không đủ quyền. Hệ thống từ chối thao tác.<br>
+2. Dự án đã bị xóa trước đó bởi người khác. Hệ thống thông báo và làm mới danh sách.<br>
+3. Sau 30 ngày trong thùng rác, hệ thống tự động xóa vĩnh viễn dự án cùng toàn bộ dữ liệu liên quan.
 </td></tr>
 </table>
-
-<!-- ==================== PR3 ==================== -->
-<h2>3. NHÓM CHỨC NĂNG: QUẢN LÝ CÔNG VIỆC</h2>
-
+<h2>3. Nhóm use case Quản lý công việc (PR3)</h2>
 <p class="cap">Đặc tả Use case Tạo và giao công việc</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Tạo và giao công việc</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý (hoặc thành viên dự án nếu chính sách của không gian làm việc cho phép).</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép tạo công việc mới trong dự án và giao cho một thành viên phụ trách thực hiện.</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN), hoặc Thành viên dự án nếu chính sách không gian làm việc cho phép.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Tạo công việc mới trong dự án và phân công cho thành viên phụ trách thực hiện.</td></tr>
 <tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng có quyền tạo công việc theo chính sách của không gian làm việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
 1. Người dùng mở dự án và chọn chức năng Tạo công việc.<br>
-2. Hệ thống kiểm tra chính sách tạo công việc của không gian làm việc. Mặc định chỉ quản trị viên và quản lý được tạo; nếu chính sách mở cho thành viên thì mọi thành viên dự án đều được tạo.<br>
-3. Hệ thống hiển thị biểu mẫu gồm tiêu đề, mô tả, loại, độ ưu tiên, người thực hiện, hạn chót, giai đoạn và nhãn.<br>
-4. Người dùng nhập thông tin và bấm Tạo.<br>
-5. Hệ thống kiểm tra tiêu đề không rỗng, không quá 200 ký tự và hạn chót không vượt quá ngày kết thúc của dự án.<br>
-6. Hệ thống lưu công việc vào CSDL với trạng thái mặc định Chờ làm.<br>
-7. Hệ thống phát sự kiện thời gian thực tới các thành viên đang mở dự án, tính lại tiến độ dự án và ghi nhật ký hoạt động.<br>
-8. Nếu người được giao khác người tạo, hệ thống gửi thông báo trong ứng dụng và email cho người được giao, đồng thời gửi thông điệp tới webhook nếu không gian làm việc có cấu hình.
+2. Hệ thống kiểm tra chính sách tạo công việc của không gian làm việc, mặc định chỉ Quản lý và Quản trị viên được phép.<br>
+3. Hệ thống hiển thị biểu mẫu gồm tiêu đề, mô tả, người được giao, giai đoạn, độ ưu tiên và hạn chót.<br>
+4. Người dùng nhập thông tin và xác nhận.<br>
+5. Hệ thống kiểm tra tiêu đề không rỗng và hạn chót không vượt quá ngày kết thúc dự án («include» Hạn công việc ≤ ngày kết thúc dự án).<br>
+6. Hệ thống lưu công việc với trạng thái Chưa làm và tính lại tiến độ dự án.<br>
+7. Nếu người được giao khác người tạo, hệ thống gửi thông báo trong ứng dụng kèm email («include» Thông báo cho người được giao).
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Công việc được tạo trong dự án, hiển thị tức thời trên bảng Kanban của mọi thành viên đang trực tuyến; người được giao nhận được thông báo.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Công việc mới được tạo trong dự án và xuất hiện trên bảng Kanban ở cột Chưa làm.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng không đủ quyền theo chính sách. Hệ thống hiển thị thông báo "Chỉ quản trị viên hoặc quản lý mới được tạo công việc (chính sách workspace)".<br>
-2. Người dùng bỏ trống tiêu đề. Hệ thống hiển thị thông báo "Tiêu đề công việc là bắt buộc".<br>
-3. Tiêu đề vượt quá 200 ký tự. Hệ thống hiển thị thông báo "Tiêu đề quá dài (tối đa 200 ký tự)".<br>
-4. Hạn chót vượt quá ngày kết thúc dự án. Hệ thống hiển thị thông báo "Hạn công việc không được sau ngày kết thúc dự án".<br>
-5. Ngày hết hạn nhập sai định dạng. Hệ thống hiển thị thông báo "Ngày hết hạn không hợp lệ".
+1. Người dùng không đủ quyền theo chính sách. Hệ thống hiển thị thông báo chỉ Quản trị viên hoặc Quản lý mới được tạo công việc.<br>
+2. Tiêu đề công việc để trống hoặc chỉ chứa khoảng trắng. Hệ thống từ chối và yêu cầu nhập lại.<br>
+3. Hạn chót vượt quá ngày kết thúc dự án. Hệ thống hiển thị cảnh báo và yêu cầu điều chỉnh.<br>
+4. Người được giao không thuộc dự án. Hệ thống từ chối và gợi ý thêm họ vào dự án trước.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Cập nhật trạng thái công việc</p>
+<p class="cap">Đặc tả Use case Cập nhật thông tin công việc</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Cập nhật trạng thái công việc</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý, Người được giao công việc.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép thay đổi trạng thái tiến triển của công việc bằng thao tác kéo và thả trên bảng Kanban.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng là quản trị viên, quản lý hoặc chính là người được giao công việc đó.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Cập nhật thông tin công việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Chỉnh sửa nội dung công việc khi có thay đổi về phạm vi, người thực hiện hoặc thời hạn.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở chi tiết công việc.<br>
+2. Hệ thống hiển thị thông tin hiện tại của công việc.<br>
+3. Người dùng chỉnh sửa tiêu đề, mô tả, nhãn, người được giao, giai đoạn hoặc hạn chót.<br>
+4. Hệ thống kiểm tra quyền và tính hợp lệ của dữ liệu.<br>
+5. Hệ thống lưu thay đổi, ghi nhật ký hoạt động và phát sự kiện cập nhật thời gian thực tới các thành viên đang xem.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Thông tin công việc được cập nhật và đồng bộ ngay tới mọi người đang mở dự án.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không đủ quyền. Hệ thống từ chối thao tác.<br>
+2. Hạn chót mới vượt quá ngày kết thúc dự án. Hệ thống hiển thị cảnh báo.<br>
+3. Công việc đã bị xóa bởi người khác. Hệ thống thông báo và làm mới giao diện.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Đổi trạng thái công việc</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Đổi trạng thái công việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án (người được giao công việc), Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cập nhật tiến trình thực hiện công việc bằng thao tác kéo thả trên bảng Kanban.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng là Quản lý, Quản trị viên hoặc chính là người được giao công việc đó.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
 1. Người dùng mở bảng Kanban của dự án.<br>
-2. Người dùng kéo thẻ công việc từ cột trạng thái hiện tại sang cột trạng thái mới.<br>
-3. Hệ thống kiểm tra quyền đổi trạng thái của người dùng đối với công việc.<br>
-4. Nếu trạng thái mới là Hoàn thành, hệ thống kiểm tra tất cả công việc tiên quyết đã ở trạng thái Hoàn thành và kiểm tra thời điểm hiện tại đã đạt mốc cho phép hoàn thành theo kế hoạch thời gian.<br>
-5. Hệ thống cập nhật trạng thái công việc vào CSDL và tự động tắt chế độ chuyển trạng thái tự động.<br>
-6. Hệ thống tính lại tiến độ dự án theo tỷ lệ công việc đã hoàn thành và phát sự kiện thời gian thực cho mọi thành viên đang mở dự án.<br>
-7. Hệ thống ghi nhật ký hoạt động; nếu công việc chuyển sang Hoàn thành, hệ thống gửi thông báo cho quản lý và quản trị viên, đồng thời gửi thông điệp tới webhook.
+2. Người dùng kéo thẻ công việc từ cột hiện tại sang cột trạng thái mới.<br>
+3. Hệ thống kiểm tra quyền đổi trạng thái của người thực hiện.<br>
+4. Nếu chuyển sang trạng thái Hoàn thành, hệ thống kiểm tra tất cả công việc tiên quyết đã hoàn thành và thời điểm hoàn thành không quá sớm so với kế hoạch («include» Việc tiên quyết đã xong và đúng mốc kế hoạch).<br>
+5. Hệ thống cập nhật trạng thái, tính lại tiến độ dự án theo tỷ lệ công việc đã hoàn thành và phát sự kiện thời gian thực («include» Tính lại tiến độ dự án và phát sự kiện realtime).<br>
+6. Nếu tiến độ dự án đạt 100 phần trăm, hệ thống tự động chuyển dự án sang trạng thái Hoàn thành.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Trạng thái công việc được cập nhật, tiến độ dự án được tính lại. Nếu toàn bộ công việc đã hoàn thành thì dự án tự động chuyển sang trạng thái Hoàn thành.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Trạng thái công việc được cập nhật; tiến độ dự án được tính lại và hiển thị tức thời cho mọi thành viên.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng không có quyền đổi trạng thái. Hệ thống hoàn tác thao tác kéo trên giao diện và hiển thị thông báo "Bạn không có quyền đổi trạng thái công việc này".<br>
-2. Còn công việc tiên quyết chưa hoàn thành. Hệ thống từ chối và hiển thị thông báo "Phải hoàn thành công việc tiên quyết trước" kèm danh sách các công việc đang chặn.<br>
-3. Người dùng đánh dấu Hoàn thành quá sớm so với kế hoạch thời gian. Hệ thống từ chối và thông báo mốc thời gian sớm nhất được phép hoàn thành, đồng thời gợi ý chỉnh lại kế hoạch trạng thái hoặc hạn chót.<br>
-4. Công việc tiên quyết đã bị xóa vào thùng rác. Hệ thống bỏ qua ràng buộc đó và cho phép hoàn thành.
+1. Người dùng không phải người được giao và cũng không phải Quản lý hoặc Quản trị viên. Hệ thống từ chối và hiển thị thông báo không đủ quyền.<br>
+2. Công việc tiên quyết chưa hoàn thành. Hệ thống từ chối chuyển sang Hoàn thành và chỉ rõ công việc còn vướng.<br>
+3. Thời điểm hoàn thành quá sớm so với kế hoạch số ngày đã đặt. Hệ thống cảnh báo và từ chối cập nhật.<br>
+4. Khi người quản lý chỉnh trạng thái thủ công, hệ thống tự động tắt chế độ tự động chuyển trạng thái để tránh bị ghi đè.
 </td></tr>
 </table>
-
 <p class="cap">Đặc tả Use case Thiết lập phụ thuộc công việc</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Thiết lập phụ thuộc công việc</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý, Thành viên dự án.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép khai báo quan hệ tiên quyết giữa hai công việc, bảo đảm một công việc chỉ được hoàn thành sau khi các công việc phụ thuộc đã xong.</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Xác định thứ tự thực hiện giữa các công việc, bảo đảm công việc sau chỉ hoàn thành khi công việc trước đã xong.</td></tr>
 <tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; trong dự án tồn tại ít nhất hai công việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở trang chi tiết của công việc cần thiết lập phụ thuộc.<br>
-2. Hệ thống hiển thị khối Phụ thuộc công việc gồm danh sách công việc cần hoàn thành trước và danh sách công việc đang bị chặn.<br>
-3. Người dùng chọn một công việc tiên quyết từ danh sách các công việc cùng dự án và bấm thêm.<br>
-4. Hệ thống kiểm tra hai công việc thuộc cùng một dự án, không trùng với chính nó và liên kết chưa tồn tại.<br>
-5. Hệ thống áp dụng thuật toán tìm kiếm theo chiều rộng để kiểm tra liên kết mới không tạo thành vòng lặp phụ thuộc.<br>
-6. Hệ thống lưu quan hệ phụ thuộc và cập nhật lại danh sách hiển thị.
+1. Người dùng mở chi tiết một công việc và vào mục Phụ thuộc.<br>
+2. Hệ thống hiển thị danh sách công việc khác trong cùng dự án để lựa chọn.<br>
+3. Người dùng chọn công việc tiên quyết và xác nhận.<br>
+4. Hệ thống kiểm tra hai công việc thuộc cùng một dự án.<br>
+5. Hệ thống duyệt đồ thị phụ thuộc theo chiều rộng để bảo đảm không tạo thành vòng lặp («include» Không tạo vòng lặp phụ thuộc).<br>
+6. Hệ thống lưu quan hệ phụ thuộc và hiển thị trên biểu đồ Gantt.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Quan hệ phụ thuộc được lưu; công việc hiện tại chỉ có thể chuyển sang Hoàn thành sau khi tất cả công việc tiên quyết đã hoàn thành.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Quan hệ phụ thuộc được thiết lập; công việc phụ thuộc không thể hoàn thành trước công việc tiên quyết.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng chọn chính công việc đang xem làm công việc tiên quyết. Hệ thống hiển thị thông báo "Công việc không thể phụ thuộc chính nó".<br>
-2. Hai công việc không thuộc cùng một dự án. Hệ thống hiển thị thông báo "Chỉ liên kết phụ thuộc trong cùng dự án".<br>
-3. Liên kết tạo thành vòng lặp phụ thuộc. Hệ thống từ chối và hiển thị thông báo "Liên kết này tạo thành vòng lặp phụ thuộc".<br>
-4. Quan hệ phụ thuộc đã tồn tại. Hệ thống hiển thị thông báo "Phụ thuộc này đã tồn tại".<br>
-5. Người dùng chọn xóa một quan hệ phụ thuộc. Hệ thống xóa liên kết và cập nhật lại danh sách.
+1. Hai công việc không thuộc cùng dự án. Hệ thống từ chối và thông báo lỗi.<br>
+2. Quan hệ tạo thành vòng lặp phụ thuộc. Hệ thống từ chối và hiển thị thông báo cảnh báo.<br>
+3. Quan hệ đã tồn tại. Hệ thống thông báo trùng lặp và không tạo bản ghi mới.<br>
+4. Người dùng không đủ quyền. Hệ thống từ chối thao tác.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Thiết lập chuyển trạng thái tự động</p>
+<p class="cap">Đặc tả Use case Bật tự động chuyển trạng thái công việc</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Thiết lập chuyển trạng thái tự động theo kế hoạch</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép công việc tự động chuyển trạng thái theo tiến trình thời gian, dựa trên kế hoạch số ngày phân bổ cho từng trạng thái.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; công việc đã được đặt hạn chót; người dùng là quản trị viên hoặc quản lý.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Bật tự động chuyển trạng thái công việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cho phép hệ thống tự động cập nhật trạng thái công việc theo kế hoạch thời gian đã định, giảm thao tác thủ công.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; công việc đã được đặt hạn chót. Đây là luồng mở rộng («extend») của use case Đổi trạng thái công việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở trang chi tiết công việc và chọn chức năng thiết lập chuyển trạng thái tự động.<br>
-2. Hệ thống hiển thị công tắc bật hoặc tắt chế độ tự động và bảng kế hoạch số ngày cho bốn trạng thái Chờ làm, Đang làm, Review, Hoàn thành.<br>
-3. Người dùng bật chế độ tự động và nhập số ngày cho từng trạng thái.<br>
-4. Hệ thống kiểm tra quyền của người dùng và kiểm tra số ngày của mỗi trạng thái là số không âm, tổng số ngày phải lớn hơn 0.<br>
-5. Hệ thống lưu thiết lập vào công việc.<br>
-6. Hệ thống hiển thị công việc trên biểu đồ Gantt với thanh tiến trình được chia thành các khoảng màu tương ứng kế hoạch trạng thái.
+1. Người dùng mở chi tiết công việc và vào mục Tự động chuyển trạng thái.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+3. Người dùng bật chế độ tự động và nhập kế hoạch số ngày cho từng trạng thái.<br>
+4. Hệ thống kiểm tra số ngày của mỗi trạng thái là số không âm và tổng số ngày lớn hơn không.<br>
+5. Hệ thống lưu cấu hình; tác vụ nền định kỳ sẽ đối chiếu thời gian thực tế với kế hoạch để cập nhật trạng thái.<br>
+6. Khi có người chỉnh trạng thái thủ công, hệ thống tự động tắt chế độ này để tránh xung đột.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Công việc được đánh dấu tự động chuyển trạng thái; kế hoạch thời gian này cũng là căn cứ để hệ thống chặn thao tác đánh dấu Hoàn thành quá sớm.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Công việc được hệ thống tự động chuyển trạng thái theo tiến trình thời gian đã lập kế hoạch.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng không đủ quyền. Hệ thống hiển thị thông báo "Chỉ quản trị viên hoặc quản lý mới chỉnh chế độ tự động".<br>
-2. Người dùng nhập số ngày âm hoặc không hợp lệ. Hệ thống hiển thị thông báo "Kế hoạch trạng thái không hợp lệ (số ngày phải lớn hơn hoặc bằng 0)".<br>
-3. Tổng số ngày trong kế hoạch bằng 0. Hệ thống hiển thị thông báo "Tổng số ngày trong kế hoạch phải lớn hơn 0".<br>
-4. Người dùng không nhập kế hoạch riêng. Hệ thống áp dụng cách chia mặc định, phân bổ đều số ngày cho bốn trạng thái.<br>
-5. Người quản lý chỉnh tay trạng thái công việc. Hệ thống tự động tắt chế độ tự động để tránh bị ghi đè.
+1. Người dùng không đủ quyền. Hệ thống hiển thị thông báo chỉ Quản trị viên hoặc Quản lý mới chỉnh chế độ tự động.<br>
+2. Kế hoạch có số ngày âm. Hệ thống từ chối và thông báo số ngày phải lớn hơn hoặc bằng không.<br>
+3. Tổng số ngày trong kế hoạch bằng không. Hệ thống từ chối và yêu cầu nhập lại.
 </td></tr>
 </table>
-
+<p class="cap">Đặc tả Use case Quản lý việc con</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Quản lý việc con</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Chia nhỏ công việc thành các đầu mục kiểm tra để theo dõi chi tiết tiến trình thực hiện.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng là thành viên của dự án chứa công việc.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở chi tiết công việc và vào mục Việc con.<br>
+2. Hệ thống hiển thị danh sách việc con hiện có kèm trạng thái hoàn thành.<br>
+3. Người dùng nhập tiêu đề việc con mới và thêm vào danh sách.<br>
+4. Người dùng có thể đánh dấu hoàn thành hoặc bỏ đánh dấu một việc con bất kỳ.<br>
+5. Hệ thống lưu thay đổi và cập nhật tỷ lệ hoàn thành hiển thị trên thẻ công việc.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Danh sách việc con được cập nhật; tiến trình chi tiết của công việc được phản ánh trực quan.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không thuộc dự án. Hệ thống từ chối truy cập.<br>
+2. Tiêu đề việc con để trống. Hệ thống yêu cầu nhập nội dung.<br>
+3. Việc con đã bị xóa bởi người khác. Hệ thống thông báo và làm mới danh sách.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Ghi nhận giờ làm</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Ghi nhận giờ làm</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Ghi lại thời gian thực tế bỏ ra cho từng công việc, phục vụ tính chi phí nhân công và lập báo cáo chấm công.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng là thành viên của dự án chứa công việc.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở chi tiết công việc và vào mục Giờ làm.<br>
+2. Người dùng nhập số phút đã làm, ngày làm việc và ghi chú nếu cần.<br>
+3. Hệ thống kiểm tra số phút là số dương và ngày làm việc hợp lệ.<br>
+4. Hệ thống lưu bản ghi giờ công gắn với công việc và người thực hiện.<br>
+5. Hệ thống cập nhật tổng giờ của công việc và của dự án.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Bản ghi giờ làm được lưu; dữ liệu sẵn sàng cho bảng chấm công và báo cáo chi phí nhân công.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không thuộc dự án. Hệ thống từ chối thao tác.<br>
+2. Số phút nhập vào không phải số dương. Hệ thống hiển thị thông báo lỗi.<br>
+3. Ngày làm việc ở tương lai. Hệ thống cảnh báo và yêu cầu xác nhận lại.<br>
+4. Người dùng chỉ được xóa bản ghi giờ làm do chính mình tạo, trừ khi là Quản trị viên.
+</td></tr>
+</table>
 <p class="cap">Đặc tả Use case Xóa công việc</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Xóa công việc</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép quản trị viên đưa công việc không còn cần thiết vào thùng rác, có thể khôi phục khi cần.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng có vai trò quản trị viên của không gian làm việc.</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Loại bỏ công việc không còn cần thiết khỏi dự án nhưng vẫn giữ khả năng khôi phục.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng có vai trò Quản trị viên của không gian làm việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Quản trị viên chọn một hoặc nhiều công việc cần xóa.<br>
-2. Quản trị viên chọn chức năng Xóa và xác nhận trên hộp thoại.<br>
-3. Hệ thống kiểm tra vai trò quản trị viên của người thao tác.<br>
-4. Hệ thống thực hiện xóa mềm bằng cách đánh dấu thời điểm xóa cho công việc.<br>
-5. Hệ thống phát sự kiện thời gian thực để gỡ công việc khỏi giao diện của mọi thành viên đang mở dự án.<br>
-6. Hệ thống tính lại tiến độ của dự án dựa trên các công việc còn lại.
+1. Quản trị viên mở chi tiết công việc và chọn chức năng Xóa.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện phải là Quản trị viên.<br>
+3. Hệ thống hiển thị hộp thoại xác nhận.<br>
+4. Quản trị viên xác nhận.<br>
+5. Hệ thống thực hiện xóa mềm bằng cách đánh dấu thời điểm xóa.<br>
+6. Hệ thống tính lại tiến độ dự án, phát sự kiện thời gian thực và chuyển công việc vào thùng rác.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Công việc nằm trong thùng rác, không còn xuất hiện trong danh sách, thống kê, báo cáo và nhắc hạn; tiến độ dự án được cập nhật lại.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Công việc biến mất khỏi bảng Kanban và nằm trong thùng rác, có thể khôi phục trong vòng 30 ngày.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng không phải quản trị viên. Hệ thống từ chối và hiển thị thông báo "Chỉ quản trị viên mới được xóa công việc".<br>
-2. Người dùng hủy thao tác tại hộp thoại xác nhận. Hệ thống giữ nguyên hiện trạng.<br>
-3. Danh sách công việc chọn xóa rỗng. Hệ thống hiển thị thông báo "Danh sách công việc trống".
+1. Người thực hiện không phải Quản trị viên. Hệ thống từ chối và hiển thị thông báo chỉ quản trị viên mới được xóa công việc.<br>
+2. Công việc là tiên quyết của công việc khác. Hệ thống cảnh báo về ảnh hưởng tới quan hệ phụ thuộc.<br>
+3. Công việc đã bị xóa trước đó. Hệ thống thông báo và làm mới giao diện.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Quản lý việc con và ghi nhận giờ làm</p>
+<h2>4. Nhóm use case Cộng tác nhóm và thông báo (PR4)</h2>
+<p class="cap">Đặc tả Use case Gửi tin nhắn nhóm dự án</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Quản lý việc con và ghi nhận giờ làm</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép quản trị viên chia nhỏ công việc thành danh sách việc con và ghi nhận số giờ làm thực tế cho công việc.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng có vai trò quản trị viên của không gian làm việc.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Gửi tin nhắn nhóm dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Trao đổi thông tin theo thời gian thực giữa các thành viên trong cùng một dự án.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của dự án.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Quản trị viên mở trang chi tiết công việc.<br>
-2. Hệ thống hiển thị khối danh sách việc con và khối ghi nhận giờ làm.<br>
-3. Quản trị viên nhập nội dung việc con và bấm thêm; hoặc nhập số phút làm việc, ghi chú, ngày làm việc và bấm lưu.<br>
-4. Hệ thống kiểm tra quyền quản trị viên, kiểm tra nội dung việc con không rỗng và số phút phải lớn hơn 0.<br>
-5. Hệ thống lưu dữ liệu vào CSDL và cập nhật lại giao diện, hiển thị tỷ lệ việc con đã hoàn thành và tổng số giờ làm.
+1. Người dùng mở dự án và vào tab Trao đổi nhóm.<br>
+2. Hệ thống tải các tin nhắn gần nhất và đưa người dùng vào kênh sự kiện của dự án.<br>
+3. Người dùng soạn nội dung tin nhắn và gửi.<br>
+4. Hệ thống lưu tin nhắn vào cơ sở dữ liệu kèm người gửi và thời điểm.<br>
+5. Hệ thống phát sự kiện thời gian thực tới tất cả thành viên đang mở dự án.<br>
+6. Hệ thống gửi thông báo tới các thành viên dự án không đang trực tuyến.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Việc con và bản ghi giờ làm được lưu; dữ liệu giờ làm được tổng hợp vào báo cáo chấm công của dự án và của không gian làm việc.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Tin nhắn được lưu và hiển thị ngay lập tức trên màn hình của mọi thành viên đang tham gia.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng không phải quản trị viên. Hệ thống từ chối và hiển thị thông báo "Chỉ quản trị viên mới được thực hiện thao tác này". Các vai trò khác chỉ được xem.<br>
-2. Nội dung việc con để rỗng. Hệ thống hiển thị thông báo "Nội dung không được để trống".<br>
-3. Số phút nhập nhỏ hơn hoặc bằng 0. Hệ thống hiển thị thông báo "Số phút phải lớn hơn 0".<br>
-4. Quản trị viên đánh dấu hoàn thành hoặc xóa một việc con. Hệ thống cập nhật trạng thái tương ứng và tính lại tỷ lệ hoàn thành.
+1. Người dùng không thuộc dự án. Hệ thống từ chối truy cập kênh trao đổi.<br>
+2. Nội dung tin nhắn để trống và không có tệp đính kèm. Hệ thống từ chối gửi.<br>
+3. Mất kết nối thời gian thực. Hệ thống tự động kết nối lại và đồng bộ các tin nhắn còn thiếu.
 </td></tr>
 </table>
-
-<!-- ==================== PR4 ==================== -->
-<h2>4. NHÓM CHỨC NĂNG: CỘNG TÁC NHÓM VÀ THÔNG BÁO</h2>
-
-<p class="cap">Đặc tả Use case Thảo luận nhóm dự án</p>
+<p class="cap">Đặc tả Use case Đính kèm tệp vào tin nhắn</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Thảo luận nhóm dự án</td></tr>
-<tr><td class="lbl">Actor</td><td>Thành viên dự án.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép các thành viên trao đổi thông tin theo thời gian thực trong kênh thảo luận riêng của từng dự án.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của không gian làm việc chứa dự án.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Đính kèm tệp vào tin nhắn</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Chia sẻ tài liệu hoặc hình ảnh kèm theo nội dung trao đổi trong nhóm dự án.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Gửi tin nhắn nhóm dự án đang được thực hiện. Đây là luồng mở rộng («extend») của use case Gửi tin nhắn nhóm dự án.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở dự án và chọn thẻ Thảo luận.<br>
-2. Hệ thống tải 30 tin nhắn gần nhất và kết nối người dùng vào phòng thời gian thực của dự án.<br>
-3. Người dùng nhập nội dung tin nhắn, có thể đính kèm tệp hoặc nhắc tên thành viên bằng ký hiệu @.<br>
-4. Người dùng bấm gửi.<br>
-5. Hệ thống kiểm tra nội dung không rỗng hoặc có tệp đính kèm, sau đó lưu tin nhắn vào CSDL.<br>
-6. Hệ thống phát sự kiện thời gian thực để tin nhắn hiện ngay trên màn hình của mọi thành viên đang mở kênh thảo luận.<br>
-7. Nếu tin nhắn có nhắc tên, hệ thống gửi thông báo trong ứng dụng và email cho những người được nhắc.
+1. Người dùng chọn biểu tượng đính kèm trong khung soạn tin nhắn.<br>
+2. Người dùng chọn tệp từ thiết bị của mình.<br>
+3. Hệ thống kiểm tra loại tệp thuộc danh sách được phép và dung lượng không vượt quá 10 MB.<br>
+4. Hệ thống tải tệp lên dịch vụ lưu trữ và nhận về đường dẫn truy cập.<br>
+5. Hệ thống lưu tin nhắn kèm thông tin tệp và phát sự kiện tới các thành viên.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Tin nhắn được lưu và hiển thị tức thời cho mọi thành viên đang trực tuyến trong kênh thảo luận của dự án.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Tệp được đính kèm vào tin nhắn và các thành viên khác có thể xem hoặc tải xuống.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng gửi tin nhắn rỗng và không đính kèm tệp. Hệ thống hiển thị thông báo "Nội dung không được để trống" và không gửi.<br>
-2. Người dùng bấm Tải tin cũ hơn. Hệ thống tải thêm 30 tin nhắn cũ hơn theo mốc thời gian và giữ nguyên vị trí cuộn.<br>
-3. Người dùng không phải thành viên không gian làm việc. Hệ thống từ chối truy cập kênh thảo luận.<br>
-4. Người dùng chọn chức năng Tóm tắt AI. Hệ thống chuyển sang use case Tóm tắt thảo luận bằng trí tuệ nhân tạo.
+1. Tệp vượt quá dung lượng cho phép. Hệ thống từ chối và hiển thị thông báo giới hạn 10 MB.<br>
+2. Loại tệp không nằm trong danh sách an toàn. Hệ thống từ chối tải lên.<br>
+3. Lỗi trong quá trình tải lên. Hệ thống thông báo và cho phép thử lại.
 </td></tr>
 </table>
-
+<p class="cap">Đặc tả Use case Tải tin nhắn cũ</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Tải tin nhắn cũ</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Xem lại lịch sử trao đổi trước đó của nhóm dự án theo từng trang để tiết kiệm băng thông.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Gửi tin nhắn nhóm dự án đã thực hiện. Đây là luồng mở rộng («extend») của use case Gửi tin nhắn nhóm dự án.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng cuộn lên đầu danh sách tin nhắn đang hiển thị.<br>
+2. Hệ thống nhận biết yêu cầu tải thêm và gửi truy vấn lấy trang tin nhắn cũ hơn.<br>
+3. Hệ thống trả về tối đa 30 tin nhắn cho mỗi lần tải.<br>
+4. Hệ thống chèn các tin nhắn cũ vào đầu danh sách và giữ nguyên vị trí cuộn của người dùng.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng xem được lịch sử trao đổi đầy đủ của dự án.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Đã tải hết toàn bộ lịch sử. Hệ thống hiển thị thông báo không còn tin nhắn cũ hơn.<br>
+2. Lỗi kết nối khi tải. Hệ thống hiển thị thông báo và cho phép thử lại.
+</td></tr>
+</table>
 <p class="cap">Đặc tả Use case Bình luận trên công việc</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Bình luận trên công việc</td></tr>
-<tr><td class="lbl">Actor</td><td>Thành viên dự án.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép các thành viên trao đổi trực tiếp trong ngữ cảnh của một công việc cụ thể.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng là thành viên của không gian làm việc chứa công việc.</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Trao đổi thông tin gắn trực tiếp với một công việc cụ thể, giúp lưu vết thảo luận theo ngữ cảnh.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; người dùng là thành viên của dự án chứa công việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở trang chi tiết công việc.<br>
-2. Hệ thống hiển thị danh sách bình luận hiện có theo thứ tự thời gian.<br>
-3. Người dùng nhập nội dung bình luận, có thể nhắc tên thành viên bằng ký hiệu @, rồi bấm Đăng.<br>
-4. Hệ thống lưu bình luận vào CSDL kèm người viết và thời điểm.<br>
-5. Hệ thống phát sự kiện thời gian thực để bình luận hiện ngay trên màn hình của các thành viên đang mở công việc.<br>
-6. Hệ thống gửi thông báo và email cho người được giao công việc nếu người bình luận không phải là chính họ, đồng thời gửi thông báo cho những người được nhắc tên.<br>
-7. Hệ thống ghi nhật ký hoạt động của dự án.
+1. Người dùng mở chi tiết công việc và vào mục Bình luận.<br>
+2. Hệ thống hiển thị danh sách bình luận theo thứ tự thời gian.<br>
+3. Người dùng soạn nội dung bình luận và gửi.<br>
+4. Hệ thống lưu bình luận kèm người viết và thời điểm.<br>
+5. Hệ thống phát sự kiện thời gian thực tới các thành viên đang xem công việc.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Bình luận được lưu và hiển thị tức thời; những người liên quan nhận được thông báo.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Bình luận được lưu và hiển thị trong lịch sử trao đổi của công việc.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng để trống nội dung bình luận. Hệ thống không thực hiện gửi.<br>
-2. Người dùng chọn xóa bình luận. Hệ thống kiểm tra người thao tác là tác giả bình luận hoặc quản trị viên, nếu không sẽ hiển thị thông báo "Chỉ tác giả hoặc quản trị viên mới được xóa bình luận".
+1. Người dùng không thuộc dự án. Hệ thống từ chối truy cập.<br>
+2. Nội dung bình luận để trống. Hệ thống từ chối gửi.<br>
+3. Người dùng chỉ được xóa bình luận do chính mình viết, trừ khi là Quản trị viên.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Nhận và quản lý thông báo</p>
+<p class="cap">Đặc tả Use case Nhắc tên thành viên</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Nhận và quản lý thông báo</td></tr>
-<tr><td class="lbl">Actor</td><td>Mọi người dùng đã đăng nhập.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng nhận thông báo tức thời về các sự kiện liên quan tới mình và đánh dấu các thông báo đã đọc.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Nhắc tên thành viên</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Gọi tên trực tiếp một thành viên trong bình luận hoặc tin nhắn để thu hút sự chú ý của họ tới nội dung cần xử lý.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Bình luận trên công việc hoặc Gửi tin nhắn nhóm dự án đang được thực hiện.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng gõ ký tự @ trong khung soạn nội dung.<br>
+2. Hệ thống hiển thị danh sách gợi ý các thành viên thuộc dự án.<br>
+3. Người dùng chọn một thành viên từ danh sách gợi ý.<br>
+4. Hệ thống chèn tên người được nhắc vào nội dung dưới dạng liên kết.<br>
+5. Sau khi gửi, hệ thống phân tích nội dung để nhận diện các tên được nhắc.<br>
+6. Hệ thống gửi thông báo riêng tới từng người được nhắc kèm email («include» Gửi thông báo cho người được nhắc).
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người được nhắc nhận được thông báo trong ứng dụng và email, kèm liên kết dẫn tới nội dung liên quan.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người được nhắc không thuộc dự án. Hệ thống không hiển thị họ trong danh sách gợi ý.<br>
+2. Người dùng tự nhắc chính mình. Hệ thống không gửi thông báo trùng lặp.<br>
+3. Không gửi được email do lỗi dịch vụ. Hệ thống vẫn tạo thông báo trong ứng dụng và ghi nhận lỗi.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Nhận thông báo</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Nhận thông báo</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên; Máy chủ Email (SMTP).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Giúp người dùng nắm bắt kịp thời các sự kiện liên quan tới mình như được giao việc, được nhắc tên hoặc có tài liệu chờ duyệt.</td></tr>
 <tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Sau khi đăng nhập, hệ thống kết nối người dùng vào kênh thông báo cá nhân theo thời gian thực.<br>
-2. Hệ thống tự động quét các công việc được giao cho người dùng có hạn trong vòng 24 giờ hoặc đã quá hạn mà chưa hoàn thành, sinh thông báo nhắc việc và tránh trùng lặp trong 12 giờ.<br>
-3. Khi phát sinh sự kiện liên quan như được giao việc, được nhắc tên, tài liệu được duyệt, hệ thống tạo thông báo và đẩy tức thời tới người dùng.<br>
-4. Người dùng bấm vào biểu tượng chuông để mở danh sách thông báo.<br>
-5. Hệ thống hiển thị danh sách thông báo và tự động đánh dấu các thông báo đang hiển thị là đã đọc.
+1. Hệ thống phát sinh sự kiện cần thông báo, ví dụ giao việc, nhắc tên, duyệt tài liệu hoặc yêu cầu tham gia dự án.<br>
+2. Hệ thống xác định danh sách người nhận theo loại sự kiện.<br>
+3. Hệ thống tạo bản ghi thông báo với trạng thái chưa đọc cho từng người nhận.<br>
+4. Hệ thống đẩy thông báo tức thời tới người dùng đang trực tuyến qua kênh thời gian thực.<br>
+5. Hệ thống gửi thêm email tới người nhận thông qua máy chủ thư điện tử.<br>
+6. Người dùng bấm vào thông báo và được chuyển tới nội dung liên quan.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nắm được các sự kiện liên quan tới mình; số lượng thông báo chưa đọc được cập nhật lại.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nhận được thông báo trong ứng dụng và email; số lượng thông báo chưa đọc hiển thị trên biểu tượng chuông.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng chọn Đánh dấu tất cả đã đọc. Hệ thống cập nhật toàn bộ thông báo chưa đọc của người dùng thành đã đọc.<br>
-2. Không có thông báo nào. Hệ thống hiển thị dòng chữ "Chưa có thông báo".<br>
-3. Người dùng đã có thông báo nhắc việc cùng nội dung trong 12 giờ gần đây. Hệ thống bỏ qua, không tạo thông báo trùng lặp.
+1. Người dùng đang ngoại tuyến. Thông báo vẫn được lưu và hiển thị khi họ đăng nhập lại.<br>
+2. Không gửi được email. Hệ thống ghi nhận lỗi nhưng vẫn giữ thông báo trong ứng dụng.<br>
+3. Người dùng đã tự thực hiện hành động phát sinh sự kiện. Hệ thống không gửi thông báo cho chính họ.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Sử dụng trợ lý trí tuệ nhân tạo</p>
+<p class="cap">Đặc tả Use case Đánh dấu đã đọc thông báo</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Sử dụng trợ lý trí tuệ nhân tạo</td></tr>
-<tr><td class="lbl">Actor</td><td>Thành viên của không gian làm việc; hệ thống ngoài Gemini AI.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Hỗ trợ người dùng tóm tắt nội dung thảo luận, phân tích rủi ro dự án, gợi ý việc nhỏ và trả lời câu hỏi dựa trên dữ liệu của không gian làm việc.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của không gian làm việc; hệ thống đã được cấu hình khóa dịch vụ trí tuệ nhân tạo.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Đánh dấu đã đọc thông báo</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Giúp người dùng quản lý danh sách thông báo, phân biệt nội dung đã xử lý và chưa xử lý.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Nhận thông báo đã thực hiện; tồn tại ít nhất một thông báo chưa đọc. Đây là luồng mở rộng («extend») của use case Nhận thông báo.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng chọn một trong các chức năng: Tóm tắt thảo luận, Phân tích dự án, Gợi ý việc nhỏ hoặc Hỏi trợ lý.<br>
-2. Hệ thống kiểm tra quyền truy cập của người dùng đối với dự án hoặc không gian làm việc tương ứng.<br>
-3. Hệ thống thu thập dữ liệu liên quan gồm tin nhắn thảo luận, danh sách công việc kèm trạng thái, hạn chót và người thực hiện.<br>
-4. Hệ thống gửi dữ liệu kèm câu lệnh yêu cầu tới dịch vụ Gemini AI.<br>
-5. Dịch vụ trí tuệ nhân tạo trả về kết quả dưới dạng văn bản.<br>
-6. Hệ thống hiển thị kết quả cho người dùng.
+1. Người dùng mở danh sách thông báo.<br>
+2. Hệ thống hiển thị các thông báo, phân biệt rõ mục đã đọc và chưa đọc.<br>
+3. Người dùng chọn đánh dấu đã đọc cho một thông báo hoặc chọn đánh dấu tất cả.<br>
+4. Hệ thống cập nhật trạng thái các bản ghi tương ứng.<br>
+5. Hệ thống cập nhật lại số lượng thông báo chưa đọc trên biểu tượng chuông.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nhận được bản tóm tắt, phân tích rủi ro, danh sách việc nhỏ gợi ý hoặc câu trả lời tương ứng.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Các thông báo được đánh dấu đã đọc; bộ đếm thông báo chưa đọc giảm tương ứng.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Hệ thống chưa được cấu hình khóa dịch vụ trí tuệ nhân tạo. Hệ thống hiển thị thông báo "Tính năng AI chưa được cấu hình" và các chức năng khác vẫn hoạt động bình thường.<br>
-2. Dự án chưa có tin nhắn thảo luận nào. Hệ thống hiển thị thông báo "Chưa có tin nhắn nào để tóm tắt".<br>
-3. Dịch vụ trí tuệ nhân tạo không phản hồi hoặc lỗi. Hệ thống hiển thị thông báo không tạo được kết quả và giữ nguyên giao diện.
+1. Không có thông báo nào chưa đọc. Hệ thống vô hiệu hóa chức năng đánh dấu tất cả.<br>
+2. Thông báo đã được đánh dấu từ thiết bị khác. Hệ thống đồng bộ trạng thái khi làm mới.
 </td></tr>
 </table>
-
-<!-- ==================== PR5 ==================== -->
-<h2>5. NHÓM CHỨC NĂNG: QUẢN LÝ VÀ DUYỆT TÀI LIỆU</h2>
-
+<p class="cap">Đặc tả Use case Nhắc việc sắp và quá hạn</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Nhắc việc sắp và quá hạn</td></tr>
+<tr><td class="lbl">Actor</td><td>Hệ thống (tác vụ nền định kỳ); người nhận là Thành viên dự án được giao công việc.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Chủ động cảnh báo người thực hiện về các công việc sắp tới hạn hoặc đã quá hạn nhằm tránh chậm tiến độ.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo và giao công việc đã thực hiện; công việc đã được đặt hạn chót. Đây là luồng mở rộng («extend») của use case Nhận thông báo.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Tác vụ nền chạy theo lịch định kỳ hằng ngày.<br>
+2. Hệ thống quét toàn bộ công việc chưa hoàn thành và đối chiếu hạn chót với ngày hiện tại.<br>
+3. Hệ thống xác định các công việc sắp tới hạn trong thời gian ngắn và các công việc đã quá hạn.<br>
+4. Hệ thống tạo thông báo nhắc việc gửi tới người được giao và người quản lý dự án.<br>
+5. Hệ thống gửi kèm email tổng hợp danh sách công việc cần chú ý.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người được giao và người quản lý nhận được cảnh báo về các công việc cần ưu tiên xử lý.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Công việc không có hạn chót. Hệ thống bỏ qua, không tạo nhắc việc.<br>
+2. Công việc đã hoàn thành. Hệ thống bỏ qua dù đã quá hạn.<br>
+3. Đã gửi nhắc việc trong ngày. Hệ thống không gửi trùng lặp cho cùng một công việc.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Tóm tắt thảo luận nhóm bằng trí tuệ nhân tạo</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Tóm tắt thảo luận nhóm bằng trí tuệ nhân tạo</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên; Gemini AI.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Rút gọn nội dung trao đổi dài thành các ý chính, giúp người tham gia muộn nhanh chóng nắm bắt tình hình.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Gửi tin nhắn nhóm dự án đã thực hiện; hệ thống đã được cấu hình khóa dịch vụ trí tuệ nhân tạo.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở tab Trao đổi nhóm và chọn chức năng Tóm tắt bằng AI.<br>
+2. Hệ thống thu thập các tin nhắn trong khoảng thời gian được chọn.<br>
+3. Hệ thống gửi nội dung tới dịch vụ Gemini AI kèm yêu cầu tóm tắt.<br>
+4. Dịch vụ trả về bản tóm tắt gồm các ý chính và những điểm cần theo dõi.<br>
+5. Hệ thống hiển thị kết quả tóm tắt cho người dùng.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nhận được bản tóm tắt ngắn gọn nội dung thảo luận của nhóm.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Hệ thống chưa cấu hình khóa dịch vụ AI. Hệ thống hiển thị thông báo chức năng chưa khả dụng.<br>
+2. Dịch vụ AI không phản hồi hoặc quá tải. Hệ thống thông báo lỗi và cho phép thử lại sau.<br>
+3. Số lượng tin nhắn quá ít để tóm tắt. Hệ thống thông báo và gợi ý xem trực tiếp.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Hỏi đáp với trợ lý trí tuệ nhân tạo</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Hỏi đáp với trợ lý trí tuệ nhân tạo</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên; Gemini AI.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng đặt câu hỏi bằng ngôn ngữ tự nhiên về dữ liệu dự án và nhận câu trả lời tức thời.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của không gian làm việc; hệ thống đã cấu hình khóa dịch vụ trí tuệ nhân tạo.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở cửa sổ trợ lý và nhập câu hỏi.<br>
+2. Hệ thống thu thập dữ liệu ngữ cảnh trong phạm vi quyền truy cập của người dùng.<br>
+3. Hệ thống gửi câu hỏi kèm ngữ cảnh tới dịch vụ Gemini AI.<br>
+4. Dịch vụ phân tích và trả về câu trả lời.<br>
+5. Hệ thống hiển thị câu trả lời và lưu lịch sử hội thoại của phiên làm việc.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nhận được câu trả lời dựa trên dữ liệu thực tế mà mình có quyền xem.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Hệ thống chưa cấu hình khóa dịch vụ AI. Hệ thống thông báo chức năng chưa khả dụng.<br>
+2. Câu hỏi nằm ngoài phạm vi dữ liệu. Trợ lý phản hồi rằng không có đủ thông tin để trả lời.<br>
+3. Hệ thống chỉ cung cấp cho trợ lý dữ liệu thuộc phạm vi quyền của người hỏi, không để lộ thông tin dự án khác.
+</td></tr>
+</table>
+<h2>5. Nhóm use case Quản lý và duyệt tài liệu (PR5)</h2>
 <p class="cap">Đặc tả Use case Tải tài liệu lên</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Tải tài liệu lên</td></tr>
 <tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép người dùng nộp tài liệu đính kèm theo công việc, giai đoạn hoặc theo dự án.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của không gian làm việc chứa dự án; tệp thuộc loại được phép và có dung lượng không quá 10 MB.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Đưa tài liệu liên quan lên hệ thống, gắn với công việc hoặc giai đoạn cụ thể của dự án.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của dự án; tệp thuộc loại được phép và dung lượng không quá 10 MB.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
 1. Người dùng mở công việc hoặc giai đoạn và chọn chức năng Tải tài liệu lên.<br>
-2. Người dùng chọn tệp từ máy tính và xác nhận tải lên.<br>
-3. Hệ thống kiểm tra phần mở rộng của tệp thuộc danh sách an toàn (ảnh, tài liệu văn phòng, tệp nén) và dung lượng không vượt quá 10 MB.<br>
-4. Hệ thống lưu tệp lên nơi lưu trữ và tạo bản ghi tài liệu trong CSDL.<br>
-5. Hệ thống xác định quyền của người tải lên. Nếu là quản trị viên hoặc quản lý thì tài liệu tự động được đánh dấu Đạt; ngược lại tài liệu ở trạng thái Chờ duyệt.<br>
-6. Nếu tài liệu ở trạng thái Chờ duyệt, hệ thống gửi thông báo tới các quản lý và quản trị viên để xem xét, đồng thời ghi nhật ký hoạt động.<br>
-7. Hệ thống hiển thị tài liệu trong danh sách kèm huy hiệu trạng thái duyệt.
+2. Người dùng chọn tệp từ thiết bị của mình.<br>
+3. Hệ thống kiểm tra loại tệp thuộc danh sách an toàn gồm ảnh, PDF, tài liệu văn phòng, văn bản và tệp nén; đồng thời kiểm tra dung lượng không vượt quá 10 MB («include» Lọc loại tệp an toàn).<br>
+4. Hệ thống tải tệp lên dịch vụ lưu trữ đám mây hoặc lưu vào ổ đĩa máy chủ.<br>
+5. Hệ thống xác định quyền của người tải lên: nếu là Quản lý hoặc Quản trị viên thì tài liệu tự động đạt, ngược lại đặt trạng thái Chờ duyệt («include» Đặt trạng thái Chờ duyệt).<br>
+6. Nếu tài liệu ở trạng thái Chờ duyệt, hệ thống gửi thông báo tới Quản lý và Quản trị viên để xem xét.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Tài liệu được lưu trong hệ thống với trạng thái duyệt tương ứng; người có quyền duyệt nhận được thông báo nếu tài liệu cần xem xét.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Tài liệu được lưu trong hệ thống với trạng thái Chờ duyệt hoặc Đạt tùy theo vai trò người tải lên.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng chọn tệp thuộc loại không được phép. Hệ thống từ chối và hiển thị thông báo "Loại file không được hỗ trợ".<br>
-2. Tệp có dung lượng lớn hơn 10 MB. Hệ thống từ chối và hiển thị thông báo lỗi tải lên.<br>
-3. Thành viên thường cố đăng tài liệu chung của dự án. Hệ thống từ chối và hiển thị thông báo "Chỉ quản trị viên hoặc quản lý mới đăng tài liệu chung của dự án. Hãy đính kèm vào công việc của bạn".<br>
-4. Người dùng không chọn tệp nào. Hệ thống hiển thị thông báo "Không có file được tải lên".
+1. Tệp vượt quá 10 MB. Hệ thống từ chối và hiển thị thông báo giới hạn dung lượng.<br>
+2. Loại tệp không nằm trong danh sách an toàn. Hệ thống từ chối để tránh nguy cơ mã độc.<br>
+3. Người dùng không thuộc dự án. Hệ thống từ chối truy cập.<br>
+4. Lỗi trong quá trình tải lên. Hệ thống thông báo và cho phép thử lại.
 </td></tr>
 </table>
-
+<p class="cap">Đặc tả Use case Đăng tài liệu chung của dự án</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Đăng tài liệu chung của dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Đưa lên các tài liệu dùng chung ở cấp dự án như kế hoạch, quy trình hoặc biểu mẫu chuẩn.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên trong không gian làm việc.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở dự án và vào tab Tài liệu.<br>
+2. Người dùng chọn chức năng Đăng tài liệu chung.<br>
+3. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+4. Người dùng chọn tệp và xác nhận.<br>
+5. Hệ thống kiểm tra loại tệp và dung lượng theo quy định.<br>
+6. Hệ thống lưu tài liệu gắn trực tiếp với dự án và tự động đặt trạng thái Đạt.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Tài liệu chung được lưu ở cấp dự án và mọi thành viên dự án đều xem được.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng là Thành viên thông thường. Hệ thống từ chối và hướng dẫn đính kèm tài liệu vào công việc của mình thay vì đăng ở cấp dự án.<br>
+2. Tệp không hợp lệ về loại hoặc dung lượng. Hệ thống từ chối và thông báo lý do.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Xem và tải xuống tài liệu</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xem và tải xuống tài liệu</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Truy cập các tài liệu đã được đưa lên hệ thống để tham khảo hoặc sử dụng trong công việc.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tải tài liệu lên đã thực hiện; người dùng là thành viên của dự án chứa tài liệu.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở dự án, công việc hoặc giai đoạn có chứa tài liệu.<br>
+2. Hệ thống kiểm tra người dùng có thuộc dự án hay không.<br>
+3. Hệ thống hiển thị danh sách tài liệu kèm tên tệp, người tải lên, thời điểm và trạng thái duyệt.<br>
+4. Người dùng chọn xem trực tiếp hoặc tải tệp về thiết bị.<br>
+5. Hệ thống trả về nội dung tệp từ dịch vụ lưu trữ.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng xem hoặc tải xuống được tài liệu mà mình có quyền truy cập.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không thuộc dự án. Hệ thống từ chối truy cập tệp.<br>
+2. Tệp đã bị xóa khỏi hệ thống. Hệ thống hiển thị thông báo tệp không tồn tại.<br>
+3. Lỗi kết nối tới dịch vụ lưu trữ. Hệ thống thông báo và cho phép thử lại.
+</td></tr>
+</table>
 <p class="cap">Đặc tả Use case Duyệt tài liệu</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Duyệt tài liệu</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép người có thẩm quyền đánh giá tài liệu do thành viên nộp là Đạt hoặc Chưa đạt kèm ghi chú yêu cầu chỉnh sửa.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tải tài liệu lên đã thực hiện; tồn tại tài liệu ở trạng thái Chờ duyệt; người dùng là quản trị viên hoặc quản lý của không gian làm việc.</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Kiểm tra và phê duyệt tài liệu do thành viên nộp lên, bảo đảm chất lượng và tính phù hợp của hồ sơ dự án.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tải tài liệu lên đã thực hiện; tồn tại tài liệu ở trạng thái Chờ duyệt; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở dự án và chọn thẻ Tài liệu.<br>
-2. Hệ thống hiển thị danh sách tài liệu kèm trạng thái duyệt và người nộp.<br>
-3. Người dùng mở xem tài liệu cần đánh giá.<br>
-4. Người dùng chọn Đạt hoặc Chưa đạt và nhập ghi chú nếu cần.<br>
-5. Hệ thống kiểm tra quyền duyệt của người thao tác đối với dự án chứa tài liệu.<br>
-6. Hệ thống cập nhật trạng thái duyệt, ghi nhận người duyệt và thời điểm duyệt vào CSDL.<br>
-7. Hệ thống gửi thông báo kết quả kèm ghi chú tới người đã nộp tài liệu và ghi nhật ký hoạt động.
+1. Người dùng mở danh sách tài liệu chờ duyệt của dự án.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+3. Người dùng mở tài liệu để xem nội dung.<br>
+4. Người dùng chọn kết quả Đạt hoặc Chưa đạt.<br>
+5. Nếu chọn Chưa đạt, hệ thống yêu cầu nhập ghi chú nêu rõ nội dung cần chỉnh sửa («extend» Ghi chú yêu cầu chỉnh sửa).<br>
+6. Hệ thống cập nhật trạng thái tài liệu, lưu người duyệt và thời điểm duyệt.<br>
+7. Hệ thống gửi thông báo kết quả tới người đã nộp tài liệu («include» Thông báo kết quả cho người nộp).
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Tài liệu có trạng thái duyệt rõ ràng, truy vết được người duyệt và thời điểm duyệt; người nộp được thông báo kết quả.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Tài liệu chuyển sang trạng thái Đạt hoặc Chưa đạt; người nộp nhận được thông báo kết quả.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người thao tác không phải quản trị viên hoặc quản lý. Hệ thống từ chối và hiển thị thông báo "Chỉ quản trị viên hoặc quản lý mới được đánh giá tài liệu".<br>
-2. Người duyệt chọn Chưa đạt. Hệ thống lưu ghi chú yêu cầu chỉnh sửa và thông báo cho người nộp với nội dung "Chưa đạt — cần làm lại" kèm ghi chú; người nộp sẽ chỉnh sửa và nộp lại tài liệu mới.<br>
-3. Trạng thái đánh giá gửi lên không hợp lệ. Hệ thống hiển thị thông báo "Trạng thái đánh giá không hợp lệ".<br>
-4. Tài liệu đã bị xóa. Hệ thống hiển thị thông báo "File không tồn tại".
+1. Người thực hiện không đủ quyền. Hệ thống hiển thị thông báo chỉ Quản trị viên hoặc Quản lý mới được đánh giá tài liệu.<br>
+2. Tài liệu đã được duyệt bởi người khác. Hệ thống thông báo và làm mới danh sách.<br>
+3. Chọn Chưa đạt nhưng không nhập ghi chú. Hệ thống yêu cầu bổ sung lý do trước khi lưu.
 </td></tr>
 </table>
-
 <p class="cap">Đặc tả Use case Xóa tài liệu</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Xóa tài liệu</td></tr>
-<tr><td class="lbl">Actor</td><td>Người tải lên tài liệu, Quản trị viên, Quản lý.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép gỡ bỏ tài liệu không còn cần thiết khỏi hệ thống.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tải tài liệu lên đã thực hiện; người dùng là người đã tải tệp lên, quản lý hoặc quản trị viên.</td></tr>
+<tr><td class="lbl">Actor</td><td>Người tải lên tài liệu, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Loại bỏ tài liệu không còn cần thiết hoặc tải lên nhầm khỏi hệ thống.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tải tài liệu lên đã thực hiện; người dùng là người đã tải tệp lên, hoặc có vai trò Quản lý hoặc Quản trị viên.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở danh sách tài liệu và chọn tài liệu cần xóa.<br>
-2. Người dùng chọn chức năng Xóa và xác nhận.<br>
-3. Hệ thống kiểm tra người thao tác là người tải lên, quản lý hoặc quản trị viên.<br>
-4. Hệ thống xóa tệp vật lý khỏi nơi lưu trữ nếu tệp được lưu trên ổ đĩa cục bộ.<br>
-5. Hệ thống xóa bản ghi tài liệu khỏi CSDL và cập nhật lại danh sách hiển thị.
+1. Người dùng mở danh sách tài liệu và chọn tệp cần xóa.<br>
+2. Người dùng chọn chức năng Xóa.<br>
+3. Hệ thống kiểm tra người thực hiện là người tải lên, Quản lý hoặc Quản trị viên.<br>
+4. Hệ thống hiển thị hộp thoại xác nhận.<br>
+5. Người dùng xác nhận.<br>
+6. Hệ thống xóa bản ghi tài liệu và xóa tệp vật lý nếu tệp được lưu trên ổ đĩa máy chủ.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Tài liệu bị gỡ khỏi hệ thống và không còn xuất hiện trong danh sách tài liệu của dự án.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Tài liệu bị loại bỏ khỏi hệ thống và không còn hiển thị trong danh sách.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người thao tác không phải người tải lên, quản trị viên hoặc quản lý. Hệ thống từ chối và hiển thị thông báo "Chỉ người tải lên, quản lý hoặc quản trị viên mới được xóa file".<br>
-2. Tài liệu không tồn tại. Hệ thống hiển thị thông báo "File không tồn tại".<br>
-3. Người dùng hủy thao tác tại hộp thoại xác nhận. Hệ thống giữ nguyên hiện trạng.
+1. Người thực hiện không phải người tải lên và cũng không đủ quyền quản lý. Hệ thống từ chối và hiển thị thông báo tương ứng.<br>
+2. Tệp đã bị xóa trước đó. Hệ thống thông báo và làm mới danh sách.<br>
+3. Tài liệu đang ở trạng thái Đạt và được tham chiếu trong hồ sơ dự án. Hệ thống cảnh báo trước khi cho phép xóa.
 </td></tr>
 </table>
-
-<!-- ==================== PR6 ==================== -->
-<h2>6. NHÓM CHỨC NĂNG: BÁO CÁO, THỐNG KÊ VÀ QUẢN TRỊ HỆ THỐNG</h2>
-
-<p class="cap">Đặc tả Use case Xem báo cáo và thống kê</p>
+<h2>6. Nhóm use case Báo cáo, thống kê và quản trị hệ thống (PR6)</h2>
+<p class="cap">Đặc tả Use case Xem tổng quan không gian làm việc</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Xem báo cáo và thống kê</td></tr>
-<tr><td class="lbl">Actor</td><td>Thành viên không gian làm việc, Quản lý, Quản trị viên.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cung cấp cái nhìn tổng quan về tiến độ dự án, phân bổ công việc và giờ làm để phục vụ việc theo dõi và ra quyết định.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của không gian làm việc; trong không gian đã có dự án và công việc.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Xem tổng quan không gian làm việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cung cấp bức tranh tổng thể về tình hình các dự án và công việc trong không gian làm việc.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của không gian làm việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng chọn chức năng Báo cáo hoặc mở thẻ Phân tích của một dự án.<br>
-2. Hệ thống kiểm tra người dùng là thành viên của không gian làm việc.<br>
-3. Hệ thống truy vấn và tổng hợp dữ liệu gồm số lượng dự án, số công việc theo trạng thái và theo loại, số công việc quá hạn, tiến độ trung bình và giờ làm theo thành viên.<br>
-4. Hệ thống hiển thị các thẻ chỉ số, biểu đồ cột, biểu đồ tròn, biểu đồ Gantt và biểu đồ burndown.<br>
-5. Người dùng có thể lọc dữ liệu theo dự án hoặc phòng ban để xem chi tiết.
+1. Người dùng chọn một không gian làm việc và mở bảng điều khiển.<br>
+2. Hệ thống truy vấn dữ liệu tổng hợp về số dự án, số công việc theo từng trạng thái và tiến độ chung.<br>
+3. Hệ thống tính toán các chỉ số như tỷ lệ công việc hoàn thành và số công việc quá hạn.<br>
+4. Hệ thống hiển thị dữ liệu dưới dạng thẻ số liệu và biểu đồ trực quan.<br>
+5. Người dùng có thể lọc theo dự án hoặc khoảng thời gian để xem chi tiết hơn.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nắm được tình hình tiến độ và phân bổ công việc thông qua các biểu đồ trực quan.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nắm được tình hình tổng thể của không gian làm việc thông qua các chỉ số và biểu đồ.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng chọn xuất báo cáo. Hệ thống chuyển sang use case Xuất báo cáo.<br>
-2. Chưa có công việc nào có hạn chót. Hệ thống hiển thị thông báo "Chưa có công việc nào có hạn chót để hiển thị timeline" trên biểu đồ Gantt.<br>
-3. Người dùng không phải thành viên của không gian làm việc. Hệ thống từ chối truy cập.
+1. Người dùng không thuộc không gian làm việc. Hệ thống từ chối truy cập.<br>
+2. Không gian làm việc chưa có dữ liệu. Hệ thống hiển thị thông báo chưa có dữ liệu để thống kê.
 </td></tr>
 </table>
-
+<p class="cap">Đặc tả Use case Xem biểu đồ Gantt và Burndown</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xem biểu đồ Gantt và Burndown</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Theo dõi tiến độ dự án theo trục thời gian và đánh giá tốc độ hoàn thành công việc so với kế hoạch.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; dự án đã có dữ liệu công việc kèm thời gian.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở dự án và chọn tab Biểu đồ.<br>
+2. Hệ thống truy vấn danh sách công việc kèm ngày bắt đầu, hạn chót, trạng thái và quan hệ phụ thuộc.<br>
+3. Hệ thống dựng biểu đồ Gantt hiển thị các công việc theo trục thời gian kèm đường nối phụ thuộc.<br>
+4. Hệ thống dựng biểu đồ Burndown so sánh khối lượng công việc còn lại thực tế với đường lý tưởng.<br>
+5. Người dùng có thể phóng to, thu nhỏ hoặc lọc theo giai đoạn.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng quan sát được tiến độ dự án theo thời gian và nhận biết các công việc có nguy cơ chậm.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Dự án chưa có công việc nào. Hệ thống hiển thị thông báo chưa đủ dữ liệu để vẽ biểu đồ.<br>
+2. Công việc không có ngày bắt đầu hoặc hạn chót. Hệ thống bỏ qua các công việc này khi dựng biểu đồ Gantt.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Xem bảng chấm công</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xem bảng chấm công</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Tổng hợp giờ làm thực tế của từng thành viên theo dự án và khoảng thời gian, phục vụ đánh giá và tính chi phí.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Ghi nhận giờ làm đã thực hiện; tồn tại dữ liệu giờ công trong hệ thống.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở mục Báo cáo và chọn Bảng chấm công.<br>
+2. Người dùng chọn khoảng thời gian và phạm vi dự án cần xem.<br>
+3. Hệ thống truy vấn các bản ghi giờ công thỏa mãn điều kiện lọc.<br>
+4. Hệ thống tổng hợp theo từng thành viên và từng ngày.<br>
+5. Hệ thống hiển thị bảng kết quả kèm tổng số giờ và chi phí nhân công ước tính theo đơn giá giờ công.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng xem được bảng tổng hợp giờ làm và chi phí nhân công tương ứng.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Không có dữ liệu giờ công trong khoảng thời gian đã chọn. Hệ thống hiển thị bảng trống kèm thông báo.<br>
+2. Thành viên chưa được đặt đơn giá giờ công. Hệ thống chỉ hiển thị số giờ mà không tính chi phí.
+</td></tr>
+</table>
 <p class="cap">Đặc tả Use case Xuất báo cáo</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Xuất báo cáo</td></tr>
-<tr><td class="lbl">Actor</td><td>Thành viên không gian làm việc, Quản lý, Quản trị viên.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép kết xuất dữ liệu dự án ra tệp Excel, PDF hoặc CSV phục vụ lưu trữ và báo cáo cho cấp trên.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Xem báo cáo và thống kê đã thực hiện; dự án đã có dữ liệu công việc.</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Kết xuất dữ liệu báo cáo ra tệp để lưu trữ, in ấn hoặc chia sẻ ngoài hệ thống.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Xem tổng quan không gian làm việc đã thực hiện; dự án đã có dữ liệu công việc. Đây là luồng mở rộng («extend») của use case Xem tổng quan không gian làm việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở thẻ Phân tích của dự án.<br>
-2. Người dùng chọn định dạng xuất là Excel, PDF hoặc CSV.<br>
-3. Hệ thống thu thập dữ liệu gồm thông tin tổng quan dự án, danh sách công việc và bảng giờ làm theo thành viên.<br>
-4. Hệ thống dựng tệp theo định dạng đã chọn, trong đó tệp Excel gồm ba trang tính là Tổng quan, Công việc và Giờ làm.<br>
-5. Trình duyệt tải tệp về máy người dùng với tên tệp gồm tên dự án và ngày xuất.
+1. Người dùng mở màn hình báo cáo và chọn chức năng Xuất báo cáo.<br>
+2. Người dùng chọn định dạng tệp mong muốn gồm Excel, PDF hoặc CSV.<br>
+3. Hệ thống thu thập dữ liệu theo bộ lọc mà người dùng đang áp dụng.<br>
+4. Hệ thống dựng tệp theo định dạng đã chọn với đầy đủ tiêu đề cột và định dạng số liệu.<br>
+5. Hệ thống trả tệp về cho trình duyệt để người dùng tải xuống.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Tệp báo cáo được tải về máy người dùng với dữ liệu khớp với dữ liệu đang hiển thị trên hệ thống.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Tệp báo cáo được tải về thiết bị của người dùng với đầy đủ dữ liệu đang xem.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Dự án chưa có công việc nào. Hệ thống vẫn xuất tệp nhưng danh sách công việc để trống.<br>
-2. Dự án chưa có dữ liệu chấm công. Hệ thống bỏ qua trang tính Giờ làm trong tệp Excel.
+1. Không có dữ liệu để xuất. Hệ thống hiển thị thông báo và không tạo tệp.<br>
+2. Dữ liệu quá lớn gây quá thời gian chờ. Hệ thống gợi ý thu hẹp khoảng thời gian hoặc phạm vi lọc.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Xem nhật ký kiểm toán</p>
+<p class="cap">Đặc tả Use case Báo cáo giờ làm theo thành viên</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Xem nhật ký kiểm toán</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép quản trị viên truy vết các thao tác quan trọng trong hệ thống nhằm bảo đảm tính minh bạch và kiểm soát.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng có vai trò quản trị viên của không gian làm việc.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Báo cáo giờ làm theo thành viên</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Phân tích phân bổ thời gian làm việc của từng thành viên nhằm đánh giá khối lượng công việc và cân đối nguồn lực.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Ghi nhận giờ làm đã thực hiện; tồn tại dữ liệu giờ công.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Quản trị viên chọn chức năng Nhật ký kiểm toán.<br>
-2. Hệ thống kiểm tra vai trò quản trị viên của người truy cập.<br>
-3. Hệ thống truy vấn các bản ghi kiểm toán của không gian làm việc theo thứ tự thời gian giảm dần.<br>
-4. Hệ thống hiển thị danh sách gồm người thực hiện, hành động (Tạo, Sửa, Xóa), đối tượng tác động, các trường đã thay đổi kèm giá trị cũ và giá trị mới, cùng thời điểm thực hiện.
+1. Người dùng mở mục Báo cáo và chọn Báo cáo giờ làm theo thành viên.<br>
+2. Người dùng chọn khoảng thời gian và dự án cần phân tích.<br>
+3. Hệ thống tổng hợp giờ công theo từng thành viên.<br>
+4. Hệ thống hiển thị kết quả dưới dạng biểu đồ cột kèm bảng số liệu chi tiết.<br>
+5. Người dùng có thể xem chi tiết từng thành viên để biết giờ công phân bổ cho những công việc nào.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Quản trị viên nắm được lịch sử thay đổi chi tiết của các đối tượng quan trọng trong không gian làm việc.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nắm được phân bổ thời gian làm việc của các thành viên trong nhóm.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng không có vai trò quản trị viên. Hệ thống từ chối và hiển thị thông báo "Chỉ quản trị viên mới xem được nhật ký kiểm toán".<br>
-2. Chưa có bản ghi kiểm toán nào. Hệ thống hiển thị thông báo "Chưa có bản ghi nào".
+1. Không có dữ liệu giờ công. Hệ thống hiển thị thông báo chưa có dữ liệu.<br>
+2. Thành viên không ghi giờ làm. Hệ thống hiển thị giá trị bằng không cho thành viên đó.
 </td></tr>
 </table>
-
+<p class="cap">Đặc tả Use case Phân tích rủi ro dự án bằng trí tuệ nhân tạo</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Phân tích rủi ro dự án bằng trí tuệ nhân tạo</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN); Gemini AI.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Sử dụng trí tuệ nhân tạo để phát hiện sớm các nguy cơ ảnh hưởng tới tiến độ và chất lượng dự án.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng có vai trò Quản lý trở lên; dự án đã có dữ liệu công việc và tiến độ.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở dự án và chọn chức năng Phân tích rủi ro bằng AI.<br>
+2. Hệ thống thu thập dữ liệu về tiến độ, công việc quá hạn, phân bổ nguồn lực và tình hình chi phí.<br>
+3. Hệ thống gửi dữ liệu tới dịch vụ Gemini AI kèm yêu cầu phân tích.<br>
+4. Dịch vụ trả về danh sách rủi ro tiềm ẩn kèm mức độ và khuyến nghị xử lý.<br>
+5. Hệ thống hiển thị kết quả và cho phép người dùng chuyển các rủi ro quan trọng vào sổ rủi ro của dự án.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người quản lý nhận được đánh giá rủi ro cùng khuyến nghị để chủ động phòng ngừa.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Hệ thống chưa cấu hình khóa dịch vụ AI. Hệ thống thông báo chức năng chưa khả dụng.<br>
+2. Dự án chưa đủ dữ liệu để phân tích. Hệ thống thông báo cần thêm dữ liệu công việc.<br>
+3. Dịch vụ AI không phản hồi. Hệ thống thông báo lỗi và cho phép thử lại sau.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Quản lý phòng ban</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Quản lý phòng ban</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Thiết lập cơ cấu phòng ban trong không gian làm việc để phân loại và quản lý dự án theo đơn vị phụ trách.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở mục Quản lý phòng ban.<br>
+2. Hệ thống hiển thị danh sách phòng ban hiện có kèm số dự án của từng phòng.<br>
+3. Người dùng chọn thêm mới, chỉnh sửa hoặc xóa một phòng ban.<br>
+4. Hệ thống kiểm tra vai trò và tính hợp lệ của dữ liệu nhập vào.<br>
+5. Hệ thống lưu thay đổi và cập nhật lại danh sách.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Danh sách phòng ban được cập nhật; các dự án có thể được gán vào phòng ban tương ứng.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không đủ quyền. Hệ thống từ chối thao tác.<br>
+2. Tên phòng ban để trống. Hệ thống yêu cầu nhập tên.<br>
+3. Xóa phòng ban đang có dự án. Hệ thống cảnh báo và giữ nguyên các dự án nhưng bỏ liên kết phòng ban.
+</td></tr>
+</table>
 <p class="cap">Đặc tả Use case Quản lý thùng rác</p>
 <table class="uc">
 <tr><td class="lbl">Tên Use Case</td><td>Quản lý thùng rác</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý.</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép khôi phục các dự án và công việc đã xóa nhầm hoặc xóa vĩnh viễn những dữ liệu không còn cần thiết.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Xóa dự án hoặc Xóa công việc đã thực hiện; người dùng có vai trò quản trị viên hoặc quản lý.</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Khôi phục các dự án hoặc công việc đã xóa nhầm, hoặc xóa vĩnh viễn khi chắc chắn không còn cần dùng.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Xóa dự án hoặc Xóa công việc đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng chọn chức năng Thùng rác.<br>
-2. Hệ thống kiểm tra quyền của người truy cập.<br>
-3. Hệ thống hiển thị danh sách dự án và công việc đã bị xóa kèm thời điểm xóa.<br>
-4. Người dùng chọn Khôi phục đối với mục cần lấy lại.<br>
-5. Hệ thống gỡ dấu xóa mềm, ghi nhật ký kiểm toán hành động khôi phục.<br>
-6. Dự án hoặc công việc xuất hiện trở lại trong các danh sách và thống kê như trước khi bị xóa.
+1. Người dùng mở mục Thùng rác của không gian làm việc.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+3. Hệ thống hiển thị danh sách dự án và công việc đã xóa mềm, kèm thời điểm xóa.<br>
+4. Người dùng chọn Khôi phục hoặc Xóa vĩnh viễn cho từng mục.<br>
+5. Nếu Khôi phục, hệ thống xóa dấu thời điểm xóa và đưa mục trở lại danh sách hoạt động.<br>
+6. Nếu Xóa vĩnh viễn, hệ thống xóa hẳn bản ghi cùng dữ liệu liên quan khỏi cơ sở dữ liệu.<br>
+7. Hệ thống tự động xóa vĩnh viễn các mục nằm trong thùng rác quá 30 ngày («include» Tự dọn vĩnh viễn mục quá 30 ngày).
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Dữ liệu được khôi phục về trạng thái hoạt động, hoặc bị xóa vĩnh viễn khỏi CSDL theo lựa chọn của người dùng.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Mục được khôi phục về trạng thái hoạt động hoặc bị xóa hẳn khỏi hệ thống.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng chọn Xóa vĩnh viễn. Hệ thống hiển thị cảnh báo không thể hoàn tác, sau khi xác nhận sẽ xóa dữ liệu khỏi CSDL và ghi nhật ký kiểm toán.<br>
-2. Người dùng không đủ quyền. Hệ thống hiển thị thông báo "Chỉ quản trị viên hoặc quản lý mới truy cập thùng rác".<br>
-3. Mục trong thùng rác đã quá 30 ngày. Hệ thống tự động xóa vĩnh viễn thông qua tiến trình dọn dẹp chạy định kỳ hằng ngày.<br>
-4. Thùng rác không có mục nào. Hệ thống hiển thị thông báo "Thùng rác trống".
+1. Người dùng không đủ quyền. Hệ thống từ chối truy cập thùng rác.<br>
+2. Khôi phục công việc thuộc dự án đã bị xóa vĩnh viễn. Hệ thống từ chối và giải thích lý do.<br>
+3. Mục đã bị xóa vĩnh viễn bởi tác vụ tự động. Hệ thống thông báo và làm mới danh sách.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Quản lý không gian làm việc và phòng ban</p>
+<p class="cap">Đặc tả Use case Xem nhật ký kiểm toán</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Quản lý không gian làm việc và phòng ban</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản trị viên, Quản lý (chỉ với phòng ban).</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Cho phép quản trị viên tổ chức cơ cấu của không gian làm việc gồm mời thành viên, phân vai trò và quản lý danh mục phòng ban.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là quản trị viên của không gian làm việc; người được mời phải đã có tài khoản trong hệ thống.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Xem nhật ký kiểm toán</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Truy vết toàn bộ thao tác quan trọng trong hệ thống nhằm phục vụ kiểm soát nội bộ và điều tra khi có sự cố.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng có vai trò Quản trị viên của không gian làm việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Quản trị viên mở trang Nhóm hoặc Cài đặt của không gian làm việc.<br>
-2. Quản trị viên chọn chức năng Mời thành viên, nhập email và chọn vai trò trong ba vai trò: Quản trị viên, Quản lý, Thành viên.<br>
-3. Hệ thống kiểm tra email hợp lệ, người dùng đã có tài khoản và chưa là thành viên của không gian làm việc.<br>
-4. Hệ thống thêm người dùng vào không gian làm việc với vai trò đã chọn, gửi thông báo cho họ và ghi nhật ký hoạt động.<br>
-5. Quản trị viên có thể chọn chức năng Quản lý phòng ban, thêm hoặc sửa tên phòng ban.<br>
-6. Hệ thống kiểm tra tên phòng ban không rỗng và không trùng trong cùng không gian làm việc, sau đó lưu vào CSDL.
+1. Quản trị viên mở mục Nhật ký kiểm toán.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện phải là Quản trị viên.<br>
+3. Hệ thống truy vấn các bản ghi kiểm toán của không gian làm việc.<br>
+4. Hệ thống hiển thị danh sách gồm thời điểm, người thực hiện, loại hành động, đối tượng tác động và nội dung thay đổi.<br>
+5. Quản trị viên có thể lọc theo người dùng, loại hành động hoặc khoảng thời gian.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Cơ cấu không gian làm việc được cập nhật; thành viên mới truy cập được các dự án theo vai trò được phân, phòng ban mới sẵn sàng để gán cho dự án.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Quản trị viên xem được lịch sử đầy đủ các thao tác tạo, sửa và xóa dữ liệu trong hệ thống.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Email được mời chưa có tài khoản. Hệ thống hiển thị thông báo "Không tìm thấy người dùng với email này. Họ cần đăng ký tài khoản trước".<br>
-2. Người được mời đã là thành viên. Hệ thống hiển thị thông báo "Người này đã là thành viên không gian làm việc".<br>
-3. Quản trị viên hạ vai trò của chủ sở hữu không gian làm việc. Hệ thống từ chối và hiển thị thông báo "Không thể đổi vai trò của chủ sở hữu".<br>
-4. Tên phòng ban bị trùng. Hệ thống hiển thị thông báo "Phòng ban này đã tồn tại".<br>
-5. Quản trị viên xóa phòng ban. Hệ thống xóa phòng ban và tự động gỡ liên kết phòng ban khỏi các dự án thuộc phòng ban đó.
+1. Người dùng không phải Quản trị viên. Hệ thống từ chối truy cập.<br>
+2. Không có bản ghi nào thỏa mãn bộ lọc. Hệ thống hiển thị danh sách trống.<br>
+3. Bản ghi nhật ký không thể chỉnh sửa hoặc xóa nhằm bảo đảm tính toàn vẹn của dấu vết kiểm toán.
 </td></tr>
 </table>
-
-<h2>7. NHÓM CHỨC NĂNG: QUẢN LÝ NGUỒN LỰC (THIẾT BỊ, CHI PHÍ, RỦI RO)</h2>
-<p class="note">Nhóm chức năng phục vụ đặc thù công ty sản xuất điện tử UMC: quản lý thiết bị/máy móc dùng chung giữa các dự án, theo dõi chi phí thực chi so với ngân sách, và lập sổ rủi ro dự án theo ma trận khả năng xảy ra × mức tác động.</p>
-
-<p class="cap">Đặc tả Use case Quản lý thiết bị, máy móc</p>
+<p class="cap">Đặc tả Use case Cấu hình chính sách hệ thống</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Quản lý thiết bị, máy móc</td></tr>
-<tr><td class="lbl">Actor</td><td>Quản lý, Quản trị viên (thêm/sửa/đổi trạng thái); mọi thành viên không gian làm việc (xem).</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Quản lý danh mục thiết bị, máy móc của công ty (ví dụ máy gắn linh kiện SMT), theo dõi tình trạng và việc gán thiết bị cho từng dự án.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công; người dùng là thành viên của không gian làm việc.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Cấu hình chính sách hệ thống</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Điều chỉnh các quy tắc vận hành của không gian làm việc cho phù hợp với đặc thù tổ chức.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng có vai trò Quản trị viên của không gian làm việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở trang Thiết bị của không gian làm việc.<br>
-2. Hệ thống hiển thị danh sách thiết bị kèm mã, tên, ảnh, trạng thái và dự án đang sử dụng (nếu có).<br>
-3. Quản lý chọn Thêm thiết bị, nhập tên, mã thiết bị nội bộ, ảnh và ghi chú.<br>
-4. Hệ thống kiểm tra mã thiết bị không trùng trong cùng không gian làm việc, sau đó lưu thiết bị với trạng thái mặc định Sẵn sàng.<br>
-5. Quản lý có thể đổi trạng thái thiết bị (Sẵn sàng, Đang dùng, Bảo trì, Hỏng) và gán thiết bị cho một dự án hoặc trả về kho.
+1. Quản trị viên mở mục Cài đặt không gian làm việc.<br>
+2. Hệ thống hiển thị các chính sách hiện hành, ví dụ ai được phép tạo công việc và các quy tắc tự động hóa.<br>
+3. Quản trị viên điều chỉnh giá trị của từng chính sách.<br>
+4. Hệ thống kiểm tra tính hợp lệ và gộp cấu hình mới với cấu hình hiện có.<br>
+5. Hệ thống lưu thay đổi và áp dụng ngay cho các thao tác tiếp theo.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Thiết bị được lưu với trạng thái xác định; khi được gán cho dự án, thiết bị liên kết với dự án đó, khi trả về kho thì liên kết được gỡ bỏ.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Chính sách của không gian làm việc được cập nhật và có hiệu lực tức thời.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Mã thiết bị bị trùng. Hệ thống hiển thị thông báo mã thiết bị đã tồn tại và yêu cầu nhập lại.<br>
-2. Người dùng có vai trò Thành viên chọn thao tác thêm/sửa. Hệ thống chặn và chỉ cho phép xem.<br>
-3. Chỉ Quản trị viên được phép xóa thiết bị khỏi hệ thống.
+1. Người dùng không phải Quản trị viên. Hệ thống từ chối thao tác.<br>
+2. Giá trị cấu hình không hợp lệ. Hệ thống từ chối lưu và hiển thị thông báo lỗi.<br>
+3. Thay đổi chính sách không ảnh hưởng tới các dữ liệu đã được tạo trước đó.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Ghi chi phí dự án</p>
+<p class="cap">Đặc tả Use case Cấu hình webhook thông báo</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Ghi chi phí dự án</td></tr>
-<tr><td class="lbl">Actor</td><td>Thành viên dự án (gồm cả Quản lý, Quản trị viên).</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Ghi nhận các khoản chi thực tế của dự án và đối chiếu tổng chi phí với ngân sách đã đặt cho dự án.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công; người dùng là thành viên của dự án.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Cấu hình webhook thông báo</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Kết nối hệ thống với các nền tảng trao đổi bên ngoài để tự động đẩy thông báo về sự kiện quan trọng.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Cấu hình chính sách hệ thống đã thực hiện. Đây là luồng mở rộng («extend») của use case Cấu hình chính sách hệ thống.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở mục Chi phí của dự án.<br>
-2. Hệ thống hiển thị danh sách các khoản chi kèm tổng chi phí và mức ngân sách của dự án.<br>
-3. Người dùng chọn Thêm khoản chi, nhập nội dung, số tiền, nhóm chi (Vật tư, Thiết bị, Nhân công, Khác) và ngày chi.<br>
-4. Hệ thống kiểm tra số tiền hợp lệ (lớn hơn 0), lưu khoản chi và người ghi nhận.<br>
-5. Hệ thống tính lại tổng chi phí và so sánh với ngân sách; nếu vượt ngân sách thì hiển thị cảnh báo.
+1. Quản trị viên mở mục Cài đặt và chọn phần Webhook.<br>
+2. Quản trị viên nhập địa chỉ webhook của nền tảng bên ngoài.<br>
+3. Quản trị viên chọn các loại sự kiện cần gửi, ví dụ tạo công việc hoặc hoàn thành công việc.<br>
+4. Hệ thống kiểm tra định dạng địa chỉ và gửi thử một thông điệp để xác nhận kết nối.<br>
+5. Hệ thống lưu cấu hình; khi sự kiện tương ứng phát sinh, hệ thống tự động gửi thông điệp tới địa chỉ đã đăng ký.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Khoản chi được lưu, tổng chi phí của dự án được cập nhật và đối chiếu với ngân sách.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Webhook được kích hoạt; các sự kiện đã chọn sẽ được đẩy tự động tới nền tảng bên ngoài.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Số tiền không hợp lệ (nhỏ hơn hoặc bằng 0). Hệ thống hiển thị thông báo lỗi và yêu cầu nhập lại.<br>
-2. Người dùng không phải thành viên của dự án. Hệ thống chặn thao tác.
+1. Địa chỉ webhook sai định dạng. Hệ thống từ chối lưu.<br>
+2. Gửi thử không thành công. Hệ thống cảnh báo nhưng vẫn cho phép lưu để quản trị viên kiểm tra lại sau.<br>
+3. Nền tảng bên ngoài không phản hồi khi có sự kiện. Hệ thống ghi nhận lỗi và không làm gián đoạn nghiệp vụ chính.
 </td></tr>
 </table>
-
-<p class="cap">Đặc tả Use case Quản lý sổ rủi ro dự án</p>
+<h2>7. Nhóm use case Quản lý nguồn lực dự án (PR7)</h2>
+<p class="cap">Đặc tả Use case Xem danh sách thiết bị và máy móc</p>
 <table class="uc">
-<tr><td class="lbl">Tên Use Case</td><td>Quản lý sổ rủi ro dự án</td></tr>
-<tr><td class="lbl">Actor</td><td>Thành viên dự án (gồm cả Quản lý, Quản trị viên).</td></tr>
-<tr><td class="lbl">Mục tiêu</td><td>Lập và theo dõi sổ rủi ro của dự án theo ma trận khả năng xảy ra và mức tác động, kèm kế hoạch ứng phó và người phụ trách.</td></tr>
-<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công; người dùng là thành viên của dự án.</td></tr>
+<tr><td class="lbl">Tên Use Case</td><td>Xem danh sách thiết bị và máy móc</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Tra cứu tình trạng và vị trí sử dụng của các thiết bị, máy móc trong không gian làm việc.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của không gian làm việc.</td></tr>
 <tr><td class="lbl">Luồng chính</td><td>
-1. Người dùng mở mục Rủi ro của dự án.<br>
-2. Hệ thống hiển thị danh sách rủi ro kèm khả năng xảy ra, mức tác động, trạng thái và người phụ trách.<br>
-3. Người dùng chọn Thêm rủi ro, nhập tiêu đề, mô tả, mức khả năng xảy ra, mức tác động, kế hoạch ứng phó và chọn người phụ trách.<br>
-4. Hệ thống lưu rủi ro với trạng thái mặc định Mở.<br>
-5. Trong quá trình xử lý, người dùng cập nhật kế hoạch ứng phó và đổi trạng thái rủi ro (Mở, Đang xử lý, Đã đóng).
+1. Người dùng mở mục Thiết bị.<br>
+2. Hệ thống truy vấn danh sách thiết bị của không gian làm việc.<br>
+3. Hệ thống hiển thị danh sách kèm tên, mã thiết bị, trạng thái và dự án đang sử dụng.<br>
+4. Người dùng có thể lọc theo trạng thái hoặc theo dự án để thu hẹp kết quả.<br>
+5. Người dùng chọn một thiết bị để xem thông tin chi tiết kèm ảnh và ghi chú.
 </td></tr>
-<tr><td class="lbl">Điều kiện cuối</td><td>Rủi ro được ghi nhận với mức độ, trạng thái và người phụ trách; sổ rủi ro của dự án được cập nhật.</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nắm được tình trạng và vị trí sử dụng của toàn bộ thiết bị.</td></tr>
 <tr><td class="lbl">Luồng phụ</td><td>
-1. Người dùng bỏ trống tiêu đề rủi ro. Hệ thống yêu cầu nhập tiêu đề.<br>
-2. Người dùng không phải thành viên của dự án. Hệ thống chặn thao tác.
+1. Người dùng không thuộc không gian làm việc. Hệ thống từ chối truy cập.<br>
+2. Chưa có thiết bị nào được khai báo. Hệ thống hiển thị thông báo danh sách trống.
 </td></tr>
 </table>
-
-</div>
-</body>
-</html>
+<p class="cap">Đặc tả Use case Thêm và sửa thiết bị</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Thêm và sửa thiết bị</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Khai báo thiết bị mới hoặc cập nhật thông tin thiết bị hiện có trong hệ thống quản lý.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở mục Thiết bị và chọn Thêm thiết bị hoặc chọn sửa một thiết bị có sẵn.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+3. Hệ thống hiển thị biểu mẫu gồm tên, mã thiết bị, ảnh và ghi chú.<br>
+4. Người dùng nhập thông tin và xác nhận.<br>
+5. Hệ thống kiểm tra mã thiết bị không trùng với thiết bị khác trong cùng không gian làm việc.<br>
+6. Hệ thống lưu thiết bị với trạng thái mặc định là Sẵn sàng và ghi nhật ký hoạt động.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Thiết bị được thêm mới hoặc cập nhật trong danh mục của không gian làm việc.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không đủ quyền. Hệ thống từ chối thao tác.<br>
+2. Mã thiết bị bị trùng. Hệ thống từ chối và yêu cầu nhập mã khác.<br>
+3. Thiếu thông tin bắt buộc. Hệ thống hiển thị thông báo yêu cầu nhập đủ tên và mã thiết bị.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Đổi trạng thái và gán thiết bị cho dự án</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Đổi trạng thái và gán thiết bị cho dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Theo dõi vòng đời sử dụng của thiết bị và phân bổ thiết bị cho các dự án đang cần.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Thêm và sửa thiết bị đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở chi tiết thiết bị.<br>
+2. Người dùng chọn trạng thái mới trong các giá trị Sẵn sàng, Đang sử dụng, Bảo trì hoặc Hỏng.<br>
+3. Nếu chuyển sang trạng thái Đang sử dụng, người dùng chọn dự án được gán thiết bị.<br>
+4. Hệ thống kiểm tra dự án được chọn thuộc cùng không gian làm việc với thiết bị.<br>
+5. Hệ thống cập nhật trạng thái và liên kết dự án, ghi nhật ký hoạt động.<br>
+6. Khi trả thiết bị về kho, người dùng bỏ liên kết dự án và đặt lại trạng thái Sẵn sàng.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Trạng thái và nơi sử dụng của thiết bị được cập nhật, phản ánh đúng tình hình thực tế.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không đủ quyền. Hệ thống từ chối thao tác.<br>
+2. Thiết bị đang được gán cho dự án khác. Hệ thống cảnh báo trước khi cho phép chuyển.<br>
+3. Thiết bị ở trạng thái Hỏng. Hệ thống không cho phép gán cho dự án cho tới khi chuyển sang trạng thái khác.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Xóa thiết bị</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xóa thiết bị</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Loại bỏ thiết bị đã thanh lý hoặc khai báo nhầm khỏi danh mục quản lý.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Thêm và sửa thiết bị đã thực hiện; người dùng có vai trò Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Quản trị viên mở chi tiết thiết bị và chọn chức năng Xóa.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+3. Hệ thống hiển thị hộp thoại xác nhận.<br>
+4. Quản trị viên xác nhận.<br>
+5. Hệ thống xóa bản ghi thiết bị và ghi nhật ký kiểm toán.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Thiết bị bị loại bỏ khỏi danh mục và không còn hiển thị trong danh sách.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người thực hiện không phải Quản trị viên. Hệ thống từ chối thao tác.<br>
+2. Thiết bị đang được gán cho một dự án. Hệ thống cảnh báo và yêu cầu thu hồi về kho trước khi xóa.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Xem danh sách chi phí dự án</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xem danh sách chi phí dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Theo dõi các khoản chi đã phát sinh của dự án theo từng nhóm chi phí.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của dự án.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở dự án và vào tab Chi phí.<br>
+2. Hệ thống truy vấn các khoản chi đã ghi nhận của dự án.<br>
+3. Hệ thống nhóm dữ liệu theo loại chi phí như vật tư, thiết bị hoặc nhân công.<br>
+4. Hệ thống hiển thị danh sách kèm tổng chi phí và tỷ lệ so với ngân sách.<br>
+5. Người dùng có thể lọc theo khoảng thời gian hoặc nhóm chi phí.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nắm được tình hình chi tiêu của dự án so với ngân sách đã duyệt.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không thuộc dự án. Hệ thống từ chối truy cập.<br>
+2. Dự án chưa có khoản chi nào. Hệ thống hiển thị thông báo danh sách trống.<br>
+3. Dự án chưa đặt ngân sách. Hệ thống chỉ hiển thị tổng chi mà không tính tỷ lệ.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Ghi khoản chi của dự án</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Ghi khoản chi của dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Ghi nhận các khoản chi phát sinh để theo dõi và kiểm soát ngân sách dự án.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở dự án và vào tab Chi phí.<br>
+2. Người dùng chọn chức năng Ghi khoản chi.<br>
+3. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+4. Người dùng nhập nội dung khoản chi, số tiền, nhóm chi phí và ngày chi.<br>
+5. Hệ thống kiểm tra số tiền là số dương và ngày chi hợp lệ.<br>
+6. Hệ thống lưu khoản chi, tính lại tổng chi phí và đối chiếu với ngân sách dự án («include» So sánh chi phí với ngân sách).<br>
+7. Nếu tổng chi vượt ngân sách, hệ thống gửi cảnh báo tới người tạo dự án và các quản trị viên («extend» Cảnh báo khi vượt ngân sách).
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Khoản chi được ghi nhận; tổng chi phí và tỷ lệ sử dụng ngân sách được cập nhật.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không đủ quyền. Hệ thống hiển thị thông báo chỉ Quản trị viên hoặc Quản lý mới được ghi nhận chi phí.<br>
+2. Số tiền nhập vào không phải số dương. Hệ thống từ chối và yêu cầu nhập lại.<br>
+3. Nội dung khoản chi để trống. Hệ thống yêu cầu nhập mô tả.<br>
+4. Người dùng chỉ được xóa khoản chi do chính mình tạo, trừ khi là Quản lý hoặc Quản trị viên.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Xem sổ rủi ro dự án</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xem sổ rủi ro dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Thành viên dự án, Quản lý, Quản trị viên.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Theo dõi các rủi ro đã được nhận diện của dự án cùng mức độ ảnh hưởng và tình trạng xử lý.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện; người dùng là thành viên của dự án.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở dự án và vào tab Rủi ro.<br>
+2. Hệ thống truy vấn danh sách rủi ro đã ghi nhận của dự án.<br>
+3. Hệ thống tính điểm rủi ro dựa trên tích của khả năng xảy ra và mức độ tác động.<br>
+4. Hệ thống hiển thị danh sách kèm ma trận rủi ro trực quan theo hai trục khả năng và tác động.<br>
+5. Người dùng chọn một rủi ro để xem chi tiết kế hoạch ứng phó và người phụ trách.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng nắm được bức tranh rủi ro của dự án và mức độ ưu tiên xử lý từng rủi ro.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không thuộc dự án. Hệ thống từ chối truy cập.<br>
+2. Dự án chưa ghi nhận rủi ro nào. Hệ thống hiển thị ma trận trống kèm thông báo.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Thêm và sửa rủi ro dự án</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Thêm và sửa rủi ro dự án</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Ghi nhận các nguy cơ có thể ảnh hưởng tới dự án kèm kế hoạch ứng phó nhằm chủ động phòng ngừa.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo dự án đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở dự án và vào tab Rủi ro.<br>
+2. Người dùng chọn Thêm rủi ro hoặc chọn sửa một rủi ro có sẵn.<br>
+3. Hệ thống hiển thị biểu mẫu gồm tiêu đề, mô tả, khả năng xảy ra, mức độ tác động, kế hoạch ứng phó và người phụ trách.<br>
+4. Người dùng nhập thông tin và xác nhận.<br>
+5. Hệ thống tính điểm rủi ro và lưu bản ghi với trạng thái mặc định là Mở.<br>
+6. Nếu điểm rủi ro ở mức cao, hệ thống gửi thông báo tới người tạo dự án để lưu ý.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Rủi ro được ghi nhận trong sổ rủi ro và hiển thị trên ma trận theo đúng vị trí mức độ.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không đủ quyền. Hệ thống từ chối thao tác.<br>
+2. Thiếu tiêu đề hoặc chưa chọn mức độ. Hệ thống yêu cầu nhập đủ thông tin bắt buộc.<br>
+3. Người phụ trách không thuộc dự án. Hệ thống từ chối và yêu cầu chọn lại.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Đổi trạng thái rủi ro</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Đổi trạng thái rủi ro</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản lý (MANAGER), Quản trị viên (ADMIN).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cập nhật tiến trình xử lý rủi ro theo vòng đời từ khi phát hiện đến khi khép lại.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Thêm và sửa rủi ro dự án đã thực hiện; người dùng có vai trò Quản lý hoặc Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở chi tiết rủi ro.<br>
+2. Người dùng chọn trạng thái mới trong các giá trị Mở, Đang xử lý hoặc Đã đóng.<br>
+3. Nếu chuyển sang Đã đóng, hệ thống yêu cầu ghi chú kết quả xử lý.<br>
+4. Hệ thống cập nhật trạng thái và lưu thời điểm thay đổi.<br>
+5. Hệ thống cập nhật lại ma trận rủi ro và các chỉ số thống kê của dự án.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Trạng thái rủi ro được cập nhật; ma trận và báo cáo rủi ro phản ánh tình hình mới.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không đủ quyền. Hệ thống từ chối thao tác.<br>
+2. Chuyển sang Đã đóng mà không ghi chú kết quả. Hệ thống yêu cầu bổ sung trước khi lưu.<br>
+3. Người dùng chỉ được xóa rủi ro do chính mình tạo, trừ khi là Quản lý hoặc Quản trị viên.
+</td></tr>
+</table>
+<h2>8. Nhóm use case Quản lý không gian làm việc (PR8)</h2>
+<p class="cap">Đặc tả Use case Tạo không gian làm việc</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Tạo không gian làm việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Người dùng đã đăng nhập (mọi vai trò).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Khởi tạo một không gian làm việc mới để tổ chức các dự án và mời thành viên cùng tham gia.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng chọn chức năng Tạo không gian làm việc.<br>
+2. Hệ thống hiển thị biểu mẫu gồm tên và mô tả.<br>
+3. Người dùng nhập thông tin và xác nhận.<br>
+4. Hệ thống kiểm tra tên không gian làm việc không được để trống.<br>
+5. Hệ thống tự sinh mã định danh duy nhất từ tên kết hợp với dấu thời gian, đồng thời gán người tạo làm Quản trị viên của không gian làm việc («include» Tự sinh mã định danh và gán người tạo làm Quản trị viên).<br>
+6. Hệ thống lưu không gian làm việc và chuyển người dùng vào màn hình làm việc mới.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Không gian làm việc được tạo; người tạo trở thành Quản trị viên duy nhất và có toàn quyền quản lý.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Tên không gian làm việc để trống. Hệ thống hiển thị thông báo "Tên không gian làm việc là bắt buộc".<br>
+2. Lỗi trong quá trình lưu dữ liệu. Hệ thống thông báo và cho phép thử lại.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Xem danh sách không gian làm việc</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xem danh sách không gian làm việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Người dùng đã đăng nhập (mọi vai trò).</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Hiển thị các không gian làm việc mà người dùng đang tham gia để lựa chọn nơi làm việc.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Đăng nhập đã thực hiện thành công.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Người dùng mở màn hình chính sau khi đăng nhập.<br>
+2. Hệ thống truy vấn các bản ghi thành viên của người dùng để xác định những không gian làm việc mà họ tham gia.<br>
+3. Hệ thống trả về danh sách kèm tên, vai trò của người dùng trong từng không gian và số lượng dự án.<br>
+4. Người dùng chọn một không gian làm việc để bắt đầu làm việc.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người dùng xem được đầy đủ các không gian làm việc mà mình tham gia và truy cập được vào bên trong.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng chưa tham gia không gian làm việc nào. Hệ thống hiển thị màn hình hướng dẫn tạo mới hoặc chờ được mời.<br>
+2. Không gian làm việc đã bị xóa. Hệ thống loại khỏi danh sách và thông báo cho người dùng.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Sửa thông tin không gian làm việc</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Sửa thông tin không gian làm việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN) của không gian làm việc.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Cập nhật tên, mô tả hoặc hình ảnh đại diện của không gian làm việc khi có thay đổi.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo không gian làm việc đã thực hiện; người dùng có vai trò Quản trị viên của không gian làm việc đó.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Quản trị viên mở mục Cài đặt không gian làm việc.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+3. Hệ thống hiển thị biểu mẫu với thông tin hiện tại.<br>
+4. Quản trị viên chỉnh sửa và xác nhận.<br>
+5. Hệ thống kiểm tra tính hợp lệ của dữ liệu và lưu thay đổi.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Thông tin không gian làm việc được cập nhật và hiển thị mới cho toàn bộ thành viên.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không phải Quản trị viên. Hệ thống từ chối thao tác.<br>
+2. Tên để trống. Hệ thống yêu cầu nhập lại.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Mời thành viên vào không gian làm việc</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Mời thành viên vào không gian làm việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN) của không gian làm việc.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Bổ sung nhân sự vào không gian làm việc để họ có thể tham gia các dự án bên trong.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo không gian làm việc đã thực hiện; người được mời đã có tài khoản trong hệ thống.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Quản trị viên mở mục Thành viên và chọn chức năng Mời.<br>
+2. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+3. Quản trị viên nhập địa chỉ email của người cần mời và chọn vai trò Quản lý hoặc Thành viên.<br>
+4. Hệ thống kiểm tra định dạng email và tìm tài khoản tương ứng («include» Người được mời phải có tài khoản và không mời vai trò Quản trị viên).<br>
+5. Hệ thống kiểm tra người này chưa phải thành viên của không gian làm việc.<br>
+6. Hệ thống tạo bản ghi thành viên với vai trò đã chọn và gửi thông báo tới người được mời.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người được mời trở thành thành viên của không gian làm việc với vai trò đã gán.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không phải Quản trị viên. Hệ thống từ chối thao tác.<br>
+2. Email không hợp lệ. Hệ thống hiển thị thông báo "Email không hợp lệ".<br>
+3. Không tìm thấy tài khoản với email này. Hệ thống thông báo người đó cần đăng ký tài khoản trước.<br>
+4. Người được mời đã là thành viên. Hệ thống hiển thị thông báo trùng lặp.<br>
+5. Quản trị viên chọn vai trò Quản trị viên. Hệ thống từ chối vì mỗi không gian làm việc chỉ có một Quản trị viên duy nhất là chủ sở hữu.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Đổi vai trò thành viên</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Đổi vai trò thành viên</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN) của không gian làm việc.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Điều chỉnh quyền hạn của thành viên khi có thay đổi về nhiệm vụ hoặc vị trí công tác.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Mời thành viên vào không gian làm việc đã thực hiện; người dùng có vai trò Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Quản trị viên mở danh sách thành viên của không gian làm việc.<br>
+2. Quản trị viên chọn một thành viên và chọn vai trò mới là Quản lý hoặc Thành viên.<br>
+3. Hệ thống kiểm tra vai trò mới nằm trong danh sách hợp lệ.<br>
+4. Hệ thống kiểm tra thành viên được đổi không phải là chủ sở hữu không gian làm việc.<br>
+5. Hệ thống cập nhật vai trò và áp dụng quyền mới ngay lập tức.<br>
+6. Quản trị viên có thể đồng thời đặt đơn giá giờ công cho thành viên («extend» Đặt đơn giá giờ công).
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Vai trò của thành viên được cập nhật; quyền truy cập các chức năng thay đổi tương ứng.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không phải Quản trị viên. Hệ thống từ chối thao tác.<br>
+2. Cố gán vai trò Quản trị viên. Hệ thống từ chối và giải thích mỗi không gian làm việc chỉ có một Quản trị viên.<br>
+3. Cố đổi vai trò của chủ sở hữu. Hệ thống từ chối và hiển thị thông báo tương ứng.<br>
+4. Đơn giá giờ công nhập giá trị âm. Hệ thống từ chối và yêu cầu nhập số không âm.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Xóa thành viên khỏi không gian làm việc</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xóa thành viên khỏi không gian làm việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN) của không gian làm việc.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Thu hồi quyền truy cập của người không còn tham gia công việc trong không gian làm việc.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Mời thành viên vào không gian làm việc đã thực hiện; người dùng có vai trò Quản trị viên.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Quản trị viên mở danh sách thành viên.<br>
+2. Quản trị viên chọn thành viên cần loại bỏ và chọn chức năng Xóa.<br>
+3. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+4. Hệ thống hiển thị hộp thoại xác nhận kèm cảnh báo về phạm vi ảnh hưởng.<br>
+5. Quản trị viên xác nhận.<br>
+6. Hệ thống xóa bản ghi thành viên; người bị xóa mất quyền truy cập toàn bộ dữ liệu của không gian làm việc.
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Người bị xóa không còn nhìn thấy không gian làm việc và mọi dự án bên trong.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không phải Quản trị viên. Hệ thống từ chối thao tác.<br>
+2. Cố xóa chính chủ sở hữu không gian làm việc. Hệ thống từ chối.<br>
+3. Thành viên đang được giao công việc chưa hoàn thành. Hệ thống cảnh báo trước khi thực hiện.
+</td></tr>
+</table>
+<p class="cap">Đặc tả Use case Xóa không gian làm việc</p>
+<table class="uc">
+<tr><td class="lbl">Tên Use Case</td><td>Xóa không gian làm việc</td></tr>
+<tr><td class="lbl">Actor</td><td>Quản trị viên (ADMIN) của không gian làm việc.</td></tr>
+<tr><td class="lbl">Mục tiêu</td><td>Loại bỏ hoàn toàn một không gian làm việc không còn sử dụng cùng toàn bộ dữ liệu bên trong.</td></tr>
+<tr><td class="lbl">Tiền điều kiện<br>(UC tiên quyết)</td><td>Use case Tạo không gian làm việc đã thực hiện; người dùng có vai trò Quản trị viên của không gian làm việc đó.</td></tr>
+<tr><td class="lbl">Luồng chính</td><td>
+1. Quản trị viên mở mục Cài đặt không gian làm việc.<br>
+2. Quản trị viên chọn chức năng Xóa không gian làm việc.<br>
+3. Hệ thống kiểm tra vai trò của người thực hiện.<br>
+4. Hệ thống hiển thị cảnh báo rõ ràng rằng thao tác này sẽ xóa toàn bộ dự án, công việc, tài liệu và dữ liệu liên quan.<br>
+5. Quản trị viên nhập lại tên không gian làm việc để xác nhận.<br>
+6. Hệ thống xóa không gian làm việc cùng toàn bộ dữ liệu phụ thuộc theo cơ chế xóa dây chuyền («include» Xóa toàn bộ dự án và dữ liệu liên quan).
+</td></tr>
+<tr><td class="lbl">Điều kiện cuối</td><td>Không gian làm việc cùng toàn bộ dữ liệu bên trong bị xóa vĩnh viễn khỏi hệ thống.</td></tr>
+<tr><td class="lbl">Luồng phụ</td><td>
+1. Người dùng không phải Quản trị viên. Hệ thống từ chối thao tác.<br>
+2. Nhập sai tên xác nhận. Hệ thống không thực hiện xóa.<br>
+3. Thao tác này không thể hoàn tác. Hệ thống khuyến nghị kết xuất dữ liệu quan trọng trước khi xóa.
+</td></tr>
+</table>
+</div></body></html>
